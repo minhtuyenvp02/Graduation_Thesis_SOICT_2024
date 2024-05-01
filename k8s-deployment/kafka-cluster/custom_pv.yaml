@@ -105,8 +105,6 @@ spec:
 #  hostPath: #TODO: Only for testing, do not use hostPath in actual app
 #    path: /mnt/kubernetes/zookeeper/zookeeper3_recy
 #  volumeMode: Filesystem
-
-
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -161,7 +159,6 @@ spec:
     path: /tmp/kubernetes/minio/pv3
   volumeMode: Filesystem
 ---
-
 apiVersion: v1
 kind: PersistentVolume
 metadata:
