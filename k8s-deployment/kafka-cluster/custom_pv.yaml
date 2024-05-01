@@ -1,0 +1,199 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: kafka-pv1-recycle
+spec:
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 10Gi
+#  nfs:
+#    server: 10.2.2.10 #TODO: update with correct NFS server
+#    path: /mnt/kafka/kafka-broker1
+  hostPath: #TODO: Only for testing, do not use hostPath in actual app
+    path: /tmp/kubernetes/kafka/kafka-broker1_recy
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: kafka-pv2-recycle
+spec:
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 10Gi
+#  nfs:
+#    server: 10.2.2.10 #TODO: update with correct NFS server
+#    path: /mnt/kafka/kafka-broker2
+  hostPath: #TODO: Only for testing, do not use hostPath in actual app
+    path: /tmp/kubernetes/kafka/kafka-broker2_recy
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: kafka-pv3-recycle
+spec:
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 10Gi
+#  nfs:
+#    server: 10.2.2.10 #TODO: update with correct NFS server
+#    path: /mnt/kafka/kafka-broker3
+  hostPath: #TODO: Only for testing, do not use hostPath in actual app
+    path: /tmp/kubernetes/kafka/kafka-broker3_recy
+  volumeMode: Filesystem
+---
+#apiVersion: v1
+#kind: PersistentVolume
+#metadata:
+#  name: kafka-zook1-pv1-recycle
+#spec:
+#  persistentVolumeReclaimPolicy: Recycle
+#  storageClassName: ""
+#  accessModes:
+#    - ReadWriteOnce
+#  capacity:
+#    storage: 10Gi
+##  nfs:
+##    server: 10.2.2.10 #TODO: update with correct NFS server
+##    path: /mnt/kafka/kafka-zk1
+#  hostPath: #TODO: Only for testing, do not use hostPath in actual app
+#    path: /mnt/kubernetes/zookeeper/zookeeper1_recy
+#  volumeMode: Filesystem
+#---
+#apiVersion: v1
+#kind: PersistentVolume
+#metadata:
+#  name: kafka-zook2-pv2-recycle
+#spec:
+#  persistentVolumeReclaimPolicy: Recycle
+#  storageClassName: ""
+#  accessModes:
+#    - ReadWriteOnce
+#  capacity:
+#    storage: 10Gi
+##  nfs:
+##    server: 10.2.2.10 #TODO: update with correct NFS server
+##    path: /mnt/kafka/kafka-zk2
+#  hostPath: #TODO: Only for testing, do not use hostPath in actual app
+#    path: /mnt/kubernetes/zookeeper/zookeeper2_recy
+#  volumeMode: Filesystem
+#---
+#apiVersion: v1
+#kind: PersistentVolume
+#metadata:
+#  name: kafka-zook3-pv3-recycle
+#spec:
+#  persistentVolumeReclaimPolicy: Recycle
+#  storageClassName: ""
+#  accessModes:
+#    - ReadWriteOnce
+#  capacity:
+#    storage: 10Gi
+##  nfs:
+##    server: 10.2.2.10 #TODO: update with correct NFS server
+##    path: /mnt/kafka/kafka-zk3
+#  hostPath: #TODO: Only for testing, do not use hostPath in actual app
+#    path: /mnt/kubernetes/zookeeper/zookeeper3_recy
+#  volumeMode: Filesystem
+
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: minio-pv1
+spec:
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 15Gi
+  #  nfs:
+  #    server: 10.2.2.10 #TODO: update with correct NFS server
+  #    path: /mnt/kafka/kafka-broker1
+  hostPath: #TODO: Only for testing, do not use hostPath in actual app
+    path: /tmp/kubernetes/minio/pv1
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: minio-pv2
+spec:
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 15Gi
+  #  nfs:
+  #    server: 10.2.2.10 #TODO: update with correct NFS server
+  #    path: /mnt/kafka/kafka-broker2
+  hostPath: #TODO: Only for testing, do not use hostPath in actual app
+    path: /tmp/kubernetes/minio/pv2
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: minio-pv3
+spec:
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 15Gi
+  #  nfs:
+  #    server: 10.2.2.10 #TODO: update with correct NFS server
+  #    path: /mnt/kafka/kafka-broker2
+  hostPath: #TODO: Only for testing, do not use hostPath in actual app
+    path: /tmp/kubernetes/minio/pv3
+  volumeMode: Filesystem
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: minio-pv4
+spec:
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 15Gi
+  #  nfs:
+  #    server: 10.2.2.10 #TODO: update with correct NFS server
+  #    path: /mnt/kafka/kafka-broker3
+  hostPath: #TODO: Only for testing, do not use hostPath in actual app
+    path: /tmp/kubernetes/minio/pv4
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: minio-pv5
+spec:
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 15Gi
+  #  nfs:
+  #    server: 10.2.2.10 #TODO: update with correct NFS server
+  #    path: /mnt/kafka/kafka-broker3
+  hostPath: #TODO: Only for testing, do not use hostPath in actual app
+    path: /tmp/kubernetes/minio/pv5
+  volumeMode: Filesystem
