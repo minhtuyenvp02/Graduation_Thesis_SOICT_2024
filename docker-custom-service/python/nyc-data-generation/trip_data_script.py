@@ -16,7 +16,7 @@ def main():
     boot_strap_server = ["kafka-controller-0.kafka-controller-headless.kafka-cluster.svc.cluster.local:9092"
     ,"kafka-controller-1.kafka-controller-headless.kafka-cluster.svc.cluster.local:9092"
     ,"kafka-controller-2.kafka-controller-headless.kafka-cluster.svc.cluster.local:9092"]
-    trip_data_generator = TripGenerator(topics=["yellow_tripdata", "fhv_tripdata", "fhvhv-tripdata", "green_tripdata"], kafka_bootstrap_server="")
+    trip_data_generator = TripGenerator(topics=["yellow_tripdata", "fhv_tripdata", "fhvhv_tripdata", "green_tripdata"], kafka_bootstrap_server="")
 
 
 
