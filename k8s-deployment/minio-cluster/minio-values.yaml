@@ -224,7 +224,7 @@ statefulset:
   zones: 1
   ## @param statefulset.drivesPerNode Number of drives attached to every node (only for MinIO&reg; distributed mode)
   ##
-  drivesPerNode: 1
+  drivesPerNode: 2
 ## MinIO&reg; provisioning
 ##
 provisioning:
