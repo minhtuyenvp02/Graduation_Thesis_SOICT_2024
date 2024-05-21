@@ -35,7 +35,9 @@ class SingleMessageProducer(object):
             logging("No topic")
             return None
         if topic_name in topics:
+            print("heeeeeee")
             for index, row in df.iterrows():
+                print(index)
                 try:
                     print(f"Publishing to topic {topic_name}")
                     self.producer.produce(topic=topic_name, value=bytes(row.to_json(), 'utf-8'))

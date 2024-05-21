@@ -562,7 +562,9 @@ podLabels: {}
 ## @param podAnnotations Annotations for MinIO&reg; pods
 ## ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
 ##
-podAnnotations: {}
+podAnnotations: {
+
+}
 ## @param podAffinityPreset Pod affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
 ## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
 ##
@@ -793,10 +795,10 @@ ingress:
   ## This is supported in Kubernetes 1.18+ and required if you have more than one IngressClass marked as the default for your cluster.
   ## ref: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/
   ##
-  ingressClassName: ""
+  ingressClassName: nginx
   ## @param ingress.hostname Default host for the ingress resource
   ##
-  hostname: minio.local
+  hostname: minio.local.minhtuyenvp02.id.vn
   ## @param ingress.path The Path to MinIO&reg;. You may need to set this to '/*' in order to use this with ALB ingress controllers.
   ##
   path: /
@@ -893,7 +895,7 @@ ingress:
 apiIngress:
   ## @param apiIngress.enabled Enable ingress controller resource for MinIO API
   ##
-  enabled: false
+  enabled: true
   ## @param apiIngress.apiVersion Force Ingress API version (automatically detected if not set)
   ##
   apiVersion: ""
@@ -901,10 +903,10 @@ apiIngress:
   ## This is supported in Kubernetes 1.18+ and required if you have more than one IngressClass marked as the default for your cluster.
   ## ref: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/
   ##
-  ingressClassName: ""
+  ingressClassName: nginx
   ## @param apiIngress.hostname Default host for the ingress resource
   ##
-  hostname: minio.local
+  hostname: api.minio.local
   ## @param apiIngress.path The Path to MinIO&reg;. You may need to set this to '/*' in order to use this with ALB ingress controllers.
   ##
   path: /
@@ -1089,7 +1091,7 @@ persistence:
 volumePermissions:
   ## @param volumePermissions.enabled Enable init container that changes the owner and group of the persistent volume(s) mountpoint to `runAsUser:fsGroup`
   ##
-  enabled: false
+  enabled: true
   ## @param volumePermissions.image.registry [default: REGISTRY_NAME] Init container volume-permissions image registry
   ## @param volumePermissions.image.repository [default: REPOSITORY_NAME/os-shell] Init container volume-permissions image repository
   ## @skip volumePermissions.image.tag Init container volume-permissions image tag (immutable tags are recommended)
@@ -1188,13 +1190,13 @@ metrics:
     enabled: false
     ## @param metrics.serviceMonitor.namespace Namespace which Prometheus is running in
     ##
-    namespace: ""
+    namespace: prometheus
     ## @param metrics.serviceMonitor.labels Extra labels for the ServiceMonitor
     ##
     labels: {}
     ## @param metrics.serviceMonitor.jobLabel The name of the label on the target service to use as the job name in Prometheus
     ##
-    jobLabel: ""
+    jobLabel: "minio-job"
     ## DEPRECATED metrics.serviceMonitor.path - please use `metrics.serviceMonitor.paths` instead
     ##
     ## path: /minio/v2/metrics/cluster

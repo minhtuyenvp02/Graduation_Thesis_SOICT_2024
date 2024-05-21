@@ -1,0 +1,64 @@
+<configuration>
+    <property>
+        <name>metastore.thrift.uris</name>
+        <value>thrift://${env.HIVE_METASTORE_IP}:{env.HIVE_METASTORE_PORT}</value>
+        <description>Thrift URI for the remote metastore. Used by metastore client to connect to remote metastore.</description>
+    </property>
+    <property>
+        <name>metastore.task.threads.always</name>
+        <value>org.apache.hadoop.hive.metastore.events.EventCleanerTask,org.apache.hadoop.hive.metastore.MaterializationsCacheCleanerTask</value>
+    </property>
+    <property>
+        <name>metastore.expression.proxy</name>
+        <value>org.apache.hadoop.hive.metastore.DefaultPartitionExpressionProxy</value>
+    </property>
+    <property>
+        <name>javax.jdo.option.ConnectionDriverName</name>
+        <value>org.postgresql.Driver</value>
+        <description>The driver used to connect to underlying RDBMS</description>
+    </property>
+
+    <property>
+        <name>javax.jdo.option.ConnectionURL</name>
+        <value>jdbc:postgresql://${env.POSTGRES_DB_IP}:${env.POSTGRES_DB_PORT}/metastore_db?enabledTLSProtocols=TLSv1.2</value>
+        <description>The uri to connect to postgres where the desired metastore tables will be stored</description>
+    </property>
+
+    <property>
+        <name>javax.jdo.option.ConnectionUserName</name>
+        <value>${env.POSTGRES_USER}</value>
+        <description>The user with the desired access to postgres</description>
+    </property>
+
+    <property>
+        <name>javax.jdo.option.ConnectionPassword</name>
+        <value>${env.POSTGRES_PASSWORD}</value>
+        <description>The password of user with the desired access to postgres</description>
+    </property>
+
+    <property>
+        <name>fs.s3a.access.key</name>
+        <value>${env.S3_USER}</value>
+        <description>The access key for the underlying s3 storage</description>
+    </property>
+    <property>
+        <name>fs.s3a.secret.key</name>
+        <value>${env.S3_PASSWORD}</value>
+        <description>The secret key for the underlying s3 storage</description>
+    </property>
+    <property>
+        <name>fs.s3a.path.style.access</name>
+        <value>true</value>
+    </property>
+
+    <property>
+        <name>hive.input.format</name>
+        <value>io.delta.hive.HiveInputFormat</value>
+    </property>
+
+    <property>
+        <name>hive.tez.input.format</name>
+        <value>io.delta.hive.HiveInputFormat</value>
+    </property>
+
+</configuration>

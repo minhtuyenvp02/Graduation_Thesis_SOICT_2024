@@ -59,16 +59,16 @@ class TripGenerator(object):
                 logging.info("This directory has no file")
             else:
                 try:
-                    with ThreadPoolExecutor(max_workers=5) as execute:
-                        task_result = [False] * 4
+                    with ThreadPoolExecutor(max_workers=3) as execute:
+                        task_result = [False] * 2
                         try:
                             print("err___01")
                             task_result[0] = execute.submit(self.generator.send_single_item, list_file[0], topics)
                             task_result[1] = execute.submit(self.generator.send_single_item, list_file[1], topics)
-                            task_result[2] = execute.submit(self.generator.send_single_item, list_file[2], topics)
-                            task_result[3] = execute.submit(self.generator.send_single_item, list_file[3], topics)
+                            # task_result[2] = execute.submit(self.generator.send_single_item, list_file[2], topics)
+                            # task_result[3] = execute.submit(self.generator.send_single_item, list_file[3], topics)
                             print("error_02")
-                            # print(task_result[0])
+                            print(task_result[0])
                         except Exception as e:
                             logging.info("Submmit task failed")
                 except Exception as e:
