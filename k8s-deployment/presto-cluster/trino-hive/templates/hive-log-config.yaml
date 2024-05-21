@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hive-log4j2-config
+  namespace: {{ .Values.global.namespace }}
+data:
+ {{- range $name, $config := .Values.hive.external_config }}
+   {{ $name }}: |-
+ {{ tpl $config $ | indent 4 }}
+   {{- end }}

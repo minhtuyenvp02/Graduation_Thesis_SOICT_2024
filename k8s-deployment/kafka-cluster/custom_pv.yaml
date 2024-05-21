@@ -192,5 +192,97 @@ spec:
   #    server: 10.2.2.10 #TODO: update with correct NFS server
   #    path: /mnt/kafka/kafka-broker3
   hostPath: #TODO: Only for testing, do not use hostPath in actual app
-    path: /tmp/kubernetes/minio/pv5
+    path: /opt/kubernetes/minio/pv5
   volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: common-pv1
+spec:
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 8Gi
+  #  nfs:
+  #    server: 10.2.2.10 #TODO: update with correct NFS server
+  #    path: /mnt/kafka/kafka-broker1
+  hostPath: #TODO: Only for testing, do not use hostPath in actual app
+    path: /opt/kubernetes/common/pv1
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: common-pv2
+spec:
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 5Gi
+  #  nfs:
+  #    server: 10.2.2.10 #TODO: update with correct NFS server
+  #    path: /mnt/kafka/kafka-broker2
+  hostPath: #TODO: Only for testing, do not use hostPath in actual app
+    path: /opt/kubernetes/minio/pv2
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: common-pv3
+spec:
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 10Gi
+  #  nfs:
+  #    server: 10.2.2.10 #TODO: update with correct NFS server
+  #    path: /mnt/kafka/kafka-broker2
+  hostPath: #TODO: Only for testing, do not use hostPath in actual app
+    path: /opt/kubernetes/common/pv3
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: common-pv4
+spec:
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 8Gi
+  #  nfs:
+  #    server: 10.2.2.10 #TODO: update with correct NFS server
+  #    path: /mnt/kafka/kafka-broker3
+  hostPath: #TODO: Only for testing, do not use hostPath in actual app
+    path: /opt/kubernetes/common/pv4
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: common-pv5
+spec:
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 10Gi
+  #  nfs:
+  #    server: 10.2.2.10 #TODO: update with correct NFS server
+  #    path: /mnt/kafka/kafka-broker3
+  hostPath: #TODO: Only for testing, do not use hostPath in actual app
+    path: /opt/kubernetes/common/pv5
+  volumeMode: Filesystem
+
+  
