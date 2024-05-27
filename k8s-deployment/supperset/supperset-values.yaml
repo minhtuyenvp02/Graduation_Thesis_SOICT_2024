@@ -1,3 +1,4 @@
+
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -138,7 +139,7 @@ extraVolumeMounts: []
 # -- A dictionary of overrides to append at the end of superset_config.py - the name does not matter
 # WARNING: the order is not guaranteed
 # Files can be passed as helm --set-file configOverrides.my-override=my-file.py
-configOverrides:
+configOverrides: {}
   # extend_timeout: |
   #    # Extend timeout to allow long running queries.
   #    SUPERSET_WEBSERVER_TIMEOUT = ...
@@ -170,9 +171,9 @@ configOverrides:
   #   AUTH_USER_REGISTRATION = True
   #   # The default user self registration role
   #   AUTH_USER_REGISTRATION_ROLE = "Admin"
-  secret: |
-     # Generate your own secret key for encryption. Use `openssl rand -base64 42` to generate a good key
-     SECRET_KEY = 'KVjDypK0KowWX6Kca3f09un0Xp4N0OpZygwN+Ugpadp/8Lho7K6fqGx2'
+  # secret: |
+  #   # Generate your own secret key for encryption. Use `openssl rand -base64 42` to generate a good key
+  #   SECRET_KEY = 'CHANGE_ME_TO_A_COMPLEX_RANDOM_SECRET'
 
 # -- Same as above but the values are files
 configOverridesFiles: {}
@@ -206,8 +207,8 @@ service:
     http: nil
 
 ingress:
-  enabled: true
-  ingressClassName: nginx
+  enabled: false
+  ingressClassName: ~
   annotations: {}
     # kubernetes.io/tls-acme: "true"
     ## Extend timeout to allow long running queries.
@@ -217,7 +218,7 @@ ingress:
   path: /
   pathType: ImplementationSpecific
   hosts:
-    - superset.minhtuyenvp02.id.vn
+    - chart-example.local
   tls: []
   extraHostsRaw: []
   #  - secretName: chart-example-tls
@@ -247,9 +248,9 @@ hostAliases: []
 
 # Superset node configuration
 supersetNode:
-  replicaCount: 2
+  replicaCount: 1
   autoscaling:
-    enabled: true
+    enabled: false
     minReplicas: 1
     maxReplicas: 100
     targetCPUUtilizationPercentage: 80
@@ -283,7 +284,7 @@ supersetNode:
       enabled: false
       ssl_cert_reqs: CERT_NONE
     # You need to change below configuration incase bringing own PostgresSQL instance and also set postgresql.enabled:false
-    db_host: postgres-postgresql-hl.hive-metastore.svc.cluster.local
+    db_host: '{{ .Release.Name }}-postgresql'
     db_port: "5432"
     db_user: superset
     db_pass: superset
@@ -778,21 +779,21 @@ postgresql:
   ##
   ## Use the PostgreSQL chart dependency.
   ## Set to false if bringing your own PostgreSQL.
-  enabled: false
+  enabled: true
 
   ## Authentication parameters
   auth:
     ## The name of an existing secret that contains the postgres password.
-    existingSecret: "password"
+    existingSecret:
     ## PostgreSQL name for a custom user to create
     username: superset
     ## PostgreSQL password for the custom user to create. Ignored if `auth.existingSecret` with key `password` is provided
-    password: ""
+    password: superset
     ## PostgreSQL name for a custom database to create
     database: superset
 
   image:
-    tag: "15.6.0-debian-12-r16"
+    tag: "14.6.0-debian-11-r13"
 
   ## PostgreSQL Primary parameters
   primary:
@@ -867,6 +868,7 @@ redis:
         - ReadWriteOnce
 
 nodeSelector: {}
+
 tolerations: []
 
 affinity: {}

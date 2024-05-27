@@ -1,38 +1,22 @@
+import logging
 from pyspark.sql import SparkSession
 from pyspark.sql.types import *
 from delta.tables import *
 from pyspark.sql.functions import *
 from delta import *
+from itertools import product
+from pyspark.sql import SparkSession
 
-
+from spark_executor import create_spark_session
 class WareHouseBuilder(object):
-    def __init__(self, dwh_location: str, silver_location: str):
+    def __init__(self, dwh_location: str, silver_location: str, spark: SparkSession):
         self.silver_location = silver_location
         self.dwh_location = dwh_location
-        builder = SparkSession.builder.appName("DWHBuilder") \
-            .config("master", "local[2]") \
-            .config("spark.sql.shuffle.partitions", 4) \
-            .config("spark.sql.streaming.schemaInference", "true") \
-            .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
-            .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
-            .config("spark.databricks.delta.optimize.repartition.enabled", "true") \
-            .config("spark.databricks.delta.autoCompact.enabled", "true") \
-            .config("spark.databricks.delta.properties.defaults.enableChangeDataFeed", "true")
-        self.spark = (configure_spark_with_delta_pip(builder, extra_packages=[
-            'org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1'])
-                      .getOrCreate())
-        # add confs
-        sc = self.spark.sparkContext
-        sc._jsc.hadoopConfiguration().set("fs.s3a.access.key", S3_CONFIG["fs.s3a.access.key"])
-        sc._jsc.hadoopConfiguration().set("fs.s3a.secret.key", S3_CONFIG["fs.s3a.secret.key"])
-        sc._jsc.hadoopConfiguration().set("fs.s3a.endpoint", S3_CONFIG["fs.s3a.endpoint"])
-        sc._jsc.hadoopConfiguration().set("fs.s3a.path.style.access", "true")
-        sc._jsc.hadoopConfiguration().set("fs.s3a.connection.ssl.enabled", "false")
-        sc._jsc.hadoopConfiguration().set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
-        sc._jsc.hadoopConfiguration().set("fs.s3a.connection.ssl.enabled", "false")
+        self.spark = spark
 
     def create_dim_date(self):
-        # self.spark.sql('CREATE DATABASE IF NOT EXISTS gold;')
+        print("Hello here is dim date")
+        self.spark.sql('CREATE DATABASE IF NOT EXISTS gold;')
         # Define start and end dates
         start_date = "2020-01-01"
         end_date = "2025-12-31"
@@ -45,7 +29,7 @@ class WareHouseBuilder(object):
         # Create the DataFrame with required columns
         dim_calendar = dates.select(
             (year(col("calendar_date")) * 10000 + month(col("calendar_date")) * 100 + dayofmonth(
-                col("calendar_date"))).alias("date_int"),
+                col("calendar_date"))).alias("date_id"),
             col("calendar_date"),
             year(col("calendar_date")).alias("calendar_year"),
             date_format(col("calendar_date"), 'MMMM').alias("calendar_month"),
@@ -68,50 +52,44 @@ class WareHouseBuilder(object):
                 "fiscal_year_jul_to_jun"),
             expr("(month(calendar_date) + 5) % 12 + 1").alias("fiscal_month_jul_to_jun")
         ).orderBy(col("calendar_date"))
-
+        dim_calendar.show(10)
         # Define the path for Delta table
-        delta_table_path = f"s3a://{self.dwh_location}/dim_date_t"
-
+        delta_table_path = f"{self.dwh_location}/dim_date_t"
+        print("Starting to write....")
         # Write DataFrame to Delta table
         dim_calendar.write \
             .format("delta") \
             .option("overwriteSchema", "true") \
-            .option("delta.targetFileSize", "67108864") \
-            .option("pipelines.autoOptimize.zOrderCols", "calendar_date") \
+            .option("pipelines.autoOptimize.zOrderCols", "date_id") \
             .mode("overwrite") \
             .save(delta_table_path)
+        print("Wrinting.....")
         self.spark.sql(f"""
-                        CREATE TABLE IF NOT EXISTS gold.dim_payment_t
+                        CREATE TABLE IF NOT EXISTS gold.dim_date_t
                         USING DELTA
                         LOCATION '{dim_payment_path}'
+                        OPTIMIZE gold.dim_date_t ZORDER BY (date_id)                                 
                     """)
-
-        # Set Delta table properties using SQL
-        self.spark.sql(f"""
-            ALTER TABLE delta.`{delta_table_path}`
-            SET TBLPROPERTIES (
-              'quality' = 'gold',
-              'delta.targetFileSize' = '67108864',
-              'pipelines.autoOptimize.zOrderCols' = 'calendar_date'
-            )
-        """)
+        print("Write Done")
 
     def create_dim_location(self):
+        print("hello here is dim location")
         self.spark.sql('CREATE DATABASE IF NOT EXISTS gold;')
         DeltaTable.createIfNotExists(sparkSession=self.spark) \
-            .tableName("gold.dim_location") \
+            .tableName("gold.dim_location_t") \
             .addColumn("location_id", "INT", nullable=False) \
             .addColumn("borough", "STRING", nullable=True) \
             .addColumn("zone", "STRING", nullable=True) \
             .addColumn("service_zone", "STRING", nullable=True) \
             .addColumn("is_active", "BOOLEAN", nullable=True) \
-            .location(f"s3a://{self.dwh_location}/dim_location") \
-            .partitionedBy("location_id", "zone") \
-            .comment("dwh.dim_location_t") \
+            .location(f"{self.dwh_location}/dim_location_t") \
+            .partitionedBy("zone") \
+            .comment("gold.dim_location_t") \
             .execute()
         return
 
     def create_dim_dispatching_base_num(self):
+        print("hello here is dim base num")
         self.spark.sql('CREATE DATABASE IF NOT EXISTS gold;')
         DeltaTable.createIfNotExists(self.spark) \
             .tableName("gold.dim_dpc_base_num_t") \
@@ -119,13 +97,16 @@ class WareHouseBuilder(object):
             .addColumn("license_num", "STRING", nullable=True) \
             .addColumn("base_name", "STRING", nullable=True) \
             .addColumn("app_company", "STRING", nullable=True) \
+            .addColumn("id", "INT", nullable=True) \
             .addColumn("is_active", "BOOLEAN", nullable=True) \
             .partitionedBy("license_num") \
+            .location(f"{self.dwh_location}/dim_dpc_base_num_t") \
             .comment("dwh.dim_dpc_base_num_t") \
             .execute()
         return
 
     def create_dim_payment(self):
+        print("hello here is dim payment")
         self.spark.sql('CREATE DATABASE IF NOT EXISTS gold;')
         schema = StructType([
             StructField("payment_id", IntegerType(), False),
@@ -141,7 +122,7 @@ class WareHouseBuilder(object):
         ]
 
         df_dim_payment = self.spark.createDataFrame(data, schema)
-        dim_payment_path = f"s3a://{self.dwh_location}/dim_payment_t"
+        dim_payment_path = f"{self.dwh_location}/dim_payment_t"
 
         (df_dim_payment.write.format("delta")
          .option("overwriteSchema", "true")
@@ -162,11 +143,11 @@ class WareHouseBuilder(object):
                    "wav_match_flag"]
         rows = [Row(*row) for row in combinations]
         df_dim_flag = self.spark.createDataFrame(rows, columns)
-        dim_flag_path = f"s3a://{self.dwh_location}/dim_flag_t"
+        dim_flag_path = f"{self.dwh_location}/dim_flags_t"
         (df_dim_flag.write.format("delta").mode("overwrite")
          .option("overwriteSchema", "true").save(dim_flag_path))
         self.spark.sql(f"""
-                         CREATE TABLE IF NOT EXISTS gold.dim_flag_t
+                         CREATE TABLE IF NOT EXISTS gold.dim_flags_t
                          USING DELTA
                          LOCATION '{dim_flag_path}'
                      """)
@@ -188,7 +169,7 @@ class WareHouseBuilder(object):
         ]
 
         df_dim_rate_code = self.spark.createDataFrame(data, schema)
-        dim_rate_code_path = f"s3a://{self.dwh_location}/dim_rate_code_t"
+        dim_rate_code_path = f"{self.dwh_location}/dim_rate_code_t"
 
         (df_dim_rate_code.write.format("delta")
          .option("overwriteSchema", "true")
@@ -201,9 +182,10 @@ class WareHouseBuilder(object):
         return
 
     def create_dim_hvfhs_license_num(self):
+        print("Hello here is dim license num")
         self.spark.sql('CREATE DATABASE IF NOT EXISTS gold;')
         schema = StructType([
-            StructField("id", IntegerType(), nullable=False),
+            StructField("license_id", IntegerType(), nullable=False),
             StructField("hvfhs_license_num", StringType(), False),
             StructField("company", StringType(), False)
         ])
@@ -213,16 +195,22 @@ class WareHouseBuilder(object):
             (3, "HV0004", "Via"),
             (4, "HV0005", "Lyft")
         ]
-        df_dim_hvfhs_license = spark.createDataFrame(data, schema)
-        dim_hvfhs_license_path = f"s3a://{self.dwh_location}/dim_hvfhs_license_num_t"
-        df_dim_hvfhs_license.write.format("delta").mode("overwrite").save(dim_hvfhs_license_path)
+        df_dim_hvfhs_license = self.spark.createDataFrame(data, schema)
+        df_dim_hvfhs_license.show(10)
+        dim_hvfhs_license_path = f"{self.dwh_location}/dim_hvfhs_license_num_t"
+        (df_dim_hvfhs_license.write
+         .format("delta")
+         .option("overwriteSchema", "true")
+         .mode("overwrite").save(dim_hvfhs_license_path))
         spark.sql(f"""
             CREATE TABLE IF NOT EXISTS gold.dim_hvfhs_license_num_t
             USING DELTA
             LOCATION '{dim_hvfhs_license_path}'
         """)
+        print("Done license num")
 
     def create_dim_time(self):
+        print("hello here is dim_time")
         self.spark.sql('CREATE DATABASE IF NOT EXISTS gold;')
         times_df = self.spark.sql("""
             WITH times AS (
@@ -232,7 +220,6 @@ class WareHouseBuilder(object):
             FROM times
         """)
 
-        # Tạo bảng dim_time
         dim_time = times_df.select(
             date_format("time", "HHmm").cast("int").alias("id"),
             date_format("time", "hh:mm a").alias("time"),
@@ -242,15 +229,54 @@ class WareHouseBuilder(object):
             date_format("time", "a").alias("am_pm")
         )
         dim_time_path = f"{self.dwh_location}/dim_time_t"
+        dim_time.show(10)
         dim_time.write.format("delta") \
             .option("comment", "Time dimension") \
-            .option("delta.targetFileSize", "67108864") \
+            .option("pipelines.autoOptimize.zOrderCols", "calendar_date") \
+            .option("overwriteSchema", "true") \
             .mode("overwrite") \
-            .save(dim_time_path) \
+            .partitionBy("hour")\
+            .save(dim_time_path)
 
-        spark.sql(f"""
-                  CREATE TABLE IF NOT EXISTS gold.dim_time_t
-                  USING DELTA
-                  LOCATION '{dim_time_path}'
-                  OPTIMIZE time ZORDER BY (time)
-              """)
+        print("Done Dim Time")
+
+    def run_dim_builder(self):
+        print("hello i'm dim builder")
+        try:
+            self.create_dim_time()
+        except Exception as E:
+            logging.info("Failed to create dim time")
+            logging.info(E)
+        try:
+            self.create_dim_date()
+        except Exception as E:
+            logging.info("Failed to create dim date")
+        try:
+            self.create_dim_location()
+        except Exception as E:
+            logging.info("Failed to create dim location")
+            logging.info(E)
+        try:
+            self.create_dim_payment()
+        except Exception as E:
+            logging.info("Failed to create dim payment")
+        try:
+            self.create_dim_rate_code()
+        except Exception as E:
+            logging.info("Failed to create dim rate code")
+            logging.info(E)
+        try:
+            self.create_dim_hvfhs_license_num()
+        except Exception as E:
+            logging.info("Failed to create dim hvfhs license")
+            logging.info(E)
+        try:
+            self.create_dim_dispatching_base_num()
+        except Exception as E:
+            logging.info("Failed to create dim dpc base num")
+            logging.info(E)
+
+
+builder = WareHouseBuilder(silver_location="s3a://nyc-trip-bucket/silver", dwh_location="s3a://nyc-trip-bucket/gold",
+                           spark=create_spark_session("Test"))
+builder.create_dim_time()

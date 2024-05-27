@@ -1,32 +1,13 @@
 from delta import DeltaTable
 from pyspark.sql.functions import *
 import uuid
+from pyspark.sql import SparkSession
 
 
 class StagingTableBuilder(object):
-    def __init__(self, staging_location: str):
+    def __init__(self, staging_location: str, spark: SparkSession):
         self.staging_location = staging_location  # s3a://{bucket_name}/silver
-        builder = SparkSession.builder.appName("MyApp") \
-            .config("master", "local[2]") \
-            .config("spark.sql.shuffle.partitions", 4) \
-            .config("spark.sql.streaming.schemaInference", "true") \
-            .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
-            .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
-            .config("spark.databricks.delta.optimize.repartition.enabled", "true") \
-            .config("spark.databricks.delta.autoCompact.enabled", "true") \
-            .config("spark.databricks.delta.properties.defaults.enableChangeDataFeed", "true")
-        self.spark = (configure_spark_with_delta_pip(builder, extra_packages=[
-            'org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1'])
-                      .getOrCreate())
-        # add confs
-        sc = self.spark.sparkContext
-        sc._jsc.hadoopConfiguration().set("fs.s3a.access.key", S3_CONFIG["fs.s3a.access.key"])
-        sc._jsc.hadoopConfiguration().set("fs.s3a.secret.key", S3_CONFIG["fs.s3a.secret.key"])
-        sc._jsc.hadoopConfiguration().set("fs.s3a.endpoint", S3_CONFIG["fs.s3a.endpoint"])
-        sc._jsc.hadoopConfiguration().set("fs.s3a.path.style.access", "true")
-        sc._jsc.hadoopConfiguration().set("fs.s3a.connection.ssl.enabled", "false")
-        sc._jsc.hadoopConfiguration().set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
-        sc._jsc.hadoopConfiguration().set("fs.s3a.connection.ssl.enabled", "false")
+        self.spark = spark
 
     def create_yellowtrip_tbl(self):
         self.spark.sql('CREATE DATABASE IF NOT EXISTS silver;')
@@ -116,3 +97,5 @@ class StagingTableBuilder(object):
             .addColumn("app_company", "STRING", nullable=False) \
             .location(f"{self.staging_location}/hvfhv_dpc_base_num") \
             .execute()
+    
+

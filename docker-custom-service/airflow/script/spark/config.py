@@ -11,14 +11,14 @@ SPARK_CONFIG = {
 S3_CONFIG = {
     "fs.s3a.access.key": os.getenv("S3_ACCESS_KEY", "admin"),
     "fs.s3a.secret.key": os.getenv("S3_SECRET_KEY", "admin123"),
-    "fs.s3a.endpoint": os.getenv("S3_ENDPOINT", "api.minio.local:32589"),
+    "fs.s3a.endpoint": os.getenv("S3_ENDPOINT", "34.128.111.86:30090"),
 }
 
 EXTRA_JAR_PACKAGE = [
     'org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1']
 
 KAFKA_CONFIG = {
-    "bootstrap_servers": os.getenv("KAFKA_BOOTSTRAP_SERVERS", "10.211.56.9:30272,10.211.56.9:30441,10.211.56.9:30462")
+    "bootstrap_servers": os.getenv("KAFKA_BOOTSTRAP_SERVERS", "34.128.111.86:30092,34.128.111.86:30093,34.128.111.86:30094")
 }
 SCHEMA_CONFIG = {
     "yellow_tripdata": StructType([
@@ -39,7 +39,8 @@ SCHEMA_CONFIG = {
         StructField('tolls_amount', DoubleType(), True),
         StructField('improvement_surcharge', DoubleType(), True),
         StructField('total_amount', DoubleType(), True),
-        StructField('congestion_surcharge', DoubleType(), True)
+        StructField('congestion_surcharge', DoubleType(), True),
+        StructField('airport_fee', DoubleType(), True)
     ]),
     "fhvhv_tripdata": StructType([
         StructField("hvfhs_license_num", StringType(), True),
