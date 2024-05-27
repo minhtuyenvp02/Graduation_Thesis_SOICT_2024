@@ -10,14 +10,14 @@ from pyspark.sql import SparkSession
 from delta import *
 from minio import Minio
 from schema import CustomSchema
+from spark_executor import create_spark_session
 from config import S3_CONFIG, SPARK_CONFIG, SCHEMA_CONFIG, KAFKA_CONFIG, EXTRA_JAR_PACKAGE
 
 
 class BronzeData(object):
-    def __init__(self, kafka_server: str, spark_cluster: str
+    def __init__(self, kafka_server: str
                  , bucket_name: str, schema):
         self.schema = schema
-        self.spark_cluster = spark_cluster
         self.bronze_location = f"s3a://{bucket_name}/bronze"
         self.kafka_server = kafka_server
         kafka_conf = {
@@ -27,27 +27,8 @@ class BronzeData(object):
         dic_topic = admin_client.list_topics().topics
         self.topics = [x for x in dic_topic.keys()]
         self.bucket_name = bucket_name
-
-        builder = SparkSession.builder.appName("Bronze") \
-            .config("master", "local[2]") \
-            .config("spark.sql.shuffle.partitions", 4) \
-            .config("spark.sql.streaming.schemaInference", "true") \
-            .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
-            .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
-            .config("spark.databricks.delta.properties.defaults.enableChangeDataFeed", "true")
-        self.spark = (configure_spark_with_delta_pip(builder, extra_packages=[
-            'org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1'])
-                      .getOrCreate())
-        self.spark.conf.set("spark.debug.maxToStringFields", 100)
-        # add confs
-        sc = self.spark.sparkContext
-        sc._jsc.hadoopConfiguration().set("fs.s3a.access.key", S3_CONFIG["fs.s3a.access.key"])
-        sc._jsc.hadoopConfiguration().set("fs.s3a.secret.key", S3_CONFIG["fs.s3a.secret.key"])
-        sc._jsc.hadoopConfiguration().set("fs.s3a.endpoint", S3_CONFIG["fs.s3a.endpoint"])
-        sc._jsc.hadoopConfiguration().set("fs.s3a.path.style.access", "true")
-        sc._jsc.hadoopConfiguration().set("fs.s3a.connection.ssl.enabled", "false")
-        sc._jsc.hadoopConfiguration().set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
-        sc._jsc.hadoopConfiguration().set("fs.s3a.connection.ssl.enabled", "false")
+        self.spark = create_spark_session(app_name="StreamToBronze")
+        
 
     def csv_to_bronze(self, source_csv, target_table_name, id_option: bool):
         df = self.spark.read.format("csv") \
@@ -62,6 +43,7 @@ class BronzeData(object):
         table_path = f"{self.bronze_location}/{target_table_name}"
         df.write \
             .format("delta") \
+            .option("overwriteSchema", "true")\
             .mode("overwrite") \
             .option('path', table_path) \
             .saveAsTable(target_table_name)
@@ -81,9 +63,11 @@ class BronzeData(object):
               .select("value.*"))
         # df = df.withColumn("id", monotonically_increasing_id())
         df.printSchema()
-        stream_query = df.writeStream \
+        # df.show(1000)
+
+        stream_query = df\
+            .writeStream \
             .format("delta") \
-            .option("ignoreChanges", 'true') \
             .option("checkpointLocation", f"{target_location}/_checkpoint") \
             .start(target_location)
         stream_query.awaitTermination()
@@ -129,7 +113,10 @@ if __name__ == "__main__":
     # parser.add_argument("--fhvhv_basenum_csv", type=str, required=True)
     # args = parser.parse_args()
     schema = CustomSchema(SCHEMA_CONFIG)
-    bronze = BronzeData(schema=schema, kafka_server="10.211.56.9:30196,10.211.56.9:32476,10.211.56.9:30258", spark_cluster="local[2]", bucket_name="nyc-trip-bucket")
-    bronze.csv_to_bronze(source_csv="s3a://nyc-trip-bucket/nyc-data/location.csv", target_table_name="location", id_option=False)
-    bronze.csv_to_bronze(source_csv="s3a://nyc-trip-bucket/nyc-data/dpc_base_num_fn.csv", target_table_name="dpc_base_num", id_option=True)
+    bronze = BronzeData(schema=schema, kafka_server="10.211.56.3:32567,10.211.56.3:32285,10.211.56.3:30970", bucket_name="nyc-trip-bucket")
+    # bronze.create_streaming_table()
+    bronze.csv_to_bronze(source_csv="s3a://nyc-trip-bucket/nyc-data/location.csv", target_table_name="location",
+                         id_option=False)
+    bronze.csv_to_bronze(source_csv="s3a://nyc-trip-bucket/nyc-data/dpc_base_num.csv",
+                         target_table_name="dpc_base_num", id_option=True)
     bronze.kafka_stream_2bronze(topics=["yellow_tripdata", "fhvhv_tripdata"])

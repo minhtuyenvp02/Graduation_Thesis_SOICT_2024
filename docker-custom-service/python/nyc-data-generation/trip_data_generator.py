@@ -1,7 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
-
 from confluent_kafka.admin import AdminClient
-
 from single_message_produce import SingleMessageProducer
 import os
 import sys
@@ -10,21 +8,23 @@ import s3fs
 import logging
 from confluent_kafka import Producer
 
-sys.path.append("opt/airflow/script/stock_data_generation/")
-
 logging.basicConfig(format="%(asctime)s - %(message)s", level=logging.INFO, force=True)
 
 
 class TripGenerator(object):
-    def __init__(self, kafka_bootstrap_server: str, url_endpoint: str, data_dir: str, part_idx: int,
-                 date_str: str):
+    def __init__(self, kafka_bootstrap_server: str, url_endpoint: str, data_dir: str, send_speed: str, ):
         self.kafka_servers = kafka_bootstrap_server
         self.url_endpoint = url_endpoint
         self.data_dir = data_dir
+        self.send_speed = send_speed
         config_ = {
-            "bootstrap.servers": self.kafka_servers
+            "bootstrap.servers": self.kafka_servers,
+            'batch.size': 16384,
+            'linger.ms': 5,
+            'compression.type': 'gzip',
+            'acks': 'all'
         }
-        producer = Producer(config_)
+        producer = Producer(**config_)
 
         self.generator = SingleMessageProducer(part_idx=0, producer=producer)
 
@@ -65,8 +65,6 @@ class TripGenerator(object):
                             print("err___01")
                             task_result[0] = execute.submit(self.generator.send_single_item, list_file[0], topics)
                             task_result[1] = execute.submit(self.generator.send_single_item, list_file[1], topics)
-                            # task_result[2] = execute.submit(self.generator.send_single_item, list_file[2], topics)
-                            # task_result[3] = execute.submit(self.generator.send_single_item, list_file[3], topics)
                             print("error_02")
                             print(task_result[0])
                         except Exception as e:

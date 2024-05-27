@@ -9,7 +9,7 @@ from confluent_kafka import Producer
 
 
 class SingleMessageProducer(object):
-    def __init__(self, producer: Producer, part_idx, send_speed=50):
+    def __init__(self, producer: Producer, part_idx, send_speed=500):
         # self.url_file_path = url_file_path
         self.producer = producer
         self.part_idx = part_idx
@@ -26,31 +26,24 @@ class SingleMessageProducer(object):
     def send_single_item(self, url_file_path: str, topics: [str]):
         # print(" o day")
         df = pd.read_parquet(path="s3://" + url_file_path, storage_options={"anon": False})
-        # print("oday 02")
-        # print(s)
         topic_name = url_file_path.split("/")[-1][0:-16]
-        print(topic_name)
-        print("error here")
         if topics is None:
             logging("No topic")
             return None
         if topic_name in topics:
-            print("heeeeeee")
             for index, row in df.iterrows():
-                print(index)
+                # print(index)
                 try:
                     print(f"Publishing to topic {topic_name}")
                     self.producer.produce(topic=topic_name, value=bytes(row.to_json(), 'utf-8'))
                     # self.producer.produce(topic="test", value=bytes(row.to_json(), 'utf-8'),
                     #                       partition=self.part_idx, callback=self.acked_calback())
-                    # print(bytes(row.to_json(), 'utf-8'))
                     time_random = 1 / self.send_speed
                     time_sleep = random.uniform(time_random, time_random + time_random/2)
                     print(time_sleep)
                     time.sleep(time_sleep)
                     self.producer.flush()
                 except Exception as e:
-                    # logging.info("Send message error")
-                    logging(e)
+                    logging.info(e)
         else:
-            logging(f"Topic {topic_name} is not valid.")
+            logging.info(f"Topic {topic_name} is not valid.")
