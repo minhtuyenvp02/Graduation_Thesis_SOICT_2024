@@ -8,8 +8,10 @@ from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import Kubernete
 from airflow.operators.email import EmailOperator
 from airflow.sensors.time_delta import TimeDeltaSensor
 from airflow.utils.edgemodifier import Label
+
 sys.path.append("/opt/airflow/scripts/")
 from kafka_topic_creation import create_kafka_topic
+from airflow.utils.trigger_rule import TriggerRule
 
 sys.path.append("/opt/airflow/scripts/spark")
 
@@ -37,13 +39,13 @@ default_args = {
 }
 
 with DAG(
-    dag_id="Trip-Streaming-Kafka",
-    start_date=start_date,
-    schedule="@once",
-    description="Streaming trip record to kafka topic",
-    default_args=default_args,
-    tags=["trip-generator", "producer"],
-    catchup=False
+        dag_id="trip_streaming_kafka",
+        start_date=start_date,
+        schedule="@once",
+        description="Streaming trip record to kafka topic",
+        default_args=default_args,
+        tags=["trip-generator", "producer"],
+        catchup=False
 ) as dag:
     create_kafka_topic = PythonOperator(
         task_id="create_kafka_topic",
@@ -72,14 +74,14 @@ with DAG(
     )
     send_error_email = EmailOperator(
         task_id="send_error_email",
-        to="minhtuyenpa@gmail.com",
+        to='minhtuyenpa@gmail.com',
         subject="Producer Notification",
         retries=0,
-        trigger_rule='on_failed',
+        trigger_rule=TriggerRule.ONE_FAILED,
         html_content='ERROR!!!,\n\nThere was an error in Trip Producer task.',
         dag=dag,
     )
-    
+
     stream_data_to_bronze = BashOperator(
         task_id="streaming_raw_data_to_bronze",
         bash_command=f'''
@@ -98,5 +100,3 @@ with DAG(
 
     create_kafka_topic >> trip_generator >> Label("On error") >> send_error_email
     stream_data_to_bronze
-
-

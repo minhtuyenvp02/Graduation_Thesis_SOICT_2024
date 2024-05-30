@@ -31,7 +31,7 @@ jobs:
           push: true
           tags: ${{ steps.meta_service1.outputs.tags }}
           labels: ${{ steps.meta_service1.outputs.labels }}
-
+          
   build_and_push_airflow_imane:
     name: Build and Push Airflow Docker image
     runs-on: ubuntu-latest
@@ -56,5 +56,5 @@ jobs:
         with:
           context: ./docker-custom-service/airflow
           push: true
-          tags: ${{ steps.meta_service1.outputs.tags }}
-          labels: ${{ steps.meta_service1.outputs.labels }}
+          tags: ${{ steps.meta_service2.outputs.tags }}
+          labels: ${{ steps.meta_service2.outputs.labels }}
