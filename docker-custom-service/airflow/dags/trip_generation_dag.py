@@ -72,17 +72,12 @@ with DAG(
     )
     send_error_email = EmailOperator(
         task_id="send_error_email",
-        email="minhtuyenvp02@gmail.com",
+        to="minhtuyenvp02@gmail.com",
         subject="Producer Notification",
         retries=0,
         trigger_rule='on_failed',
         html_content='ERROR!!!,\n\nThere was an error in Trip Producer task.',
         dag=dag,
-    )
-    time_sensor = TimeDeltaSensor(
-        task_id="wait_time",
-        delta=timedelta(minutes=10),
-        mode='poke'
     )
     
     stream_data_to_bronze = BashOperator(
