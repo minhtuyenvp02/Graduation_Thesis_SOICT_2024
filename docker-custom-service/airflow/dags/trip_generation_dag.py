@@ -58,7 +58,7 @@ with DAG(
     trip_generator = KubernetesPodOperator(
         namespace="airflow",
         task_id="trip_producer",
-        image=TRIP_PRODUCER_IMAGE + ":latest",
+        image=TRIP_PRODUCER_IMAGE + ":main",
         cmds=["python3", 'trip_streaming_script'],
         arguments=[
             '--kafka_servers', KAFKA_PRODUCER_SERVERS,
@@ -72,7 +72,7 @@ with DAG(
     )
     send_error_email = EmailOperator(
         task_id="send_error_email",
-        to="minhtuyenvp02@gmail.com",
+        to="minhtuyenpa@gmail.com",
         subject="Producer Notification",
         retries=0,
         trigger_rule='on_failed',
