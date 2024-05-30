@@ -72,7 +72,7 @@ with DAG(
     )
     send_error_email = EmailOperator(
         task_id="send_error_email",
-        email="minhtuyenvp02@gmail.com",
+        to='minhtuyenpa@gmail.com',
         subject="Producer Notification",
         retries=0,
         trigger_rule='on_failed',
