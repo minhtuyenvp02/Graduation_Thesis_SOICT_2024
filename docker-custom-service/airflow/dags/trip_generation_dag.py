@@ -48,7 +48,6 @@ with DAG(
     create_kafka_topic = PythonOperator(
         task_id="create_kafka_topic",
         python_callable=create_kafka_topic,
-        schedule='@once',
         op_kwargs={
             "kafka_servers": KAFKA_PRODUCER_SERVERS,
             "topics": TOPICS,
