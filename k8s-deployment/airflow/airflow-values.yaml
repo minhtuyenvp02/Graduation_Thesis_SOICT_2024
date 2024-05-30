@@ -68,22 +68,22 @@ airflowHome: /opt/airflow
 defaultAirflowRepository: apache/airflow
 
 # Default airflow tag to deploy
-defaultAirflowTag: "2.8.1"
+defaultAirflowTag: "2.9.1"
 
 # Default airflow digest. If specified, it takes precedence over tag
 defaultAirflowDigest: ~
 
 # Airflow version (Used to make some decisions based on Airflow Version being deployed)
-airflowVersion: "2.8.1"
+airflowVersion: "2.9.1"
 
 # Images
 images:
   airflow:
-    repository: ~
-    tag: ~
+    repository: minhtuyenvp02/airflow-spark
+    tag: latest
     # Specifying digest takes precedence over tag.
     digest: ~
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
   # To avoid images with user code, you can turn this to 'true' and
   # all the 'run-airflow-migrations' and 'wait-for-airflow-migrations' containers/jobs
   # will use the images from 'defaultAirflowRepository:defaultAirflowTag' values
@@ -261,7 +261,7 @@ rbac:
 
 # Airflow executor
 # One of: LocalExecutor, LocalKubernetesExecutor, CeleryExecutor, KubernetesExecutor, CeleryKubernetesExecutor
-executor: "CeleryExecutor"
+executor: "KubernetesExecutor"
 
 # If this is true and using LocalExecutor/KubernetesExecutor/CeleryKubernetesExecutor, the scheduler's
 # service account will have access to communicate with the api-server and launch pods.
@@ -271,24 +271,32 @@ allowPodLaunching: true
 
 # Environment variables for all airflow containers
 env:
-  - name: "S3_ACCESS_KEY" # 0
-    value : "admin"
-  - name : "S3_SECRET_KEY" # 1
-    value : "admin123"
-  - name : "AIRFLOW_VAR_CLIENT_SECRET" # 2
-    value : "CLIENT_SECRET"
-  - name : "AIRFLOW_VAR_TRIP_GENERATOR_IMAGE" # 3
-    value : "TRIP_GENERATOR"
+  - name: "AIRFLOW_VAR_S3_ACCESS_KEY" # 0
+    value: "admin"
+  - name: "AIRFLOW_VAR_S3_SECRET_KEY" # 1
+    value: "admin123"
+  - name: "AIRFLOW_VAR_TRIP_PRODUCER_IMAGE"
+    value: "minhtuyenvp02/trip-generator"
   - name: "AIRFLOW_VAR_KAFKA_PRODUCER_SERVERS"
-    value: "kafka-controller-0.kafka-controller-headless.kafka-cluster.svc.cluster.local:9092,kafka-controller-1.kafka-controller-headless.kafka-cluster.svc.cluster.local:9092,kafka-controller-2.kafka-controller-headless.kafka-cluster.svc.cluster.local:9092"
+    value: "kafka-controller-0.kafka-controller-headless.kafka.svc.cluster.local:9092,kafka-controller-1.kafka-controller-headless.kafka.svc.cluster.local:9092,kafka-controller-2.kafka-controller-headless.kafka.svc.cluster.local:9092"
   - name: "AIRFLOW_VAR_KAFKA_CONSUMER_SERVERS"
     value: "kafka.kafka.svc.cluster.local:9092"
   - name: "AIRFLOW_VAR_TOPIC"
     value: "yellow_tripdata,fhvhv_tripdata"
-  - name : "AIRFLOW_VAR_MINIO_ENDPOINT"
-    value : "minio.minio.svc.cluster.local:9000"
-  - name : "AIRFLOW_VAR_SPARK_CLUSTER"
-    value : "spark://spark-master-svc.spark.svc.cluster.local:7077"
+  - name: "AIRFLOW_VAR_S3_ENDPOINT"
+    value: "minio.minio.svc.cluster.local:9000"
+  - name: "AIRFLOW_VAR_PATH_LOCATION_CSV"
+    value: "s3a://nyc-trip-bucket/nyc-data/location.csv"
+  - name: "AIRFLOW_VAR_PATH_DPC_BASE_NUM_CSV"
+    value: "s3a://nyc-trip-bucket/nyc-data/dpc_base_num.csv"
+  - name: "AIRFLOW_VAR_SPARK_CLUSTER"
+    value: "spark://spark-master-svc.spark.svc.cluster.local:7077"
+  - name: "AIRFLOW_VAR_DATA_DIR"
+    value: "nyc-trip-bucket/nyc-data/2023"
+  - name: "AIRFLOW_VAR_MESSAGE_SEND_SPEED"
+    value: "200"
+  - name: "AIRFLOW_VAR_S3_BUCKET_NAME"
+    value: "nyc-trip-bucket"
 
 # Volumes for all airflow containers
 volumes: []
@@ -635,7 +643,7 @@ workers:
     # Enable persistent volumes
     enabled: true
     # Volume size for worker StatefulSet
-    size: 100Gi
+    size: 15Gi
     # If using a custom storageClass, pass name ref to all statefulSets here
     storageClassName:
     # Execute init container to chown log directory.
@@ -1441,7 +1449,7 @@ triggerer:
     # Enable persistent volumes
     enabled: true
     # Volume size for triggerer StatefulSet
-    size: 100Gi
+    size: 15Gi
     # If using a custom storageClass, pass name ref to all statefulSets here
     storageClassName:
     # Execute init container to chown log directory.
@@ -2556,15 +2564,15 @@ dags:
 
 logs:
   # Configuration for empty dir volume (if logs.persistence.enabled == false)
-  # emptyDirConfig:
-  #   sizeLimit: 1Gi
-  #   medium: Memory
+#  emptyDirConfig:
+#     sizeLimit: 1Gi
+#     medium: Memory
 
   persistence:
     # Enable persistent volume for storing logs
     enabled: false
     # Volume size for logs
-    size: 100Gi
+    size: 1Gi
     # Annotations for the logs PVC
     annotations: {}
     # If using a custom storageClass, pass name here
