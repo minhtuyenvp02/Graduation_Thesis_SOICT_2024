@@ -10,6 +10,7 @@ from airflow.sensors.time_delta import TimeDeltaSensor
 from airflow.utils.edgemodifier import Label
 sys.path.append("/opt/airflow/scripts/")
 from kafka_topic_creation import create_kafka_topic
+from airflow.utils.trigger_rule import TriggerRule
 
 sys.path.append("/opt/airflow/scripts/spark")
 
@@ -75,7 +76,7 @@ with DAG(
         to='minhtuyenpa@gmail.com',
         subject="Producer Notification",
         retries=0,
-        trigger_rule='on_failed',
+        trigger_rule=TriggerRule.ONE_FAILED,
         html_content='ERROR!!!,\n\nThere was an error in Trip Producer task.',
         dag=dag,
     )
