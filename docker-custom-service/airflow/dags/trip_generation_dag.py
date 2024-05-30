@@ -79,11 +79,6 @@ with DAG(
         html_content='ERROR!!!,\n\nThere was an error in Trip Producer task.',
         dag=dag,
     )
-    time_sensor = TimeDeltaSensor(
-        task_id="wait_time",
-        delta=timedelta(minutes=10),
-        mode='poke'
-    )
     
     stream_data_to_bronze = BashOperator(
         task_id="streaming_raw_data_to_bronze",
