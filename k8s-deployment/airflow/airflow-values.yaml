@@ -1411,8 +1411,8 @@ triggerer:
   # If the triggerer stops heartbeating for 5 minutes (5*60s) kill the
   # triggerer and let Kubernetes restart it
   livenessProbe:
-    initialDelaySeconds: 10
-    timeoutSeconds: 
+    initialDelaySeconds: 20
+    timeoutSeconds: 30
     failureThreshold: 5
     periodSeconds: 60
     command: ~
