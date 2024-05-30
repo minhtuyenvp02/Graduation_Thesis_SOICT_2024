@@ -4,7 +4,7 @@ from spark.config import *
 
 
 # Initialize the kafka topic
-def create_kafka_topic(kafka_servers: str, topics: [str], n_partitions=2, n_nodes=2):
+def create_kafka_topic(kafka_servers: str, topics: [str], n_partitions=3, n_nodes=2):
     """Create the kafka topic for the kafka server"""
     conf = {
         "bootstrap.servers": kafka_servers
@@ -16,12 +16,14 @@ def create_kafka_topic(kafka_servers: str, topics: [str], n_partitions=2, n_node
 
     for topic in topics:
         if topic not in admin_client.list_topics().topics:
-            topic_lst = [NewTopic(topic, num_partitions=n_partitions, replication_factor=n_nodes)]
+            topic_lst = [NewTopic(topic=topic, num_partitions=n_partitions, replication_factor=n_nodes,
+                                  config={'retention.ms': '21600000'})]
             fs = admin_client.create_topics(topic_lst)
-            for topic, f in fs.items():
+            for tp, f in fs.items():
                 try:
-                    logging.info(f"Topic {topic} created")
+                    f.result()
+                    print(f"Topic {tp} created")
                 except Exception as e:
-                    logging.info(f"Failed to create topic {topic}: {e}")
+                    print(f"Failed to create topic {topic}: {e}")
         else:
-            logging.info(f"Topic {topic} is already created")
+            print(f"Topic {topic} is already created")

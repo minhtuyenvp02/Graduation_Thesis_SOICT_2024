@@ -1490,7 +1490,7 @@ externalAccess:
       externalIPs: []
       ## @param externalAccess.controller.service.useHostIPs Use service host IPs to configure Kafka external listener when service type is NodePort
       ##
-      useHostIPs: true
+      useHostIPs: false
       ## @param externalAccess.controller.service.usePodIPs using the MY_POD_IP address for external access.
       ##
       usePodIPs: false
@@ -1498,7 +1498,7 @@ externalAccess:
       ## NodePort: If not specified, the container will try to get the kubernetes node external IP
       ## ClusterIP: Must be specified, ingress IP or domain where tcp for external ports is configured
       ##
-      domain: "34.128.111.86"
+      domain: ""
       ## @param externalAccess.controller.service.publishNotReadyAddresses Indicates that any agent which deals with endpoints for this Service should disregard any indications of ready/not-ready
       ## ref: https://kubernetes.io/docs/reference/kubernetes-api/service-resources/service-v1/
       ##

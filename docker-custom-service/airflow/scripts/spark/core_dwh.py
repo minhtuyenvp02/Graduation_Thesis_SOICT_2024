@@ -8,6 +8,8 @@ from itertools import product
 from pyspark.sql import SparkSession
 
 from spark_executor import create_spark_session
+
+
 class WareHouseBuilder(object):
     def __init__(self, dwh_location: str, silver_location: str, spark: SparkSession):
         self.silver_location = silver_location
@@ -235,7 +237,7 @@ class WareHouseBuilder(object):
             .option("pipelines.autoOptimize.zOrderCols", "calendar_date") \
             .option("overwriteSchema", "true") \
             .mode("overwrite") \
-            .partitionBy("hour")\
+            .partitionBy("hour") \
             .save(dim_time_path)
 
         print("Done Dim Time")
@@ -246,7 +248,6 @@ class WareHouseBuilder(object):
             self.create_dim_time()
         except Exception as E:
             logging.info("Failed to create dim time")
-            logging.info(E)
         try:
             self.create_dim_date()
         except Exception as E:
@@ -255,7 +256,6 @@ class WareHouseBuilder(object):
             self.create_dim_location()
         except Exception as E:
             logging.info("Failed to create dim location")
-            logging.info(E)
         try:
             self.create_dim_payment()
         except Exception as E:
@@ -264,19 +264,11 @@ class WareHouseBuilder(object):
             self.create_dim_rate_code()
         except Exception as E:
             logging.info("Failed to create dim rate code")
-            logging.info(E)
         try:
             self.create_dim_hvfhs_license_num()
         except Exception as E:
             logging.info("Failed to create dim hvfhs license")
-            logging.info(E)
         try:
             self.create_dim_dispatching_base_num()
         except Exception as E:
             logging.info("Failed to create dim dpc base num")
-            logging.info(E)
-
-
-builder = WareHouseBuilder(silver_location="s3a://nyc-trip-bucket/silver", dwh_location="s3a://nyc-trip-bucket/gold",
-                           spark=create_spark_session("Test"))
-builder.create_dim_time()

@@ -6,7 +6,7 @@ from delta import configure_spark_with_delta_pip
 from schema import CustomSchema
 
 
-def create_spark_session(app_name: str, spark_cluster: str):
+def create_spark_session(app_name: str, spark_cluster: str, s3_endpoint: str, s3_access_key: str, s3_secret_key: str):
     builder = SparkSession.builder.appName(f"{app_name}") \
         .config("master", f"{spark_cluster}") \
         .config("spark.sql.shuffle.partitions", 16) \
@@ -21,9 +21,9 @@ def create_spark_session(app_name: str, spark_cluster: str):
              .getOrCreate())
     # add confs
     sc = spark.sparkContext
-    sc._jsc.hadoopConfiguration().set("fs.s3a.access.key", S3_CONFIG["fs.s3a.access.key"])
-    sc._jsc.hadoopConfiguration().set("fs.s3a.secret.key", S3_CONFIG["fs.s3a.secret.key"])
-    sc._jsc.hadoopConfiguration().set("fs.s3a.endpoint", S3_CONFIG["fs.s3a.endpoint"])
+    sc._jsc.hadoopConfiguration().set("fs.s3a.access.key", f"{s3_access_key}")
+    sc._jsc.hadoopConfiguration().set("fs.s3a.secret.key", f"{s3_secret_key}")
+    sc._jsc.hadoopConfiguration().set("fs.s3a.endpoint", f"{s3_endpoint}")
     sc._jsc.hadoopConfiguration().set("fs.s3a.path.style.access", "true")
     sc._jsc.hadoopConfiguration().set("fs.s3a.connection.ssl.enabled", "false")
     sc._jsc.hadoopConfiguration().set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")

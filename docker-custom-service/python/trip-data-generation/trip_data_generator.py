@@ -12,9 +12,10 @@ logging.basicConfig(format="%(asctime)s - %(message)s", level=logging.INFO, forc
 
 
 class TripGenerator(object):
-    def __init__(self, kafka_bootstrap_server: str, url_endpoint: str, data_dir: str, send_speed: str, ):
+    def __init__(self, kafka_bootstrap_server: str, minio_endpoint: str
+                 , data_dir: str, send_speed: int):
         self.kafka_servers = kafka_bootstrap_server
-        self.url_endpoint = url_endpoint
+        self.url_endpoint = minio_endpoint
         self.data_dir = data_dir
         self.send_speed = send_speed
         config_ = {
@@ -25,7 +26,6 @@ class TripGenerator(object):
             'acks': 'all'
         }
         producer = Producer(**config_)
-
         self.generator = SingleMessageProducer(part_idx=0, producer=producer)
 
     def simulate_streaming(self):
@@ -50,7 +50,6 @@ class TripGenerator(object):
         topics = [x for x in dic_topic.keys()]
         for i, dir_path in enumerate(list_dir):
             try:
-                print(dir_path)
                 list_file = s3.find(dir_path["name"])
                 [print(x) for x in list_file]
             except Exception as e:
@@ -62,13 +61,9 @@ class TripGenerator(object):
                     with ThreadPoolExecutor(max_workers=3) as execute:
                         task_result = [False] * 2
                         try:
-                            print("err___01")
-                            task_result[0] = execute.submit(self.generator.send_single_item, list_file[0], topics)
-                            task_result[1] = execute.submit(self.generator.send_single_item, list_file[1], topics)
-                            print("error_02")
-                            print(task_result[0])
+                            task_result[0] = execute.submit(self.generator.send_single_item, list_file[0], topics, send_speed=self.send_speed)
+                            task_result[1] = execute.submit(self.generator.send_single_item, list_file[1], topics, send_speed=self.send_speed)
                         except Exception as e:
                             logging.info("Submmit task failed")
                 except Exception as e:
-                    # print("errr")
                     logging.info("Error when create threads")

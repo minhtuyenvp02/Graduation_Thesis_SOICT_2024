@@ -22,7 +22,7 @@ class SingleMessageProducer(object):
         else:
             print(f"Message produced: {message.topic()} [{message.partition()}] @ {message.offset()}")
 
-    def send_single_item(self, url_file_path: str, topics: [str]):
+    def send_single_item(self, url_file_path: str, topics: [str], send_speed):
         # print(" o day")
         df = pd.read_parquet(path="s3://" + url_file_path, storage_options={"anon": False})
         topic_name = url_file_path.split("/")[-1][0:-16]
@@ -35,9 +35,9 @@ class SingleMessageProducer(object):
                 try:
                     print(f"Publishing to topic {topic_name}")
                     self.producer.produce(topic=topic_name, value=bytes(row.to_json(), 'utf-8'))
-                    # self.producer.produce(topic="test", value=bytes(row.to_json(), 'utf-8'),
-                    #                       partition=self.part_idx, callback=self.acked_calback())
-                    time_random = 1 / self.send_speed
+                    if topic_name == 'fhvhv_tripdata':
+                        send_speed = send_speed * 4
+                    time_random = 1 / send_speed
                     time_sleep = random.uniform(time_random, time_random + time_random/2)
                     print(time_sleep)
                     time.sleep(time_sleep)

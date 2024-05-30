@@ -11,11 +11,11 @@ from delta import *
 from minio import Minio
 from schema import CustomSchema
 from spark_executor import create_spark_session
-from config import S3_CONFIG, SPARK_CONFIG, SCHEMA_CONFIG, KAFKA_CONFIG, EXTRA_JAR_PACKAGE
+from config import SCHEMA_CONFIG
 
 
 class BronzeData(object):
-    def __init__(self, kafka_server: str, bucket_name: str, schema, spark_cluster: str):
+    def __init__(self, kafka_server: str, bucket_name: str, schema, spark: SparkSession):
         self.schema = schema
         self.bronze_location = f"s3a://{bucket_name}/bronze"
         self.kafka_server = kafka_server
@@ -26,7 +26,7 @@ class BronzeData(object):
         dic_topic = admin_client.list_topics().topics
         self.topics = [x for x in dic_topic.keys()]
         self.bucket_name = bucket_name
-        self.spark = create_spark_session(app_name="StreamToBronze")
+        self.spark = spark 
 
     def csv_to_bronze(self, source_csv, target_table_name, id_option: bool):
         df = self.spark.read.format("csv") \
@@ -98,19 +98,25 @@ class BronzeData(object):
 
 
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("--spark_cluster", type=str, required=True)
-    # parser.add_argument("--kafka_server", type=str, required=True)
-    # parser.add_argument("--topics", type=str, required=True)
-    # parser.add_argument("--bucket_name", type=str, required=True)
-    # parser.add_argument("--schema", type=str, required=True)
-    # parser.add_argument("--location_csv", type=str, required=True)
-    # parser.add_argument("--fhvhv_basenum_csv", type=str, required=True)
-    # args = parser.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--spark_cluster", type=str, required=True)
+    parser.add_argument("--kafka_servers", type=str, required=True)
+    parser.add_argument("--bucket_name", type=str, required=True)
+    parser.add_argument("--path_location_csv", type=str, required=True)
+    parser.add_argument("--path_dpc_base_num_csv", type=str, required=True)
+    parser.add_argument("--s3_endpoint", type=str, required=True)
+    parser.add_argument("--s3_access_key", type=str, required=True)
+    parser.add_argument("--s3_secret_key", type=str, required=True)
+    
+    args = parser.parse_args()
     schema = CustomSchema(SCHEMA_CONFIG)
-    bronze = BronzeData(schema=schema, kafka_server=KAFKA_CONFIG["bootstrap_servers"], bucket_name="nyc-trip-bucket")
-    bronze.csv_to_bronze(source_csv="s3a://nyc-trip-bucket/nyc-data/location.csv", target_table_name="location",
+    spark = create_spark_session(app_name="Kafka Stream To Bronze", spark_cluster=args.spark_cluster,
+                                 s3_endpoint=args.s3_endpoint, s3_access_key=args.s3_access_key,
+                                 s3_secret_key=args.s3_secret_key)
+    bronze = BronzeData(schema=schema, kafka_server=args.kafka_servers, bucket_name=args.bucket_name, spark=spark
+                        )
+    bronze.csv_to_bronze(source_csv=args.path_location_csv, target_table_name="location",
                          id_option=False)
-    bronze.csv_to_bronze(source_csv="s3a://nyc-trip-bucket/nyc-data/dpc_base_num.csv",
+    bronze.csv_to_bronze(source_csv=args.path_dpc_base_num_csv,
                          target_table_name="dpc_base_num", id_option=True)
     bronze.kafka_stream_2bronze(topics=["yellow_tripdata", "fhvhv_tripdata"])

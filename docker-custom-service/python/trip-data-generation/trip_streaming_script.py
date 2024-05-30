@@ -7,7 +7,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--kafka_servers", type=str, required=True)
     parser.add_argument("--data_dir", type=str, required=True)
-    parser.add_argument("--date_str", type=str, required=True)
     parser.add_argument("--send_speed", type=str, required=True)
     parser.add_argument("--minio_endpoint", type=str, required=True)
     args = parser.parse_args()
@@ -15,9 +14,10 @@ def main():
         kafka_bootstrap_server=args.kafka_servers,
         data_dir=args.data_dir,
         send_speed=int(args.send_speed),
-        url_endpoint=args.minio_endpoint,
+        minio_endpoint=args.minio_endpoint,
     )
     generator.simulate_streaming()
+
 
 if __name__ == '__main__':
     main()

@@ -1,29 +1,23 @@
 from pyspark.sql.functions import *
 from pyspark.sql import SparkSession
 from delta import *
-from config import S3_CONFIG, SPARK_CONFIG, SCHEMA_CONFIG
+from config import S3_CONFIG, SPARK_CONFIG
 from pyspark.sql.types import *
-from schema import CustomSchema
 from delta import DeltaTable
 import uuid
-
+import argparse
 
 def generate_uuid():
     return str(uuid.uuid4())
 
 
 class Silver(object):
-    def __init__(self, bucket_name: str, schema, spark: SparkSession):
+    def __init__(self, bucket_name: str, spark: SparkSession):
         self.bucket_name = bucket_name
-        self.schema = schema
         self.silver_location = f"s3a://{self.bucket_name}/silver"
         self.spark = spark
         self.yellow_trip_tbl = f"{self.silver_location}/yellow_trip"
         self.fhvhv_trip_tbl = f"{self.silver_location}/fhvhv_trip"
-        # self.spark.sql(f"ALTER TABLE delta.`{self.fhvhv_trip_tbl}` SET TBLPROPERTIES (delta.enableChangeDataFeed = true)")
-        # self.spark.sql(f"ALTER TABLE delta.`{self.yellow_trip_tbl}` SET TBLPROPERTIES (delta.enableChangeDataFeed = true)")
-
-    # def create_table(self):
 
     def create_yellow_streaming_table(self):
         self.spark.sql("CREATE DATABASE IF NOT EXISTS silver")
@@ -45,9 +39,13 @@ class Silver(object):
         """)
 
     def fhvhv_transform(self):
+        time_tracking = self.spark.range(1) \
+            .selectExpr("current_timestamp() - INTERVAL 2 HOURS as start_time") \
+            .collect()[0]['start_time']    
         df = self.spark.readStream \
             .format("delta") \
             .option("readChangeFeed", "true") \
+            .option("startingTimestamp", time_tracking) \
             .load(f"s3a://{self.bucket_name}/bronze/fhvhv_tripdata")
 
         df = df.fillna("N", ["access_a_ride_flag"]) \
@@ -109,9 +107,13 @@ class Silver(object):
         print("Done Streaming")
 
     def yellow_transform(self):
+        time_tracking = self.spark.range(1) \
+            .selectExpr("current_timestamp() - INTERVAL 2 HOURS as start_time") \
+            .collect()[0]['start_time']
         df = self.spark.readStream \
             .format("delta") \
             .option("readChangeFeed", "true") \
+            .option("startingTimestamp", time_tracking) \
             .option("ignoreDeletes", "true") \
             .load(f"s3a://{self.bucket_name}/bronze/yellow_tripdata")
         uuid_udf = udf(generate_uuid, StringType())
