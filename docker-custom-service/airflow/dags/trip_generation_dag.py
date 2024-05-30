@@ -37,7 +37,7 @@ default_args = {
 }
 
 with DAG(
-    dag_id="Trip-Streaming-Kafka",
+    dag_id="trip_streaming_kafka",
     start_date=start_date,
     schedule="@once",
     description="Streaming trip record to kafka topic",
@@ -72,7 +72,7 @@ with DAG(
     )
     send_error_email = EmailOperator(
         task_id="send_error_email",
-        to="minhtuyenvp02@gmail.com",
+        to='minhtuyenpa@gmail.com',
         subject="Producer Notification",
         retries=0,
         trigger_rule='on_failed',
@@ -98,5 +98,3 @@ with DAG(
 
     create_kafka_topic >> trip_generator >> Label("On error") >> send_error_email
     stream_data_to_bronze
-
-

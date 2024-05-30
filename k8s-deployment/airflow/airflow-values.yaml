@@ -80,7 +80,7 @@ airflowVersion: "2.9.1"
 images:
   airflow:
     repository: minhtuyenvp02/airflow-spark
-    tag: latest
+    tag: main
     # Specifying digest takes precedence over tag.
     digest: ~
     pullPolicy: Always
