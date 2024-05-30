@@ -8,6 +8,7 @@ from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import Kubernete
 from airflow.operators.email import EmailOperator
 from airflow.sensors.time_delta import TimeDeltaSensor
 from airflow.utils.edgemodifier import Label
+
 sys.path.append("/opt/airflow/scripts/")
 from kafka_topic_creation import create_kafka_topic
 from airflow.utils.trigger_rule import TriggerRule
@@ -38,13 +39,13 @@ default_args = {
 }
 
 with DAG(
-    dag_id="trip_streaming_kafka",
-    start_date=start_date,
-    schedule="@once",
-    description="Streaming trip record to kafka topic",
-    default_args=default_args,
-    tags=["trip-generator", "producer"],
-    catchup=False
+        dag_id="trip_streaming_kafka",
+        start_date=start_date,
+        schedule="@once",
+        description="Streaming trip record to kafka topic",
+        default_args=default_args,
+        tags=["trip-generator", "producer"],
+        catchup=False
 ) as dag:
     create_kafka_topic = PythonOperator(
         task_id="create_kafka_topic",
@@ -59,8 +60,8 @@ with DAG(
     trip_generator = KubernetesPodOperator(
         namespace="airflow",
         task_id="trip_producer",
-        image=TRIP_PRODUCER_IMAGE + ":latest",
-        cmds=["python3", 'trip_streaming_script'],
+        image=TRIP_PRODUCER_IMAGE + ":main",
+        cmds=["python3", 'trip_streaming_script.py'],
         arguments=[
             '--kafka_servers', KAFKA_PRODUCER_SERVERS,
             '--data_dir', DATA_DIR,
@@ -80,7 +81,7 @@ with DAG(
         html_content='ERROR!!!,\n\nThere was an error in Trip Producer task.',
         dag=dag,
     )
-    
+
     stream_data_to_bronze = BashOperator(
         task_id="streaming_raw_data_to_bronze",
         bash_command=f'''
