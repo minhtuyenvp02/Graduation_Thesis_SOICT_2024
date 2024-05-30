@@ -29,7 +29,7 @@ jobs:
         with:
           context: ./docker-custom-service/kafka
           push: true
-          tags: latest
+          tags: ${{ steps.meta_service1.outputs.tags }}
           labels: ${{ steps.meta_service1.outputs.labels }}
           
   build_and_push_airflow_imane:
@@ -56,5 +56,5 @@ jobs:
         with:
           context: ./docker-custom-service/airflow
           push: true
-          tags: latest
+          tags: ${{ steps.meta_service2.outputs.tags }}
           labels: ${{ steps.meta_service2.outputs.labels }}
