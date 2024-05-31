@@ -8,10 +8,12 @@ from airflow.operators.email import EmailOperator
 from airflow.sensors.time_delta import TimeDeltaSensor
 from airflow.utils.edgemodifier import Label
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
+
 sys.path.append("/opt/airflow/scripts/")
 from kafka_topic_creation import create_kafka_topic
 from airflow.utils.trigger_rule import TriggerRule
 from airflow.providers.http.hooks.http import HttpHook
+
 sys.path.append("/opt/airflow/scripts/spark")
 
 KAFKA_PRODUCER_SERVERS = Variable.get("KAFKA_PRODUCER_SERVERS")
@@ -52,8 +54,13 @@ def alert_slack_channel(context):
     }
     msg = "\n".join([title, *[f"*{key}*: {value}" for key, value in msg_parts.items()]]).strip()
 
-    http_hook = HttpHook(http_conn_id='slack_webhook_conn', method='POST')
-    http_hook.run(endpoint='', data=f'{{"text": "{msg}"}}')
+    http_hook = HttpHook(method='POST')
+    headers = {'Content-Type': 'application/json'}
+    payload = json.dumps({'text': msg})
+    response = http_hook.run(endpoint=SLACK_WEBHOOK_URL, data=payload, headers=headers)
+    if response.status_code != 200:
+        raise ValueError(
+            f"Request to Slack returned an error {response.status_code}, the response is:\n{response.text}")
 
 
 default_args = {
@@ -117,5 +124,5 @@ with DAG(
         retries=2
     )
 
-    create_kafka_topic >> trip_generator 
+    create_kafka_topic >> trip_generator
     create_kafka_topic >> stream_data_to_bronze
