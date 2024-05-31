@@ -82,7 +82,7 @@ images:
     repository: minhtuyenvp02/airflow-spark
     tag: main
     # Specifying digest takes precedence over tag.
-    digest: sha256:e77531e3b0fd09a9b5758e624c0ba812870b1c4fe819fa00b768605959e9391f
+    digest: sha256:ac6adde7e8b7005f9865029a10a603c4da2e801612bfdbf7236d3fa216e2dfd7
     pullPolicy: Always
   # To avoid images with user code, you can turn this to 'true' and
   # all the 'run-airflow-migrations' and 'wait-for-airflow-migrations' containers/jobs
@@ -2570,7 +2570,7 @@ logs:
 
   persistence:
     # Enable persistent volume for storing logs
-    enabled: false
+    enabled: true
     # Volume size for logs
     size: 1Gi
     # Annotations for the logs PVC
