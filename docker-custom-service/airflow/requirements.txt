@@ -4,3 +4,5 @@ minio==7.2.5
 pyspark==3.5.1
 pytz==2023.3
 apache-airflow==2.9.1
+apache-airflow-providers-apache-kafka
+apache-airflow-providers-apache-spark
