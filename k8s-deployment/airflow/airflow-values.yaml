@@ -82,7 +82,7 @@ images:
     repository: minhtuyenvp02/airflow-spark
     tag: main
     # Specifying digest takes precedence over tag.
-    digest: sha256:ac6adde7e8b7005f9865029a10a603c4da2e801612bfdbf7236d3fa216e2dfd7
+    digest: sha256:a0af5de77005bbc76a3b8a95b3f20cae3d5bfcd74ffc2c0eda7ee8137b2033ba
     pullPolicy: Always
   # To avoid images with user code, you can turn this to 'true' and
   # all the 'run-airflow-migrations' and 'wait-for-airflow-migrations' containers/jobs
