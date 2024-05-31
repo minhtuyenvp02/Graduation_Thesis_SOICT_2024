@@ -7,6 +7,7 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.email import EmailOperator
 from airflow.sensors.time_delta import TimeDeltaSensor
 from airflow.utils.edgemodifier import Label
+from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 
 sys.path.append("/opt/airflow/scripts/")
@@ -108,20 +109,37 @@ with DAG(
         image_pull_policy='Always',
         on_failure_callback=alert_slack_channel,
     )
-    stream_data_to_bronze = BashOperator(
-        task_id="streaming_raw_data_to_bronze",
-        bash_command=f'''
-            spark-submit /opt/airflow/scripts/spark/stream_to_bronze.py \
-                --spark_cluster {SPARK_CLUSTER} \
-                --kafka_servers {KAFKA_CONSUMER_SERVERS} \
-                --bucket_name {S3_BUCKET_NAME} \
-                --path_location_csv {PATH_LOCATION_CSV} \
-                --path_dpc_base_num_csv {PATH_DPC_BASE_NUM_CSV} \
-                --s3_endpoint {S3_ENDPOINT} \
-                --s3_access_key {S3_ACCESS_KEY} \
-                --s3_secret_key {S3_SECRET_KEY} \
-            ''',
-        retries=2
+    # stream_data_to_bronze = BashOperator(
+    #     task_id="streaming_raw_data_to_bronze",
+    #     bash_command=f'''
+    #         spark-submit /opt/airflow/scripts/spark/stream_to_bronze.py \
+    #             --spark_cluster {SPARK_CLUSTER} \
+    #             --kafka_servers {KAFKA_CONSUMER_SERVERS} \
+    #             --bucket_name {S3_BUCKET_NAME} \
+    #             --path_location_csv {PATH_LOCATION_CSV} \
+    #             --path_dpc_base_num_csv {PATH_DPC_BASE_NUM_CSV} \
+    #             --s3_endpoint {S3_ENDPOINT} \
+    #             --s3_access_key {S3_ACCESS_KEY} \
+    #             --s3_secret_key {S3_SECRET_KEY} \
+    #         ''',
+    #     retries=2,
+    #     on_failure_callback=alert_slack_channel
+    # )
+    stream_data_to_bronze = SparkSubmitOperator(
+        task_id="stream_data_to_bronze",
+        application="/opt/airflow/scripts/spark/stream_to_bronze.py",
+        application_args=[
+            "--spark_cluster", SPARK_CLUSTER,
+            "--kafka_servers", KAFKA_CONSUMER_SERVERS,
+            "--bucket_name", S3_BUCKET_NAME,
+            "--path_location_csv", PATH_LOCATION_CSV,
+            "--path_dpc_base_num_csv", PATH_DPC_BASE_NUM_CSV,
+            "--s3_endpoint", S3_ENDPOINT,
+            "--s3_access_key", S3_ACCESS_KEY,
+            "--s3_secret_key", S3_SECRET_KEY
+        ],
+        conn_id=spark_default,
+        on_failure_callback=alert_slack_channel
     )
 
     create_kafka_topic >> trip_generator
