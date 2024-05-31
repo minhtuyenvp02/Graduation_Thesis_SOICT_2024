@@ -284,7 +284,7 @@ env:
   - name: "AIRFLOW_VAR_TOPIC"
     value: "yellow_tripdata,fhvhv_tripdata"
   - name: "AIRFLOW_VAR_S3_ENDPOINT"
-    value: "minio.minio.svc.cluster.local:9000"
+    value: "http://minio.minio.svc.cluster.local:9000"
   - name: "AIRFLOW_VAR_PATH_LOCATION_CSV"
     value: "s3a://nyc-trip-bucket/nyc-data/location.csv"
   - name: "AIRFLOW_VAR_PATH_DPC_BASE_NUM_CSV"
@@ -1324,12 +1324,12 @@ webserver:
   webserverConfigConfigMapName: ~
 
   service:
-    type: ClusterIP
+    type: NodePort
     ## service annotations
     annotations: {}
-    ports:
-      - name: airflow-ui
-        port: "{{ .Values.ports.airflowUI }}"
+#    ports:
+#      - name: airflow-ui
+#        port: "{{ .Values.ports.airflowUI }}"
     # To change the port used to access the webserver:
     # ports:
     #   - name: airflow-ui
@@ -1342,11 +1342,11 @@ webserver:
     #     targetPort: 8888
     # If you have a public IP, set NodePort to set an external port.
     # Service type must be 'NodePort':
-    # ports:
-    #   - name: airflow-ui
-    #     port: 8080
-    #     targetPort: 8080
-    #     nodePort: 31151
+    ports:
+       - name: airflow-ui
+         port: 8080
+         targetPort: 8080
+         nodePort: 30082
     loadBalancerIP: ~
     ## Limit load balancer source ips to list of CIDRs
     # loadBalancerSourceRanges:
@@ -2570,7 +2570,7 @@ logs:
 
   persistence:
     # Enable persistent volume for storing logs
-    enabled: true
+    enabled: false
     # Volume size for logs
     size: 1Gi
     # Annotations for the logs PVC
