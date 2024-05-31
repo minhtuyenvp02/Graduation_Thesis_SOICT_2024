@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.models import Variable, Connection
 from airflow.operators.bash import BashOperator
-from airflow.operators.python import PythonOperatork
+from airflow.operators.python import PythonOperator
 from airflow.operators.email import EmailOperator
 from airflow.sensors.time_delta import TimeDeltaSensor
 from airflow.utils.edgemodifier import Label
