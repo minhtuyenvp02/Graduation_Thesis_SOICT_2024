@@ -1,0 +1,38 @@
+#apiVersion: v1
+#kind: PersistentVolumeClaim
+#metadata:
+#  name: my-airflow-logs-pvc
+#  namespace: airflow  # thay thế bằng namespace của bạn
+#spec:
+#  accessModes:
+#    - ReadWriteOnce
+#  resources:
+#    requests:
+#      storage: 1Gi
+#  storageClassName: standard
+#---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: airflow-logs
+  namespace: airflow  
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: standard
+#---
+#apiVersion: v1
+#kind: PersistentVolumeClaim
+#metadata:
+#  name: airflow-logs-2
+#  namespace: airflow  # thay thế bằng namespace của bạn
+#spec:
+#  accessModes:
+#    - ReadWriteOnce
+#  resources:
+#    requests:
+#      storage: 1Gi
+#  storageClassName: standard

@@ -82,7 +82,7 @@ images:
     repository: minhtuyenvp02/airflow-spark
     tag: main
     # Specifying digest takes precedence over tag.
-    digest: sha256:5f4b04db537f5c4f9f768cfbe5ed91a15c88c027260c176edabb2f0db1252672
+    digest: sha256:035bd71402c8599e2929b89a54bbc2af4064ce0a83410c3d3c8259180ea6bb81
     pullPolicy: Always
   # To avoid images with user code, you can turn this to 'true' and
   # all the 'run-airflow-migrations' and 'wait-for-airflow-migrations' containers/jobs
@@ -2578,4 +2578,4 @@ logs:
     # If using a custom storageClass, pass name here
     storageClassName:
     ## the name of an existing PVC to use
-    existingClaim:
+    existingClaim: 
