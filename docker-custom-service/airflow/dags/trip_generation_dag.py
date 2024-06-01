@@ -34,21 +34,21 @@ start_date = datetime(2024, 5, 30)
 SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"
 
 
-def create_spark_connection():
-    conn = Connection(
-        conn_id='spark_default',
-        conn_type='Spark',
-        host='spark://spark-master-svc.spark.svc.cluster.local:7077',
-        login='admin',
-        password='admin',
-        port='7077'
-    )  # create a connection object
-    session = settings.Session()  # get the session
-    session.add(conn)
-    session.commit()
-
-
-create_spark_connection()
+# def create_spark_connection():
+#     conn = Connection(
+#         conn_id='spark_default',
+#         conn_type='Spark',
+#         host='spark://spark-master-svc.spark.svc.cluster.local:7077',
+#         login='admin',
+#         password='admin',
+#         port='7077'
+#     )  # create a connection object
+#     session = settings.Session()  # get the session
+#     session.add(conn)
+#     session.commit()
+# 
+# 
+# create_spark_connection()
 
 
 def alert_slack_channel(context):
