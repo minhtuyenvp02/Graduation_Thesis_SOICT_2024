@@ -82,7 +82,7 @@ images:
     repository: minhtuyenvp02/airflow-spark
     tag: main
     # Specifying digest takes precedence over tag.
-    digest: sha256:035bd71402c8599e2929b89a54bbc2af4064ce0a83410c3d3c8259180ea6bb81
+    digest: sha256:28084fdaab1514b1b9f10b7f8da23aadc084ead5570353b74d7f65a705a2830b
     pullPolicy: Always
   # To avoid images with user code, you can turn this to 'true' and
   # all the 'run-airflow-migrations' and 'wait-for-airflow-migrations' containers/jobs
@@ -643,7 +643,7 @@ workers:
     # Enable persistent volumes
     enabled: true
     # Volume size for worker StatefulSet
-    size: 15Gi
+    size: 10Gi
     # If using a custom storageClass, pass name ref to all statefulSets here
     storageClassName:
     # Execute init container to chown log directory.
@@ -2151,7 +2151,7 @@ redis:
     # Enable persistent volumes
     enabled: true
     # Volume size for worker StatefulSet
-    size: 1Gi
+    size: 3Gi
     # If using a custom storageClass, pass name ref to all statefulSets here
     storageClassName:
     # Annotations to add to redis volumes
@@ -2461,13 +2461,13 @@ dags:
     ## optional subpath for dag volume mount
     subPath: ~
   gitSync:
-    enabled: false
+    enabled: true
 
     # git repo clone url
     # ssh example: git@github.com:apache/airflow.git
     # https example: https://github.com/apache/airflow.git
-    repo: https://github.com/apache/airflow.git
-    branch: v2-2-stable
+    repo: https://github.com/minhtuyenvp02/Graduation_Thesis_SOICT_2024.git
+    branch: main
     rev: HEAD
     # The git revision (branch, tag, or hash) to check out, v4 only
     ref: v2-2-stable
@@ -2476,7 +2476,7 @@ dags:
     maxFailures: 0
     # subpath within the repo where dags are located
     # should be "" if dags are at repo root
-    subPath: "tests/dags"
+    subPath: 'docker-custom-service/airflow/dags'
     # if your repo needs a user name password
     # you can load them to a k8s secret like the one below
     #   ---
@@ -2507,7 +2507,7 @@ dags:
     #     # key needs to be gitSshKey
     #     gitSshKey: <base64_encoded_data>
     # and specify the name of the secret below
-    # sshKeySecret: airflow-ssh-secret
+    sshKeySecret: airflow-ssh-secret
     #
     # If you are using an ssh private key, you can additionally
     # specify the content of your known_hosts file, example:
@@ -2570,12 +2570,12 @@ logs:
 
   persistence:
     # Enable persistent volume for storing logs
-    enabled: true
+    enabled: false
     # Volume size for logs
     size: 1Gi
     # Annotations for the logs PVC
     annotations: {}
     # If using a custom storageClass, pass name here
-    storageClassName:
+    storageClassName: standard
     ## the name of an existing PVC to use
-    existingClaim: 
+    existingClaim: airflow-logs
