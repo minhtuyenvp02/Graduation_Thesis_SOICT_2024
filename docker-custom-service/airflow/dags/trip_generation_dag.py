@@ -34,6 +34,20 @@ start_date = datetime(2024, 5, 30)
 SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"
 
 
+def create_spark_connection():
+    conn = Connection(
+        conn_id='spark_default',
+        conn_type='Spark',
+        host='	spark://spark-master-svc.spark.svc.cluster.local',
+        login='admin',
+        password='admin',
+        port='7077'
+    )  # create a connection object
+    session = settings.Session()
+    session.add(conn)
+    session.commit()
+
+
 def alert_slack_channel(context):
     """ Alert to slack channel on failed dag
     :param context: airflow context object
