@@ -9,11 +9,11 @@ from airflow.sensors.time_delta import TimeDeltaSensor
 from airflow.utils.edgemodifier import Label
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
-
+from airflow.providers.slack.hooks.slack_webhook import SlackWebhookHook
 sys.path.append("/opt/airflow/scripts/")
 from kafka_topic_creation import create_kafka_topic
 from airflow.utils.trigger_rule import TriggerRule
-from airflow.providers.http.hooks.http import HttpHook
+
 
 sys.path.append("/opt/airflow/scripts/spark")
 
