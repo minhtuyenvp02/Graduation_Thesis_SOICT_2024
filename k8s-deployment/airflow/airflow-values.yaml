@@ -82,7 +82,7 @@ images:
     repository: minhtuyenvp02/airflow-spark
     tag: main
     # Specifying digest takes precedence over tag.
-    digest: sha256:ff32f4c433c23c5c6eeccf092d6b2330e03febf905badd27e837d09f54b92b45
+    digest: sha256:e229e610153610ed6c7a3abec7eac1ad752738941dfa5609a1b82b82dbbbb67e
     pullPolicy: Always
   # To avoid images with user code, you can turn this to 'true' and
   # all the 'run-airflow-migrations' and 'wait-for-airflow-migrations' containers/jobs
@@ -2371,10 +2371,10 @@ config:
     remote_logging: '{{- ternary "True" "False" .Values.elasticsearch.enabled }}'
   logging:
     remote_logging: 'True'
-    remote_base_log_folder: 'gs://airflow/logs/'
-    remote_log_conn_id: 'sc-key'
+    remote_base_log_folder: 'gs://airflow-remote-logging/logs'
+    remote_log_conn_id: 'google_cloud_default'
     google_key_path: "/opt/airflow/secrets/key.json"
-    colored_console_log: 'False'
+    colored_console_log: 'True'
   metrics:
     statsd_on: '{{ ternary "True" "False" .Values.statsd.enabled }}'
     statsd_port: 9125
