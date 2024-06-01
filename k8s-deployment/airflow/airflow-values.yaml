@@ -82,7 +82,7 @@ images:
     repository: minhtuyenvp02/airflow-spark
     tag: main
     # Specifying digest takes precedence over tag.
-    digest: sha256:28084fdaab1514b1b9f10b7f8da23aadc084ead5570353b74d7f65a705a2830b
+    digest: sha256:ff32f4c433c23c5c6eeccf092d6b2330e03febf905badd27e837d09f54b92b45
     pullPolicy: Always
   # To avoid images with user code, you can turn this to 'true' and
   # all the 'run-airflow-migrations' and 'wait-for-airflow-migrations' containers/jobs
@@ -297,6 +297,8 @@ env:
     value: "200"
   - name: "AIRFLOW_VAR_S3_BUCKET_NAME"
     value: "nyc-trip-bucket"
+  - name: "GOOGLE_APPLICATION_CREDENTIALS"
+    value: "/opt/airflow/secrets/key.json"
 
 # Volumes for all airflow containers
 volumes: []
@@ -927,8 +929,14 @@ scheduler:
   #     - name: my-templated-extra-volume
   #       mountPath: "{{ .Values.my_custom_path }}"
   #       readOnly: true
-  extraVolumes: []
-  extraVolumeMounts: []
+  extraVolumes:
+    - name: google-cloud-key
+      secret:
+        secretName: sc-key
+  extraVolumeMounts:
+    - name: google-cloud-key
+      mountPath: /opt/airflow/secrets
+
 
   # Select certain nodes for airflow scheduler pods.
   nodeSelector: {}
@@ -1305,8 +1313,13 @@ webserver:
   #     - name: my-templated-extra-volume
   #       mountPath: "{{ .Values.my_custom_path }}"
   #       readOnly: true
-  extraVolumes: []
-  extraVolumeMounts: []
+  extraVolumeMounts:
+    - name: google-cloud-key
+      mountPath: /opt/airflow/secrets
+  extraVolumes:
+    - name: google-cloud-key
+      secret:
+        secretName: sc-key
 
   # This string (can be templated) will be mounted into the Airflow Webserver
   # as a custom webserver_config.py. You can bake a webserver_config.py in to
@@ -1491,13 +1504,18 @@ triggerer:
   #     - name: my-templated-extra-volume
   #       mountPath: "{{ .Values.my_custom_path }}"
   #       readOnly: true
-  extraVolumes: []
-  extraVolumeMounts: []
+  extraVolumeMounts:
+    - name: google-cloud-key
+      mountPath: /opt/airflow/secrets
+  extraVolumes:
+    - name: google-cloud-key
+      secret:
+        secretName: sc-key
 
   # Select certain nodes for airflow triggerer pods.
   nodeSelector: {}
   affinity: {}
-  # default triggerer affinity is:
+  # default triggerer affinity is
   #  podAntiAffinity:
   #    preferredDuringSchedulingIgnoredDuringExecution:
   #    - podAffinityTerm:
@@ -2352,7 +2370,10 @@ config:
     colored_console_log: 'False'
     remote_logging: '{{- ternary "True" "False" .Values.elasticsearch.enabled }}'
   logging:
-    remote_logging: '{{- ternary "True" "False" .Values.elasticsearch.enabled }}'
+    remote_logging: 'True'
+    remote_base_log_folder: 'gs://airflow/logs/'
+    remote_log_conn_id: 'sc-key'
+    google_key_path: "/opt/airflow/secrets/key.json"
     colored_console_log: 'False'
   metrics:
     statsd_on: '{{ ternary "True" "False" .Values.statsd.enabled }}'
