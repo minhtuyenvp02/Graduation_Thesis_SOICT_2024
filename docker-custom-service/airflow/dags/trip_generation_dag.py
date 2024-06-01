@@ -34,20 +34,6 @@ start_date = datetime(2024, 5, 30)
 SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"
 
 
-def create_spark_connection():
-    conn = Connection(
-        conn_id='spark_default',
-        conn_type='Spark',
-        host='	spark://spark-master-svc.spark.svc.cluster.local',
-        login='admin',
-        password='admin',
-        port='7077'
-    )  # create a connection object
-    session = settings.Session()
-    session.add(conn)
-    session.commit()
-
-
 def alert_slack_channel(context):
     """ Alert to slack channel on failed dag
     :param context: airflow context object
@@ -86,6 +72,7 @@ default_args = {
     "retry_delay": timedelta(seconds=5)
 }
 
+
 with DAG(
         dag_id="trip_streaming_kafka",
         start_date=start_date,
@@ -123,38 +110,38 @@ with DAG(
         image_pull_policy='Always',
         on_failure_callback=alert_slack_channel,
     )
-    # stream_data_to_bronze = BashOperator(
-    #     task_id="streaming_raw_data_to_bronze",
-    #     bash_command=f'''
-    #         spark-submit /opt/airflow/scripts/spark/stream_to_bronze.py \
-    #             --spark_cluster {SPARK_CLUSTER} \
-    #             --kafka_servers {KAFKA_CONSUMER_SERVERS} \
-    #             --bucket_name {S3_BUCKET_NAME} \
-    #             --path_location_csv {PATH_LOCATION_CSV} \
-    #             --path_dpc_base_num_csv {PATH_DPC_BASE_NUM_CSV} \
-    #             --s3_endpoint {S3_ENDPOINT} \
-    #             --s3_access_key {S3_ACCESS_KEY} \
-    #             --s3_secret_key {S3_SECRET_KEY} \
-    #         ''',
-    #     retries=2,
-    #     on_failure_callback=alert_slack_channel
-    # )
-    stream_data_to_bronze = SparkSubmitOperator(
-        task_id="stream_data_to_bronze",
-        application="/opt/airflow/scripts/spark/stream_to_bronze.py",
-        application_args=[
-            "--spark_cluster", SPARK_CLUSTER,
-            "--kafka_servers", KAFKA_CONSUMER_SERVERS,
-            "--bucket_name", S3_BUCKET_NAME,
-            "--path_location_csv", PATH_LOCATION_CSV,
-            "--path_dpc_base_num_csv", PATH_DPC_BASE_NUM_CSV,
-            "--s3_endpoint", S3_ENDPOINT,
-            "--s3_access_key", S3_ACCESS_KEY,
-            "--s3_secret_key", S3_SECRET_KEY
-        ],
-        conn_id=spark_default,
+    stream_data_to_bronze = BashOperator(
+        task_id="streaming_raw_data_to_bronze",
+        bash_command=f'''
+            spark-submit /opt/airflow/scripts/spark/stream_to_bronze.py \
+                --spark_cluster {SPARK_CLUSTER} \
+                --kafka_servers {KAFKA_CONSUMER_SERVERS} \
+                --bucket_name {S3_BUCKET_NAME} \
+                --path_location_csv {PATH_LOCATION_CSV} \
+                --path_dpc_base_num_csv {PATH_DPC_BASE_NUM_CSV} \
+                --s3_endpoint {S3_ENDPOINT} \
+                --s3_access_key {S3_ACCESS_KEY} \
+                --s3_secret_key {S3_SECRET_KEY} \
+            ''',
+        retries=2,
         on_failure_callback=alert_slack_channel
     )
+    # stream_data_to_bronze = SparkSubmitOperator(
+    #     task_id="stream_data_to_bronze",
+    #     application="/opt/airflow/scripts/spark/stream_to_bronze.py",
+    #     application_args=[
+    #         "--spark_cluster", SPARK_CLUSTER,
+    #         "--kafka_servers", KAFKA_CONSUMER_SERVERS,
+    #         "--bucket_name", S3_BUCKET_NAME,
+    #         "--path_location_csv", PATH_LOCATION_CSV,
+    #         "--path_dpc_base_num_csv", PATH_DPC_BASE_NUM_CSV,
+    #         "--s3_endpoint", S3_ENDPOINT,
+    #         "--s3_access_key", S3_ACCESS_KEY,
+    #         "--s3_secret_key", S3_SECRET_KEY
+    #     ],
+    #     conn_id=spark_default,
+    #     on_failure_callback=alert_slack_channel
+    # )
 
     create_kafka_topic >> trip_generator
     create_kafka_topic >> stream_data_to_bronze
