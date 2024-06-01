@@ -159,7 +159,7 @@ with DAG(
             "--s3_access_key", S3_ACCESS_KEY,
             "--s3_secret_key", S3_SECRET_KEY
         ],
-        conn_id=spark_default,
+        conn_id='spark_default',
         on_failure_callback=alert_slack_channel
     )
 
