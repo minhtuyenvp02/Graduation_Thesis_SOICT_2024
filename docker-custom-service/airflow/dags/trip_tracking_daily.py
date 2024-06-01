@@ -10,7 +10,6 @@ from airflow.sensors.time_delta import TimeDeltaSensor
 from airflow.providers.slack.hooks.slack_webhook import SlackWebhookHook
 
 sys.path.append("/opt/airflow/scripts/")
-from kafka_topic_creation import create_kafka_topic
 
 sys.path.append("/opt/airflow/scripts/spark")
 
@@ -61,6 +60,7 @@ def alert_slack_channel(context: dict):
 
     SlackWebhookHook(
         webhook_token=SLACK_WEBHOOK_URL,
+        slack_webhook_conn_id=slack_id,
         message=msg,
     ).execute()
 
