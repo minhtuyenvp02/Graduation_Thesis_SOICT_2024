@@ -60,7 +60,9 @@ def alert_slack_channel(context):
     payload = json.dumps({'text': msg})
     response = http_hook.run(endpoint=SLACK_WEBHOOK_URL, data=payload, headers=headers)
     if response.status_code != 200:
-        raise ValueError(f"Request to Slack returned an error {response.status_code}, the response is:\n{response.text}")
+        raise ValueError(
+            f"Request to Slack returned an error {response.status_code}, the response is:\n{response.text}")
+
 
 default_args = {
     "owner": "airflow",
