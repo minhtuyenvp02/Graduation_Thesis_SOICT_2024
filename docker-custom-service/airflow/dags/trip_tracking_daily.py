@@ -28,7 +28,7 @@ TRIP_PRODUCER_IMAGE = Variable.get("TRIP_PRODUCER_IMAGE")
 DATA_DIR = Variable.get("DATA_DIR")
 MESSAGE_SEND_SPEED = Variable.get("MESSAGE_SEND_SPEED")
 start_date = datetime(2024, 5, 30)
-SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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p"
+SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"
 
 
 def alert_slack_channel(context: dict):
