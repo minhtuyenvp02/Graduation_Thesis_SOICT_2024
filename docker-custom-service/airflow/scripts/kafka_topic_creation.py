@@ -1,6 +1,5 @@
 import logging
 from confluent_kafka.admin import AdminClient, NewTopic
-from spark.config import *
 
 
 # Initialize the kafka topic

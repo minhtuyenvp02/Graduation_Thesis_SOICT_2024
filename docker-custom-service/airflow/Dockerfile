@@ -16,8 +16,8 @@ COPY ./requirements.txt ./
 
 RUN pip3 install -r requirements.txt
 
-#COPY ./dags /opt/airflow/dags
-#COPY ./scripts /opt/airflow/scripts
+COPY ./dags /opt/airflow/dags
+COPY ./scripts /opt/airflow/scripts
 
 #ENTRYPOINT [ "/bin/bash" ]
 
