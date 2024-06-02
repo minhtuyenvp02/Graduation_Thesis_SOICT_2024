@@ -118,7 +118,7 @@ with DAG(
         namespace="airflow",
         task_id="trip_producer",
         image=TRIP_PRODUCER_IMAGE + ":main",
-        cmds=["python3", 'trip-data-generation/trip_streaming_script.py'],
+        cmds=["python3", '/trip-data-generation/trip_streaming_script.py'],
         arguments=[
             '--kafka_servers', KAFKA_PRODUCER_SERVERS,
             '--data_dir', DATA_DIR,
