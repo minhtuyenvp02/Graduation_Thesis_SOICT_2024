@@ -79,7 +79,7 @@ with DAG(
     gold_fact_yellow_tracking = BashOperator(
         task_id="gold_update_yellow_tracking_daily",
         bash_command=f'''
-                        spark-submit /opt/airflow/scripts/spark/gold_fact_yellow_tracking.py \
+                        spark-submit --package org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 /opt/airflow/scripts/spark/gold_fact_yellow_tracking.py \
                             --spark_cluster {SPARK_CLUSTER} \
                             --bucket_name {S3_BUCKET_NAME} \
                             --s3_endpoint {S3_ENDPOINT} \
@@ -91,7 +91,7 @@ with DAG(
     gold_fact_fhvhv_tracking = BashOperator(
         task_id="gold_update_fhvhv_tracking_daily",
         bash_command=f'''
-                           spark-submit /opt/airflow/scripts/spark/gold_fact_fhvhv_tracking.py \
+                           spark-submit --package org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 /opt/airflow/scripts/spark/gold_fact_fhvhv_tracking.py \
                                --spark_cluster {SPARK_CLUSTER} \
                                --bucket_name {S3_BUCKET_NAME} \
                                --s3_endpoint {S3_ENDPOINT} \
@@ -100,18 +100,5 @@ with DAG(
                            ''',
         on_failure_callback=alert_slack_channel,
     )
-    test_python_ops = PythonOperator(
-        task_id="tracking_test",
-        python_callable=main,
-        op_kwargs={
-            "--spark_cluster": SPARK_CLUSTER,
-            "--bucket_name": S3_BUCKET_NAME,
-            "--s3_endpoint": S3_ENDPOINT,
-            "--s3_access_key": S3_ACCESS_KEY,
-            "--s3_secret_key": S3_SECRET_KEY,
-        },
-        on_failure_callback=alert_slack_channel
-    )
     gold_fact_fhvhv_tracking
     gold_fact_yellow_tracking
-    test_python_ops

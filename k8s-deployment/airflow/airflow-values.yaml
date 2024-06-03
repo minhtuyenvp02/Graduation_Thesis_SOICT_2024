@@ -2,7 +2,7 @@
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
 # regarding copyright ownership.  The ASF licenses this file
-# to you under the Apache License, Version 2.0 (the
+# to you under the Apache License, Version 2.0 (thef
 # "License"); you may not use this file except in compliance
 # with the License.  You may obtain a copy of the License at
 #
@@ -278,7 +278,7 @@ env:
   - name: "AIRFLOW_VAR_TRIP_PRODUCER_IMAGE"
     value: "minhtuyenvp02/trip-generator"
   - name: "AIRFLOW_VAR_KAFKA_PRODUCER_SERVERS"
-    value: "kafka-controller-0.kafka-controller-headless.kafka.svc.cluster.local:9092,kafka-controller-1.kafka-controller-headless.kafka.svc.cluster.local:9092,kafka-controller-2.kafka-controller-headless.kafka.svc.cluster.local:9092"
+    value: "kafka-controller-headless.kafka.svc.cluster.local:9092"
   - name: "AIRFLOW_VAR_KAFKA_CONSUMER_SERVERS"
     value: "kafka.kafka.svc.cluster.local:9092"
   - name: "AIRFLOW_VAR_TOPIC"
