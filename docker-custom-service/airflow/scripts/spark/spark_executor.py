@@ -1,9 +1,9 @@
 import logging
 from pyspark.sql import SparkSession
-from silver_medallion import Silver
-from config import *
+from spark.silver_medallion import Silver
+from spark.config import *
 from delta import configure_spark_with_delta_pip
-from schema import CustomSchema
+from spark.schema import CustomSchema
 
 
 def create_spark_session(app_name: str, spark_cluster: str, s3_endpoint: str, s3_access_key: str, s3_secret_key: str):
@@ -11,7 +11,7 @@ def create_spark_session(app_name: str, spark_cluster: str, s3_endpoint: str, s3
         .config("master", f"{spark_cluster}") \
         .config("spark.sql.shuffle.partitions", 16) \
         .config("spark.driver.maxResultSize", "2g") \
-        .config("spark.executor.memory", "3g") \
+        .config("spark.executor.memory", "2g") \
         .config("spark.sql.streaming.schemaInference", "true") \
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
         .config("spark.databricks.delta.schema.autoMerge.enabled", "true") \

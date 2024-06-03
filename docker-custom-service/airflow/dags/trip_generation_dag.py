@@ -31,7 +31,7 @@ TRIP_PRODUCER_IMAGE = Variable.get("TRIP_PRODUCER_IMAGE")
 DATA_DIR = Variable.get("DATA_DIR")
 MESSAGE_SEND_SPEED = Variable.get("MESSAGE_SEND_SPEED")
 start_date = datetime(2024, 5, 30)
-SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"
+SLACK_WEBHOOK_URL = Variable.get("SLACK_WEB_HOOK")
 
 
 # def create_spark_connection():
@@ -159,7 +159,13 @@ with DAG(
             "--s3_access_key", S3_ACCESS_KEY,
             "--s3_secret_key", S3_SECRET_KEY
         ],
+        total_executor_cores='1',
+        executor_cores='1',
+        executor_memory='2g',
+        num_executors='1',
+        driver_memory='2g',
         conn_id='spark_default',
+        verbose=True,
         on_failure_callback=alert_slack_channel
     )
 

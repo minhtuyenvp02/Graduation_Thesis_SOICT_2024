@@ -1,11 +1,11 @@
 import logging
 from pyspark.sql import SparkSession
 from delta import configure_spark_with_delta_pip
-from silver_medallion import Silver
-from config import SCHEMA_CONFIG
-from schema import CustomSchema
-from config import *
-from spark_executor import create_spark_session
+from spark.silver_medallion import Silver
+from spark.config import SCHEMA_CONFIG
+from spark.schema import CustomSchema
+from spark.config import *
+from spark.spark_executor import create_spark_session
 import argparse
 
 if __name__ == "__main__":
@@ -20,5 +20,5 @@ if __name__ == "__main__":
     spark = create_spark_session(app_name="Silver Yellow Transform", spark_cluster=args.spark_cluster,
                                  s3_endpoint=args.s3_endpoint, s3_access_key=args.s3_access_key,
                                  s3_secret_key=args.s3_secret_key)
-    silver = Silver(bucket_name=args.bucket_name, schema=CustomSchema(SCHEMA_CONFIG), spark=spark)
+    silver = Silver(bucket_name=args.bucket_name, spark=spark)
     silver.yellow_transform()

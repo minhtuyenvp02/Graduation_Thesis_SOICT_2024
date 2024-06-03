@@ -1,10 +1,10 @@
 import logging
 from pyspark.sql import SparkSession
-from silver_medallion import Silver
-from config import *
+from spark.silver_medallion import Silver
+from spark.config import *
 from delta import configure_spark_with_delta_pip
-from schema import CustomSchema
-from spark_executor import create_spark_session
+from spark.schema import CustomSchema
+from spark.spark_executor import create_spark_session
 import argparse
 
 if __name__ == "__main__":

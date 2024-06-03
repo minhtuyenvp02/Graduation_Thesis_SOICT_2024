@@ -82,7 +82,7 @@ images:
     repository: minhtuyenvp02/airflow-spark
     tag: main
     # Specifying digest takes precedence over tag.
-    digest: sha256:36e671c5ac704781d7195ec8ae0406ba465b141d65299260f1f2f593c1a34b05
+    digest: sha256:63cb08a69c441505e85fe592c09994f86d032db4da01449a4de6f023e2683b38
     pullPolicy: Always
   # To avoid images with user code, you can turn this to 'true' and
   # all the 'run-airflow-migrations' and 'wait-for-airflow-migrations' containers/jobs
@@ -299,19 +299,17 @@ env:
     value: "nyc-trip-bucket"
   - name: "GOOGLE_APPLICATION_CREDENTIALS"
     value: "/opt/airflow/secrets/key.json"
-
 # Volumes for all airflow containers
 volumes: []
 
 # VolumeMounts for all airflow containers
 volumeMounts: []
 
-# Secrets for all airflow containers
-secret : []
-# secret:
-#   - envName: "AIRFLOW_CONN_"
-#     secretName: "airflow-connections"
-#     secretKey: "AIRFLOW_CONN_GCP"
+
+secret:
+   - envName: "AIRFLOW_VAR_SLACK_WEB_HOOK"
+     secretName: "webhook-secret"
+     secretKey: "SLACK_WEB_HOOK"
 
 # Enables selected built-in secrets that are set via environment variables by default.
 # Those secrets are provided by the Helm Chart secrets by default but in some cases you
@@ -2483,7 +2481,7 @@ dags:
     ## optional subpath for dag volume mount
     subPath: ~
   gitSync:
-    enabled: false
+    enabled: true
 
     # git repo clone url
     # ssh example: git@github.com:apache/airflow.git
