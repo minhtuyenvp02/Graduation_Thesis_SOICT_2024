@@ -13,6 +13,7 @@ from kafka_topic_creation import create_kafka_topic
 from airflow.utils.trigger_rule import TriggerRule
 
 sys.path.append("/opt/airflow/scripts/spark")
+sys.path.append("/opt/airflow/scripts/")
 
 KAFKA_PRODUCER_SERVERS = Variable.get("KAFKA_PRODUCER_SERVERS")
 KAFKA_CONSUMER_SERVERS = Variable.get("KAFKA_CONSUMER_SERVERS")

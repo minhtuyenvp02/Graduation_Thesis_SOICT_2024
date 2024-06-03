@@ -7,6 +7,7 @@ from delta import DeltaTable
 import uuid
 import argparse
 
+
 def generate_uuid():
     return str(uuid.uuid4())
 
@@ -41,7 +42,7 @@ class Silver(object):
     def fhvhv_transform(self):
         time_tracking = self.spark.range(1) \
             .selectExpr("current_timestamp() - INTERVAL 2 HOURS as start_time") \
-            .collect()[0]['start_time']    
+            .collect()[0]['start_time']
         df = self.spark.readStream \
             .format("delta") \
             .option("readChangeFeed", "true") \
