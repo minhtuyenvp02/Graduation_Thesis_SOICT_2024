@@ -6,7 +6,8 @@ from spark.spark_executor import create_spark_session
 from spark.gold_medallion import Gold
 import argparse
 
-if __name__ == "__main__":
+
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--spark_cluster", type=str, required=True)
     parser.add_argument("--bucket_name", type=str, required=True)
@@ -24,3 +25,7 @@ if __name__ == "__main__":
     except Exception as E:
         logging.info("Failed to load data to gold")
         logging.info(E)
+
+
+if __name__ == __main__:
+    main()
