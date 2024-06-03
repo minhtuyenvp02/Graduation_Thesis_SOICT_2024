@@ -8,8 +8,8 @@ from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperato
 from airflow.providers.slack.hooks.slack_webhook import SlackWebhookHook
 
 sys.path.append("/opt/airflow/scripts/")
-
-import spark.gold_fact_fhvhv_tracking as gold_fact_fhvhv_tracking 
+sys.path.append("/opt/airflow/scripts/spark")
+from gold_fact_fhvhv_tracking import main
 
 KAFKA_PRODUCER_SERVERS = Variable.get("KAFKA_PRODUCER_SERVERS")
 KAFKA_CONSUMER_SERVERS = Variable.get("KAFKA_CONSUMER_SERVERS")
@@ -105,7 +105,7 @@ with DAG(
     )
     test_python_ops = PythonOperator(
         task_id="tracking_test",
-        python_callable=gold_fact_fhvhv_tracking,
+        python_callable=main,
         op_kwargs={
             "--spark_cluster": SPARK_CLUSTER,
             "--bucket_name": S3_BUCKET_NAME,
