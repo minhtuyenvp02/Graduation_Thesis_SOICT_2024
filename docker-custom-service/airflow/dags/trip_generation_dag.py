@@ -9,11 +9,10 @@ from airflow.sensors.time_delta import TimeDeltaSensor
 from airflow.utils.edgemodifier import Label
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
-from kafka_topic_creation import create_kafka_topic
 from airflow.utils.trigger_rule import TriggerRule
-
 sys.path.append("/opt/airflow/scripts/spark")
 sys.path.append("/opt/airflow/scripts/")
+from kafka_topic_creation import create_kafka_topic
 
 KAFKA_PRODUCER_SERVERS = Variable.get("KAFKA_PRODUCER_SERVERS")
 KAFKA_CONSUMER_SERVERS = Variable.get("KAFKA_CONSUMER_SERVERS")
