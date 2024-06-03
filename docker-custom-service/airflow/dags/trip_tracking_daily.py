@@ -8,8 +8,8 @@ from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperato
 from airflow.providers.slack.hooks.slack_webhook import SlackWebhookHook
 
 sys.path.append("/opt/airflow/scripts/")
-sys.path.append("/opt/airflow/scripts/spark")
-from gold_fact_fhvhv_tracking import main
+# sys.path.append("/opt/airflow/scripts/spark")
+from spark.gold_fact_fhvhv_tracking import main
 
 KAFKA_PRODUCER_SERVERS = Variable.get("KAFKA_PRODUCER_SERVERS")
 KAFKA_CONSUMER_SERVERS = Variable.get("KAFKA_CONSUMER_SERVERS")
