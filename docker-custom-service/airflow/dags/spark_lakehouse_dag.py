@@ -64,10 +64,8 @@ def alert_slack_channel(context: dict):
     msg = "\n".join([title, *[f"*{key}*: {value}" for key, value in msg_parts.items()]]).strip()
 
     SlackWebhookHook(
-        webhook_token=SLACK_WEBHOOK_URL,
-        slack_webhook_conn_id='slack_default',
-        message=msg,
-    ).execute()
+        slack_webhook_conn_id='slack_default'
+    ).send_text(msg)
 
 
 default_args = {

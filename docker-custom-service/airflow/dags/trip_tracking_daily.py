@@ -7,9 +7,8 @@ from airflow.operators.python import PythonOperator
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 from airflow.providers.slack.hooks.slack_webhook import SlackWebhookHook
 
-sys.path.append("/opt/airflow/scripts/")
-# sys.path.append("/opt/airflow/scripts/spark")
-from spark.gold_fact_fhvhv_tracking import main
+sys.path.append("/opt/airflow/scripts/spark")
+from gold_fact_fhvhv_tracking import main
 
 KAFKA_PRODUCER_SERVERS = Variable.get("KAFKA_PRODUCER_SERVERS")
 KAFKA_CONSUMER_SERVERS = Variable.get("KAFKA_CONSUMER_SERVERS")
@@ -57,10 +56,8 @@ def alert_slack_channel(context: dict):
     msg = "\n".join([title, *[f"*{key}*: {value}" for key, value in msg_parts.items()]]).strip()
 
     SlackWebhookHook(
-        webhook_token=SLACK_WEBHOOK_URL,
-        slack_webhook_conn_id='slack_default',
-        message=msg,
-    ).execute()
+        slack_webhook_conn_id='slack_default'
+    ).send_text(msg)
 
 
 default_args = {

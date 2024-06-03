@@ -1,7 +1,7 @@
 from pyspark.sql.functions import *
 from pyspark.sql import SparkSession
 from delta import *
-from spark.config import S3_CONFIG, SPARK_CONFIG
+from config import S3_CONFIG, SPARK_CONFIG
 from pyspark.sql.types import *
 from delta import DeltaTable
 import uuid
