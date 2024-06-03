@@ -1,11 +1,10 @@
 from pyspark.sql import SparkSession
 from delta import configure_spark_with_delta_pip
-from config import *
+from spark.config import *
 import logging
-from spark_executor import create_spark_session
-from gold_medallion import Gold
+from spark.spark_executor import create_spark_session
+from spark.gold_medallion import Gold
 import argparse
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

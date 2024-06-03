@@ -9,9 +9,9 @@ from confluent_kafka.admin import AdminClient
 from pyspark.sql import SparkSession
 from delta import *
 from minio import Minio
-from schema import CustomSchema
-from spark_executor import create_spark_session
-from config import SCHEMA_CONFIG
+from spark.schema import CustomSchema
+from spark.spark_executor import create_spark_session
+from spark.config import SCHEMA_CONFIG
 
 
 class BronzeData(object):

@@ -7,7 +7,7 @@ from delta import *
 from itertools import product
 from pyspark.sql import SparkSession
 
-from spark_executor import create_spark_session
+from spark.spark_executor import create_spark_session
 
 
 class WareHouseBuilder(object):

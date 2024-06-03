@@ -299,23 +299,17 @@ env:
     value: "nyc-trip-bucket"
   - name: "GOOGLE_APPLICATION_CREDENTIALS"
     value: "/opt/airflow/secrets/key.json"
-  - name: "AIRFLOW_VAR_SLACK_WEB_HOOK"
-    valueFrom:
-      secretKeyRef:
-        name: webhook-secret
-        key: SLACK_WEB_HOOK
 # Volumes for all airflow containers
 volumes: []
 
 # VolumeMounts for all airflow containers
 volumeMounts: []
 
-# Secrets for all airflow containers
-secret : []
-# secret:
-#   - envName: "AIRFLOW_CONN_"
-#     secretName: "airflow-connections"
-#     secretKey: "AIRFLOW_CONN_GCP"
+
+secret:
+   - envName: "AIRFLOW_VAR_SLACK_WEB_HOOK"
+     secretName: "webhook-secret"
+     secretKey: "SLACK_WEB_HOOK"
 
 # Enables selected built-in secrets that are set via environment variables by default.
 # Those secrets are provided by the Helm Chart secrets by default but in some cases you

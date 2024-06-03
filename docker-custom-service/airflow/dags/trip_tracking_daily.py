@@ -9,7 +9,7 @@ from airflow.providers.slack.hooks.slack_webhook import SlackWebhookHook
 
 sys.path.append("/opt/airflow/scripts/")
 
-sys.path.append("/opt/airflow/scripts/spark")
+import spark.golf_fact_fhvhv_tracking as golf_fact_fhvhv_tracking 
 
 KAFKA_PRODUCER_SERVERS = Variable.get("KAFKA_PRODUCER_SERVERS")
 KAFKA_CONSUMER_SERVERS = Variable.get("KAFKA_CONSUMER_SERVERS")
@@ -102,6 +102,18 @@ with DAG(
                                --s3_secret_key {S3_SECRET_KEY} \
                            ''',
         on_failure_callback=alert_slack_channel,
+    )
+    create_kafka_topic = PythonOperator(
+        task_id="tracking_test",
+        python_callable=gold_fact_fhvhv_tracking,
+        op_kwargs={
+            "--spark_cluster": SPARK_CLUSTER,
+            "--bucket_name": S3_BUCKET_NAME,
+            "--s3_endpoint": S3_ENDPOINT,
+            "--s3_access_key": S3_ACCESS_KEY,
+            "--s3_secret_key": S3_SECRET_KEY,
+        },
+        on_failure_callback=alert_slack_channel
     )
     gold_fact_fhvhv_tracking
     gold_fact_yellow_tracking
