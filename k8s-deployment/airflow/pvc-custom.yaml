@@ -1,39 +1,27 @@
-#apiVersion: v1
-#kind: PersistentVolumeClaim
-#metadata:
-#  name: my-airflow-logs-pvc
-#  namespace: airflow  # thay thế bằng namespace của bạn
-#spec:
-#  accessModes:
-#    - ReadWriteOnce
-#  resources:
-#    requests:
-#      storage: 1Gi
-#  storageClassName: standard
-#---
 apiVersion: v1
-kind: PersistentVolumeClaim
+kind: PersistentVolume
 metadata:
-  name: airflow-logs-2
+  name: nfs-pv-1
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  nfs:
+    server: nfs-server.default.svc.cluster.local
+    path: "/"
+  persistentVolumeReclaimPolicy: Delete
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: nfs-pvc-1
   namespace: airflow
 spec:
   accessModes:
     - ReadWriteMany
+  storageClassName: ""
   resources:
     requests:
       storage: 1Gi
-  storageClassName: 
-  volumeName: 
-#---
-#apiVersion: v1
-#kind: PersistentVolumeClaim
-#metadata:
-#  name: airflow-logs-2
-#  namespace: airflow  # thay thế bằng namespace của bạn
-#spec:
-#  accessModes:
-#    - ReadWriteMany
-#  resources:
-#    requests:
-#      storage: 1Gi
-#  storageClassName: standard
