@@ -33,7 +33,6 @@ MESSAGE_SEND_SPEED = Variable.get("MESSAGE_SEND_SPEED")
 start_date = datetime(2024, 5, 30)
 SLACK_WEBHOOK_URL = Variable.get("SLACK_WEB_HOOK")
 
-
 # def create_spark_connection():
 #     conn = Connection(
 #         conn_id='spark_default',
@@ -81,6 +80,7 @@ def alert_slack_channel(context: dict):
 
     SlackWebhookHook(
         webhook_token=SLACK_WEBHOOK_URL,
+        slack_webhook_conn_id='slack_default',
         message=msg,
     ).execute()
 
