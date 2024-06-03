@@ -58,7 +58,7 @@ def alert_slack_channel(context: dict):
 
     SlackWebhookHook(
         webhook_token=SLACK_WEBHOOK_URL,
-        slack_webhook_conn_id=slack_id,
+        slack_webhook_conn_id='slack_default',
         message=msg,
     ).execute()
 
