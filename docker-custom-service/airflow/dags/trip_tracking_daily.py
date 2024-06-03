@@ -9,7 +9,7 @@ from airflow.providers.slack.hooks.slack_webhook import SlackWebhookHook
 
 sys.path.append("/opt/airflow/scripts/")
 
-import spark.golf_fact_fhvhv_tracking as golf_fact_fhvhv_tracking 
+import spark.gold_fact_fhvhv_tracking as gold_fact_fhvhv_tracking 
 
 KAFKA_PRODUCER_SERVERS = Variable.get("KAFKA_PRODUCER_SERVERS")
 KAFKA_CONSUMER_SERVERS = Variable.get("KAFKA_CONSUMER_SERVERS")
