@@ -90,7 +90,7 @@ with DAG(
             on_failure_callback=alert_slack_channel,
             task_id="silver_yellow_transform",
             bash_command=f'''
-               spark-submit /opt/airflow/scripts/spark/silver_yellow_transform.py \
+               spark-submit --package org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 /opt/airflow/scripts/spark/silver_yellow_transform.py \
                    --spark_cluster {SPARK_CLUSTER} \
                    --bucket_name {S3_BUCKET_NAME} \
                    --s3_endpoint {S3_ENDPOINT} \
@@ -103,7 +103,7 @@ with DAG(
         silver_fhvhv_transform = BashOperator(
             task_id="silver_fhvhv_transform",
             bash_command=f'''
-                   spark-submit /opt/airflow/scripts/spark/silver_fhvhv_transform.py \
+                   spark-submit --package org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 /opt/airflow/scripts/spark/silver_fhvhv_transform.py \
                        --spark_cluster {SPARK_CLUSTER} \
                        --bucket_name {S3_BUCKET_NAME} \
                        --s3_endpoint {S3_ENDPOINT} \
@@ -122,7 +122,7 @@ with DAG(
         gold_scd1_update = BashOperator(
             task_id="gold_update_scd1",
             bash_command=f'''
-                    spark-submit /opt/airflow/scripts/spark/gold_update_scd0.py \
+                    spark-submit --package org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 /opt/airflow/scripts/spark/gold_update_scd0.py \
                         --spark_cluster {SPARK_CLUSTER} \
                         --bucket_name {S3_BUCKET_NAME} \
                         --s3_endpoint {S3_ENDPOINT} \
@@ -161,7 +161,7 @@ with DAG(
         gold_update_fhvhv_trip_fact = BashOperator(
             task_id="gold_update_fhvhv_fact",
             bash_command=f'''
-                            spark-submit /opt/airflow/scripts/spark/gold_load_fhvhv_fact.py \
+                            spark-submit --package org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1  /opt/airflow/scripts/spark/gold_load_fhvhv_fact.py \
                                 --spark_cluster {SPARK_CLUSTER} \
                                 --bucket_name {S3_BUCKET_NAME} \
                                 --s3_endpoint {S3_ENDPOINT} \
