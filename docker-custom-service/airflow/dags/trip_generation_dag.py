@@ -143,6 +143,7 @@ with DAG(
     # )
     stream_data_to_bronze = SparkSubmitOperator(
         task_id="stream_data_to_bronze",
+        packages='org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1',
         application="/opt/airflow/scripts/spark/stream_to_bronze.py",
         application_args=[
             "--spark_cluster", SPARK_CLUSTER,
