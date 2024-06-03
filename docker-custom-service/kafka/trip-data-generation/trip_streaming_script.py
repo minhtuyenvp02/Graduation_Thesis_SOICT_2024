@@ -1,5 +1,6 @@
 import argparse
 import sys
+sys.path.append("/opt/airflow/scripts/trip_data_generation/")
 from trip_data_generator import TripGenerator
 
 

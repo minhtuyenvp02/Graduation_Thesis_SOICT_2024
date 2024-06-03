@@ -2482,7 +2482,6 @@ dags:
     subPath: ~
   gitSync:
     enabled: true
-
     # git repo clone url
     # ssh example: git@github.com:apache/airflow.git
     # https example: https://github.com/apache/airflow.git
