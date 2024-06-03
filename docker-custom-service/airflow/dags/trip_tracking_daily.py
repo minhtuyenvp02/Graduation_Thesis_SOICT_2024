@@ -103,7 +103,7 @@ with DAG(
                            ''',
         on_failure_callback=alert_slack_channel,
     )
-    create_kafka_topic = PythonOperator(
+    test_python_ops = PythonOperator(
         task_id="tracking_test",
         python_callable=gold_fact_fhvhv_tracking,
         op_kwargs={
@@ -117,3 +117,4 @@ with DAG(
     )
     gold_fact_fhvhv_tracking
     gold_fact_yellow_tracking
+    test_python_ops
