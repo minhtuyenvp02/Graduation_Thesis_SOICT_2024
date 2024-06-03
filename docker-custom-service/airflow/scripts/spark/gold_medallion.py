@@ -1,13 +1,8 @@
 import uuid
-
 from pyspark.sql import SparkSession
 from delta import *
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
-from spark.config import *
-from delta import configure_spark_with_delta_pip
-from spark.spark_executor import create_spark_session
-import argparse
 
 
 class Gold(object):

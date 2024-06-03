@@ -1,9 +1,8 @@
 import logging
 from pyspark.sql import SparkSession
-from spark.silver_medallion import Silver
-from spark.config import *
+from config import *
 from delta import configure_spark_with_delta_pip
-from spark.schema import CustomSchema
+from schema import CustomSchema
 
 
 def create_spark_session(app_name: str, spark_cluster: str, s3_endpoint: str, s3_access_key: str, s3_secret_key: str):

@@ -9,11 +9,8 @@ from airflow.sensors.time_delta import TimeDeltaSensor
 from airflow.utils.edgemodifier import Label
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
-from airflow.providers.slack.hooks.slack_webhook import SlackWebhookHook
-sys.path.append("/opt/airflow/scripts/")
 from kafka_topic_creation import create_kafka_topic
 from airflow.utils.trigger_rule import TriggerRule
-
 
 sys.path.append("/opt/airflow/scripts/spark")
 
@@ -79,10 +76,8 @@ def alert_slack_channel(context: dict):
     msg = "\n".join([title, *[f"*{key}*: {value}" for key, value in msg_parts.items()]]).strip()
 
     SlackWebhookHook(
-        webhook_token=SLACK_WEBHOOK_URL,
-        slack_webhook_conn_id='slack_default',
-        message=msg,
-    ).execute()
+        slack_webhook_conn_id='slack_default'
+    ).send_text(msg)
 
 
 default_args = {

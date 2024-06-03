@@ -1,9 +1,7 @@
 from spark.gold_medallion import Gold
-from pyspark.sql import SparkSession
-from delta import configure_spark_with_delta_pip
-from spark.config import *
+from config import *
 import logging
-from spark.spark_executor import create_spark_session
+from spark_executor import create_spark_session
 import argparse
 
 
