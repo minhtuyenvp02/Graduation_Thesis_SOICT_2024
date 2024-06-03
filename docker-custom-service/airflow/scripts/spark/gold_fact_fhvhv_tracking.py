@@ -27,5 +27,5 @@ def main():
         logging.info(E)
 
 
-if __name__ == __main__:
-    main()
+# if __name__ == __main__:
+#     main()
