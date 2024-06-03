@@ -15,6 +15,7 @@ ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-${ARCH}
 COPY ./requirements.txt ./
 
 RUN pip3 install -r requirements.txt
+RUN sudo chmod -R 777 /opt/airflow/logs
 
 COPY ./dags /opt/airflow/dags
 COPY ./scripts /opt/airflow/scripts
