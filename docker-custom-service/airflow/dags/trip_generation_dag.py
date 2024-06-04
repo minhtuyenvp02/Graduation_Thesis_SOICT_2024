@@ -116,7 +116,7 @@ with DAG(
     def kafka_streaming():
         yellow_trip_generator = KubernetesPodOperator(
             namespace="airflow",
-            task_id="trip_producer",
+            task_id="yellow_trip_producer",
             image=TRIP_PRODUCER_IMAGE + ":main",
             cmds=["python3", 'yellow_trip_streaming_script.py'],
             arguments=[
@@ -133,7 +133,7 @@ with DAG(
 
         fhvhv_trip_generator = KubernetesPodOperator(
             namespace="airflow",
-            task_id="trip_producer",
+            task_id="fhvhv_trip_producer",
             image=TRIP_PRODUCER_IMAGE + ":main",
             cmds=["python3", 'fhvhv_trip_streaming_script.py'],
             arguments=[
