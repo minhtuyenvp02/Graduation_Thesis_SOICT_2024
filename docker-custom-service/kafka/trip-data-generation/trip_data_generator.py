@@ -1,4 +1,3 @@
-from concurrent.futures import ThreadPoolExecutor
 from confluent_kafka.admin import AdminClient
 from single_message_produce import SingleMessageProducer
 import os
@@ -28,7 +27,7 @@ class TripGenerator(object):
         producer = Producer(**config_)
         self.generator = SingleMessageProducer(part_idx=0, producer=producer)
 
-    def simulate_streaming(self):
+    def simulate_streaming(self, file_name: str):
         fsspec.config.conf = {
             "s3":
                 {
@@ -53,17 +52,16 @@ class TripGenerator(object):
                 list_file = s3.find(dir_path["name"])
                 [print(x) for x in list_file]
             except Exception as e:
-                logging.info(e)
+                logging.info("List dir erorr")
             if len(list_file) == 0:
                 logging.info("This directory has no file")
             else:
                 try:
-                    with ThreadPoolExecutor(max_workers=3) as execute:
-                        task_result = [False] * 2
-                        try:
-                            task_result[0] = execute.submit(self.generator.send_single_item, list_file[0], topics, send_speed=self.send_speed)
-                            task_result[1] = execute.submit(self.generator.send_single_item, list_file[1], topics, send_speed=self.send_speed)
-                        except Exception as e:
-                            logging.info("Submmit task failed")
+                    for idx, file in enumerate(list_file):
+                        if file_name in file:
+                            print(f"topic ís {file_name}")
+                            self.generator.send_single_item(file, topics, send_speed=self.send_speed, s3_endpoint=self.url_endpoint)
+                            print("send erorr")
+
                 except Exception as e:
                     logging.info("Error when create threads")

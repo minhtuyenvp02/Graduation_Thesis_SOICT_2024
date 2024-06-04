@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trip-generator-deployment
+  namespace: test
+  labels:
+    app: trip-generator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trip-generator
+  template:
+    metadata:
+      labels:
+        app: trip-generator
+    spec:
+      containers:
+      - name: trip-generator
+        image: minhtuyenvp02/trip-generator:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "500m"
+          limits:
+            memory: "512Mi"
+            cpu: "1"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: trip-generator-service
+  namespace: test
+spec:
+  selector:
+    app: trip-generator
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: NodePort

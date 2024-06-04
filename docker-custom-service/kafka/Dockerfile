@@ -6,3 +6,5 @@ COPY ./trip-data-generation .
 COPY ./requirements.txt .
 
 RUN pip3 install --no-cache-dir -r requirements.txt
+
+#CMD ["/bin/bash"]
