@@ -7,6 +7,7 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.email import EmailOperator
 from airflow.sensors.time_delta import TimeDeltaSensor
 from airflow.utils.edgemodifier import Label
+from airflow.decorators import task_group
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 from airflow.utils.trigger_rule import TriggerRule
@@ -109,22 +110,45 @@ with DAG(
         },
         on_failure_callback=alert_slack_channel
     )
-    trip_generator = KubernetesPodOperator(
-        namespace="airflow",
-        task_id="trip_producer",
-        image=TRIP_PRODUCER_IMAGE + ":main",
-        cmds=["python3", 'trip_streaming_script.py'],
-        arguments=[
-            '--kafka_servers', KAFKA_PRODUCER_SERVERS,
-            '--data_dir', DATA_DIR,
-            '--send_speed', str(MESSAGE_SEND_SPEED),
-            '--minio_endpoint', S3_ENDPOINT
-        ],
-        get_logs=True,
-        in_cluster=True,
-        image_pull_policy='Always',
-        on_failure_callback=alert_slack_channel,
-    )
+
+
+    @task_group(default_args={'retries': 1})
+    def kafka_streaming():
+        yellow_trip_generator = KubernetesPodOperator(
+            namespace="airflow",
+            task_id="trip_producer",
+            image=TRIP_PRODUCER_IMAGE + ":main",
+            cmds=["python3", 'yellow_trip_streaming_script.py'],
+            arguments=[
+                '--kafka_servers', KAFKA_PRODUCER_SERVERS,
+                '--data_dir', DATA_DIR,
+                '--send_speed', str(MESSAGE_SEND_SPEED),
+                '--minio_endpoint', S3_ENDPOINT
+            ],
+            get_logs=True,
+            in_cluster=True,
+            image_pull_policy='Always',
+            on_failure_callback=alert_slack_channel,
+        )
+
+        fhvhv_trip_generator = KubernetesPodOperator(
+            namespace="airflow",
+            task_id="trip_producer",
+            image=TRIP_PRODUCER_IMAGE + ":main",
+            cmds=["python3", 'fhvhv_trip_streaming_script.py'],
+            arguments=[
+                '--kafka_servers', KAFKA_PRODUCER_SERVERS,
+                '--data_dir', DATA_DIR,
+                '--send_speed', str(MESSAGE_SEND_SPEED),
+                '--minio_endpoint', S3_ENDPOINT
+            ],
+            get_logs=True,
+            in_cluster=True,
+            image_pull_policy='Always',
+            on_failure_callback=alert_slack_channel,
+        )
+        yellow_trip_generator
+        fhvhv_trip_generator
     # stream_data_to_bronze = BashOperator(
     #     task_id="streaming_raw_data_to_bronze",
     #     bash_command=f'''
@@ -155,15 +179,15 @@ with DAG(
             "--s3_access_key", S3_ACCESS_KEY,
             "--s3_secret_key", S3_SECRET_KEY
         ],
-        total_executor_cores='1',
-        executor_cores='1',
+        total_executor_cores=1,
+        executor_cores=1,
         executor_memory='2g',
-        num_executors='1',
+        num_executors=1,
         driver_memory='2g',
         conn_id='spark_default',
         verbose=True,
         on_failure_callback=alert_slack_channel
     )
 
-    create_kafka_topic >> trip_generator
-    create_kafka_topic >> stream_data_to_bronze
+    create_kafka_topic >> Label("Topics created") >> kafka_streaming()
+    create_kafka_topic >> Label("Consume data") >> stream_data_to_bronze
