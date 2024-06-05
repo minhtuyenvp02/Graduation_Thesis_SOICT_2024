@@ -8,6 +8,7 @@ from airflow.operators.email import EmailOperator
 from airflow.sensors.time_delta import TimeDeltaSensor
 from airflow.utils.edgemodifier import Label
 from airflow.decorators import task_group
+from airflow.providers.slack.hooks.slack_webhook import SlackWebhookHook
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 from airflow.utils.trigger_rule import TriggerRule
@@ -179,7 +180,8 @@ with DAG(
             "--s3_access_key", S3_ACCESS_KEY,
             "--s3_secret_key", S3_SECRET_KEY
         ],
-        conf={'spark.driver.host': '$(hostname -i)'},
+        conf={'spark.driver.host': '$(hostname -i)',
+              "spark.kubernetes.driver.service.deleteOnTermination": "true"},
         total_executor_cores=1,
         executor_cores=1,
         executor_memory='2g',
