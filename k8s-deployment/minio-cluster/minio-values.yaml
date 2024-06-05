@@ -218,7 +218,7 @@ statefulset:
   podManagementPolicy: Parallel
   ## @param statefulset.replicaCount Number of pods per zone (only for MinIO&reg; distributed mode). Should be even and `>= 4`
   ##
-  replicaCount: 4
+  replicaCount: 2
   ## @param statefulset.zones Number of zones (only for MinIO&reg; distributed mode)
   ##
   zones: 1
@@ -1083,7 +1083,7 @@ persistence:
     - ReadWriteOnce
   ## @param persistence.size PVC Storage Request for MinIO&reg; data volume
   ##
-  size: 10Gi
+  size: 6Gi
   ## @param persistence.annotations Annotations for the PVC
   ##
   annotations: {}
