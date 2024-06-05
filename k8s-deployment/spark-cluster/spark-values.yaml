@@ -495,7 +495,7 @@ worker:
   memoryLimit: "2GB"
   ## @param worker.coreLimit Se the maximum number of cores that the worker can use
   ##
-  coreLimit: "2"
+  coreLimit: "1"
   ## @param worker.dir Set a custom working directory for the application
   ##
   dir: ""

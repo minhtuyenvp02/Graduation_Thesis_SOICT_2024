@@ -79,7 +79,7 @@ airflowVersion: "2.9.1"
 # Images
 images:
   airflow:
-    repository: minhtuyenvp02/airflow-spark
+    repository: docker.io/minhtuyenvp02/airflow-spark
     tag: pr-49
     # Specifying digest takes precedence over tag.
     digest: ~
@@ -643,7 +643,7 @@ workers:
     # Enable persistent volumes
     enabled: true
     # Volume size for worker StatefulSet
-    size: 10Gi
+    size: 8Gi
     # If using a custom storageClass, pass name ref to all statefulSets here
     storageClassName:
     # Execute init container to chown log directory.

@@ -97,7 +97,7 @@ with DAG(
         default_args=default_args,
         on_failure_callback=alert_slack_channel,
         tags=["trip-generator", "producer"],
-        catchup=False
+        catchup=False,
 ) as dag:
     create_kafka_topic = PythonOperator(
         task_id="create_kafka_topic",
@@ -179,10 +179,11 @@ with DAG(
             "--s3_access_key", S3_ACCESS_KEY,
             "--s3_secret_key", S3_SECRET_KEY
         ],
+        conf={'spark.driver.host': '$(hostname -i)'},
         total_executor_cores=1,
         executor_cores=1,
         executor_memory='2g',
-        num_executors=1,
+        num_executors=2,
         driver_memory='2g',
         conn_id='spark_default',
         verbose=True,
