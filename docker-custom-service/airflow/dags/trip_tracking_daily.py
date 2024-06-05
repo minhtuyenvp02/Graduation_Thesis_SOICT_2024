@@ -91,7 +91,9 @@ with DAG(
     gold_fact_fhvhv_tracking = BashOperator(
         task_id="gold_update_fhvhv_tracking_daily",
         bash_command=f'''
-                           spark-submit --package org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 /opt/airflow/scripts/spark/gold_fact_fhvhv_tracking.py \
+                           spark-submit --package org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1  \
+                           --conf spark.driver.host=$(hostname -i) \
+                           /opt/airflow/scripts/spark/gold_fact_fhvhv_tracking.py \
                                --spark_cluster {SPARK_CLUSTER} \
                                --bucket_name {S3_BUCKET_NAME} \
                                --s3_endpoint {S3_ENDPOINT} \
