@@ -180,7 +180,7 @@ with DAG(
             "--s3_access_key", S3_ACCESS_KEY,
             "--s3_secret_key", S3_SECRET_KEY
         ],
-        conf={'spark.driver.host': '$(hostname -i)',
+        conf={'spark.driver.host': '10.112.1.9',
               "spark.kubernetes.driver.service.deleteOnTermination": "true"},
         total_executor_cores=1,
         executor_cores=1,
