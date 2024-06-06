@@ -11,6 +11,9 @@ spec:
   imagePullPolicy: Always
   mainApplicationFile: local:///app/spark/stream_to_bronze.py
   sparkVersion: "3.5.0"
+  sparkConf:
+    "spark.sql.extensions": "io.delta.sql.DeltaSparkSessionExtension"
+    "spark.sql.catalog.spark_catalog": "org.apache.spark.sql.delta.catalog.DeltaCatalog"
   restartPolicy:
     type: OnFailure
     onFailureRetries: 3
