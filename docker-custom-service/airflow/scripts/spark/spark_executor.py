@@ -14,8 +14,6 @@ def create_spark_session(app_name: str, spark_cluster: str, s3_endpoint: str, s3
         .config("spark.sql.streaming.schemaInference", "true") \
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
         .config("spark.databricks.delta.schema.autoMerge.enabled", "true") \
-        .config("spark.kubernetes.driver.service.deleteOnTermination", "true") \
-        .config("spark.driver.host", "$(hostname -i)") \
         .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
         .config("spark.databricks.delta.properties.defaults.enableChangeDataFeed", "true")
     spark = (configure_spark_with_delta_pip(builder, extra_packages=[

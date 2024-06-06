@@ -1,0 +1,36 @@
+trino:
+  target: dev
+  outputs:
+    dev:
+      type: trino
+      user: admin
+      host: http://34.101.191.43:30088
+      port: 30088
+      database: staging
+      schema: silver
+      threads: 1
+#
+#spark:
+#  target: dev
+#  outputs:
+#    dev:
+#      type: spark
+#      method: thrift
+#      host: spark://spark-master-svc.spark.svc.cluster.local
+#      port: 7077
+#      schema: silver
+#      connect_retries: 5
+#      connect_timeout: 60
+#      retry_all: true
+
+gold:
+  target: dev
+  outputs:
+    dev:
+      type: trino
+      user: admin
+      host: http://34.101.191.43:30088
+      port: 8080
+      database: dwh
+      schema: gold
+      threads: 1
