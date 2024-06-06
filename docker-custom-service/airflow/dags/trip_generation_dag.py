@@ -136,7 +136,7 @@ with DAG(
         fhvhv_trip_generator
 
 
-    submit = SparkKubernetesOperator(
+    stream_data_to_bronze = SparkKubernetesOperator(
         task_id='stream_data_to_bronze',
         namespace='spark',
         application_file='/kubernetes/spark-pi.yaml',
