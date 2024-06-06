@@ -11,6 +11,7 @@ from airflow.decorators import task_group
 from airflow.providers.slack.hooks.slack_webhook import SlackWebhookHook
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
+from airflow.providers.cncf.kubernetes.operators.spark_kubernetes import SparkKubernetesOperator
 from airflow.utils.trigger_rule import TriggerRule
 sys.path.append("/opt/airflow/scripts/spark")
 sys.path.append("/opt/airflow/scripts/")
@@ -31,23 +32,6 @@ DATA_DIR = Variable.get("DATA_DIR")
 MESSAGE_SEND_SPEED = Variable.get("MESSAGE_SEND_SPEED")
 start_date = datetime(2024, 5, 30)
 SLACK_WEBHOOK_URL = Variable.get("SLACK_WEB_HOOK")
-
-# def create_spark_connection():
-#     conn = Connection(
-#         conn_id='spark_default',
-#         conn_type='Spark',
-#         host='spark://spark-master-svc.spark.svc.cluster.local:7077',
-#         login='admin',
-#         password='admin',
-#         port='7077'
-#     )  # create a connection object
-#     session = settings.Session()  # get the session
-#     session.add(conn)
-#     session.commit()
-# 
-# 
-# create_spark_connection()
-
 
 def alert_slack_channel(context: dict):
     """ Alert to slack channel on failed dag
@@ -150,47 +134,42 @@ with DAG(
         )
         yellow_trip_generator
         fhvhv_trip_generator
-    # stream_data_to_bronze = BashOperator(
-    #     task_id="streaming_raw_data_to_bronze",
-    #     bash_command=f'''
-    #         spark-submit /opt/airflow/scripts/spark/stream_to_bronze.py \
-    #             --spark_cluster {SPARK_CLUSTER} \
-    #             --kafka_servers {KAFKA_CONSUMER_SERVERS} \
-    #             --bucket_name {S3_BUCKET_NAME} \
-    #             --path_location_csv {PATH_LOCATION_CSV} \
-    #             --path_dpc_base_num_csv {PATH_DPC_BASE_NUM_CSV} \
-    #             --s3_endpoint {S3_ENDPOINT} \
-    #             --s3_access_key {S3_ACCESS_KEY} \
-    #             --s3_secret_key {S3_SECRET_KEY} \
-    #         ''',
-    #     retries=2,
+
+
+    submit = SparkKubernetesOperator(
+        task_id='stream_data_to_bronze',
+        namespace='spark',
+        application_file='/kubernetes/spark-pi.yaml',
+        kubernetes_conn_id='kubernetes_default',
+        on_failure_callback=alert_slack_channel,
+        do_xcom_push=True,
+    )
+    # stream_data_to_bronze = SparkSubmitOperator(
+    #     task_id="stream_data_to_bronze",
+    #     packages='org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1',
+    #     application="/opt/airflow/scripts/spark/stream_to_bronze.py",
+    #     application_args=[
+    #         "--spark_cluster", SPARK_CLUSTER,
+    #         "--kafka_servers", KAFKA_CONSUMER_SERVERS,
+    #         "--bucket_name", S3_BUCKET_NAME,
+    #         "--path_location_csv", PATH_LOCATION_CSV,
+    #         "--path_dpc_base_num_csv", PATH_DPC_BASE_NUM_CSV,
+    #         "--s3_endpoint", S3_ENDPOINT,
+    #         "--s3_access_key", S3_ACCESS_KEY,
+    #         "--s3_secret_key", S3_SECRET_KEY
+    #     ],
+    #     conf={'spark.driver.host': '10.112.1.9',
+    #           "spark.kubernetes.driver.service.deleteOnTermination": "true"},
+    #     total_executor_cores=1,
+    #     executor_cores=1,
+    #     executor_memory='2g',
+    #     num_executors=2,
+    #     driver_memory='2g',
+    #     conn_id='spark_default',
+    #     verbose=True,
     #     on_failure_callback=alert_slack_channel
     # )
-    stream_data_to_bronze = SparkSubmitOperator(
-        task_id="stream_data_to_bronze",
-        packages='org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1',
-        application="/opt/airflow/scripts/spark/stream_to_bronze.py",
-        application_args=[
-            "--spark_cluster", SPARK_CLUSTER,
-            "--kafka_servers", KAFKA_CONSUMER_SERVERS,
-            "--bucket_name", S3_BUCKET_NAME,
-            "--path_location_csv", PATH_LOCATION_CSV,
-            "--path_dpc_base_num_csv", PATH_DPC_BASE_NUM_CSV,
-            "--s3_endpoint", S3_ENDPOINT,
-            "--s3_access_key", S3_ACCESS_KEY,
-            "--s3_secret_key", S3_SECRET_KEY
-        ],
-        conf={'spark.driver.host': '10.112.1.9',
-              "spark.kubernetes.driver.service.deleteOnTermination": "true"},
-        total_executor_cores=1,
-        executor_cores=1,
-        executor_memory='2g',
-        num_executors=2,
-        driver_memory='2g',
-        conn_id='spark_default',
-        verbose=True,
-        on_failure_callback=alert_slack_channel
-    )
+
 
     create_kafka_topic >> Label("Topics created") >> kafka_streaming()
     create_kafka_topic >> Label("Consume data") >> stream_data_to_bronze
