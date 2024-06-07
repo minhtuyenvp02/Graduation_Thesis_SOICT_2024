@@ -9,7 +9,7 @@ spec:
   mode: cluster
   image: "minhtuyenvp02/spark-operator"
   imagePullPolicy: Always
-  mainApplicationFile: local:///app/spark/stream_to_bronze.py
+  mainApplicationFile: local:///opt/spark/stream_to_bronze.py
   sparkVersion: "3.5.0"
   sparkConf:
     "spark.driver.extraJavaOptions": "-Divy.cache.dir=/tmp -Divy.home=/tmp"
