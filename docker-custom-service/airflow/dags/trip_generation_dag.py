@@ -175,4 +175,4 @@ with DAG(
 
 
     create_topic >> Label("Topics created") >> kafka_streaming()
-    create_topic >> Label("Consume data") >> kafka_stream_data_to_bronze
+    create_topic >> Label("Consume data") >> stream_data_to_bronze
