@@ -99,7 +99,7 @@ with DAG(
 
     @task_group(default_args={'retries': 1})
     def kafka_streaming():
-        yellow_trip_generator = KubernetesPodOperator(
+        kafka_yellow_trip_produce = KubernetesPodOperator(
             namespace="airflow",
             task_id="kafka_yellow_trip_producer",
             image=TRIP_PRODUCER_IMAGE + ":main",
@@ -117,7 +117,7 @@ with DAG(
             on_finish_action="delete_pod"
         )
 
-        fhvhv_trip_generator = KubernetesPodOperator(
+        kafka_fhvhv_trip_producer = KubernetesPodOperator(
             namespace="airflow",
             task_id="kafka_fhvhv_trip_producer",
             image=TRIP_PRODUCER_IMAGE + ":main",
@@ -134,11 +134,10 @@ with DAG(
             on_failure_callback=alert_slack_channel,
             on_finish_action="delete_pod"
         )
-        yellow_trip_generator
-        fhvhv_trip_generator
-
-
-    stream_data_to_bronze = SparkKubernetesOperator(
+        kafka_fhvhv_trip_producer
+        kafka_yellow_trip_produce
+       
+    kafka_stream_data_to_bronze = SparkKubernetesOperator(
         task_id='kafka_stream_data_to_bronze',
         namespace='spark',
         application_file='/kubernetes/spark-pi.yaml',
@@ -175,4 +174,4 @@ with DAG(
 
 
     create_topic >> Label("Topics created") >> kafka_streaming()
-    create_topic >> Label("Consume data") >> stream_data_to_bronze
+    create_topic >> Label("Consume data") >> kafka_stream_data_to_bronze
