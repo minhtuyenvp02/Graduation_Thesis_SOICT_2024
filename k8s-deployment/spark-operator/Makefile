@@ -7,3 +7,7 @@ spark-operator:
 upgrade-spark-operator:
 	helm upgrade --install spark-operator spark-operator/spark-operator \
     --namespace spark -f spark-operator-values.yaml
+delete-unused-svc:
+	kubectl get services -n spark -o name | grep "data-to-bronze" | xargs kubectl delete -n spark
+
+	kubectl get services -n spark -o name | grep "data-to-bronze" | xargs kubectl delete -n spark

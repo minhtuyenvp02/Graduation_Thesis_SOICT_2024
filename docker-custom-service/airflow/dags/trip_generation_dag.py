@@ -85,7 +85,7 @@ with DAG(
         catchup=False,
 ) as dag:
     create_kafka_topic = PythonOperator(
-        task_id="create_kafka_topic",
+        task_id="create_topic",
         python_callable=create_kafka_topic,
         op_kwargs={
             "kafka_servers": KAFKA_PRODUCER_SERVERS,
@@ -101,7 +101,7 @@ with DAG(
     def kafka_streaming():
         yellow_trip_generator = KubernetesPodOperator(
             namespace="airflow",
-            task_id="yellow_trip_producer",
+            task_id="kafka_yellow_trip_producer",
             image=TRIP_PRODUCER_IMAGE + ":main",
             cmds=["python3", 'yellow_trip_streaming_script.py'],
             arguments=[
@@ -119,7 +119,7 @@ with DAG(
 
         fhvhv_trip_generator = KubernetesPodOperator(
             namespace="airflow",
-            task_id="fhvhv_trip_producer",
+            task_id="kafka_fhvhv_trip_producer",
             image=TRIP_PRODUCER_IMAGE + ":main",
             cmds=["python3", 'fhvhv_trip_streaming_script.py'],
             arguments=[
@@ -139,7 +139,7 @@ with DAG(
 
 
     stream_data_to_bronze = SparkKubernetesOperator(
-        task_id='stream_data_to_bronze',
+        task_id='kafka_stream_data_to_bronze',
         namespace='spark',
         application_file='/kubernetes/spark-pi.yaml',
         kubernetes_conn_id='kubernetes_default',
@@ -174,5 +174,5 @@ with DAG(
     # )
 
 
-    create_kafka_topic >> Label("Topics created") >> kafka_streaming()
-    create_kafka_topic >> Label("Consume data") >> stream_data_to_bronze
+    create_topic >> Label("Topics created") >> kafka_streaming()
+    create_topic >> Label("Consume data") >> kafka_stream_data_to_bronze

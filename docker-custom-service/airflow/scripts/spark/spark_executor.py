@@ -16,9 +16,11 @@ def create_spark_session(app_name: str, spark_cluster: str, s3_endpoint: str, s3
         .config("spark.databricks.delta.schema.autoMerge.enabled", "true") \
         .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
         .config("spark.databricks.delta.properties.defaults.enableChangeDataFeed", "true")
+    print("start configure_spark_with_delta_pi")
     spark = (configure_spark_with_delta_pip(builder, extra_packages=[
         'org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-spark_2.12:3.1.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0'])
              .getOrCreate())
+    print(spark.sparkContext)
     # add confs
     sc = spark.sparkContext
     sc._jsc.hadoopConfiguration().set("fs.s3a.access.key", f"{s3_access_key}")
