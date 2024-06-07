@@ -114,6 +114,7 @@ with DAG(
             in_cluster=True,
             image_pull_policy='Always',
             on_failure_callback=alert_slack_channel,
+            on_finish_action="delete_pod"
         )
 
         fhvhv_trip_generator = KubernetesPodOperator(
@@ -131,6 +132,7 @@ with DAG(
             in_cluster=True,
             image_pull_policy='Always',
             on_failure_callback=alert_slack_channel,
+            on_finish_action="delete_pod"
         )
         yellow_trip_generator
         fhvhv_trip_generator
@@ -143,6 +145,7 @@ with DAG(
         kubernetes_conn_id='kubernetes_default',
         on_failure_callback=alert_slack_channel,
         do_xcom_push=True,
+        delete_on_termination=True
     )
     # stream_data_to_bronze = SparkSubmitOperator(
     #     task_id="stream_data_to_bronze",
