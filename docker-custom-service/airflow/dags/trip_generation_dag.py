@@ -84,7 +84,7 @@ with DAG(
         tags=["trip-generator", "producer"],
         catchup=False,
 ) as dag:
-    create_kafka_topic = PythonOperator(
+    create_topic = PythonOperator(
         task_id="create_topic",
         python_callable=create_kafka_topic,
         op_kwargs={
