@@ -98,15 +98,6 @@ class BronzeData(object):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--spark_cluster", type=str, required=True)
-    parser.add_argument("--kafka_servers", type=str, required=True)
-    parser.add_argument("--bucket_name", type=str, required=True)
-    parser.add_argument("--path_location_csv", type=str, required=True)
-    parser.add_argument("--path_dpc_base_num_csv", type=str, required=True)
-    parser.add_argument("--s3_endpoint", type=str, required=True)
-    parser.add_argument("--s3_access_key", type=str, required=True)
-    parser.add_argument("--s3_secret_key", type=str, required=True)
     
     args = parser.parse_args()
     schema = CustomSchema(SCHEMA_CONFIG)
