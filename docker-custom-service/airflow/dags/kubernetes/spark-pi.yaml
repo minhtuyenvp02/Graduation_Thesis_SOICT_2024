@@ -13,7 +13,7 @@ spec:
   sparkVersion: "3.5.0"
   restartPolicy:
     type: Never
-    onFailureRetries: 3
+    onFailureRetries: 2
     onFailureRetryInterval: 10
     onSubmissionFailureRetries: 5
     onSubmissionFailureRetryInterval: 20
