@@ -144,6 +144,7 @@ with DAG(
         kubernetes_conn_id='kubernetes_default',
         on_failure_callback=alert_slack_channel,
         do_xcom_push=True,
+        is_delete_operator_pod=True,
         delete_on_termination=True
     )
     # stream_data_to_bronze = SparkSubmitOperator(
