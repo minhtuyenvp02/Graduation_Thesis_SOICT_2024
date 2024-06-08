@@ -31,20 +31,6 @@ clean-targets:         # directories to be removed by `dbt clean`
 # files using the `{{ config(...) }}` macro.
 models:
   silver:
-    +materialized: incremental
-    +incremental_strategy: merge
-    +file_format: delta
-    +pre_hook:
-      - SET spark.hadoop.fs.s3a.endpoint=http://34.101.191.43:9000
-      - SET spark.hadoop.fs.s3a.access.key=admin
-      - SET spark.hadoop.fs.s3a.secret.key=admin123
-      - SET spark.hadoop.fs.s3a.path.style.access=true
-      - SET spark.hadoop.fs.s3a.connection.ssl.enabled=false
-      - SET spark.hadoop.fs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
-    silver:
-      +location_root: s3a://nyc-trip-bucket/silver
-    gold:
-      +location_root: s3a://nyc-trip-bucket/gold
-
     # Config indicated by + and applies to all files under models/example/
-
+    example:
+      +materialized: view

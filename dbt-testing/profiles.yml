@@ -1,0 +1,23 @@
+silver:
+  target: dev
+  outputs:
+    dev:
+      type: trino
+      user: admin
+      host: http://34.128.118.158
+      port: 30088
+      database: delta
+      schema: 'bronze'
+      threads: 1
+
+gold:
+  target: dev
+  outputs:
+    dev:
+      type: trino
+      user: admin
+      host: http://34.128.118.158
+      port: 30088
+      database: delta
+      schema: 'gold'
+      threads: 1
