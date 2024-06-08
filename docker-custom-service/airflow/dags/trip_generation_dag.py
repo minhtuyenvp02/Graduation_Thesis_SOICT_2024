@@ -99,7 +99,7 @@ with DAG(
 
     @task_group(default_args={'retries': 1})
     def kafka_streaming():
-        kafka_yellow_trip_produce = KubernetesPodOperator(
+        kafka_yellow_trip_producer = KubernetesPodOperator(
             namespace="airflow",
             task_id="kafka_yellow_trip_producer",
             image=TRIP_PRODUCER_IMAGE + ":main",
@@ -135,7 +135,7 @@ with DAG(
             on_finish_action="delete_pod"
         )
         kafka_fhvhv_trip_producer
-        kafka_yellow_trip_produce
+        kafka_yellow_trip_producer
 
 
     @task_group(default_args={'retries': 1})
