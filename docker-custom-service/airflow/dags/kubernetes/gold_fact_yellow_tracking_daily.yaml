@@ -1,5 +1,5 @@
 apiVersion: "sparkoperator.k8s.io/v1beta2"
-kind: SparkApplication
+kind: gold-update-yellow-tracking
 metadata:
   name: pyspark-pi
   namespace: spark
@@ -9,7 +9,7 @@ spec:
   mode: cluster
   image: "minhtuyenvp02/spark-operator"
   imagePullPolicy: Always
-  mainApplicationFile: local:///opt/app/spark/stream_to_bronze.py
+  mainApplicationFile: local:///opt/app/spark/gold_fact_yellow_tracking_daily.py
   sparkVersion: "3.5.0"
   restartPolicy:
     type: Never
@@ -27,6 +27,6 @@ spec:
   executor:
     cores: 1
     instances: 1
-    memory: "2048"
+    memory: "1024"
     labels:
       version: 3.5.0

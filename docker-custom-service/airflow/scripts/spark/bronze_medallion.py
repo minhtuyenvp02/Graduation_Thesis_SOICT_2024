@@ -1,10 +1,3 @@
-import logging
-import os
-import string
-import uuid
-import argparse
-from concurrent.futures import ThreadPoolExecutor
-from pyspark.sql.functions import *
 from confluent_kafka.admin import AdminClient
 from pyspark.sql import SparkSession
 from delta import *
@@ -26,7 +19,7 @@ class BronzeData(object):
         dic_topic = admin_client.list_topics().topics
         self.topics = [x for x in dic_topic.keys()]
         self.bucket_name = bucket_name
-        self.spark = spark 
+        self.spark = spark
 
     def csv_to_bronze(self, source_csv, target_table_name, id_option: bool):
         df = self.spark.read.format("csv") \
@@ -67,7 +60,7 @@ class BronzeData(object):
             .start(target_location)
         stream_query.awaitTermination()
 
-    def kafka_stream_2bronze(self, topics: [str]):
+    def kafka_stream_2bronze(self, topic: str):
         print(S3_CONFIG["fs.s3a.endpoint"])
         client = Minio(
             endpoint=S3_CONFIG["fs.s3a.endpoint"],
@@ -81,33 +74,5 @@ class BronzeData(object):
             logging.info(f"Bucket {self.bucket_name} doesn't exist, auto make...")
             client.make_bucket(bucket_name=self.bucket_name, )
         print(topics)
-        try:
-            with ThreadPoolExecutor(max_workers=3) as execute:
-                task_result = [False] * 2
-                for idx, topic in enumerate(topics):
-                    print(f"{idx}")
-                    print(f"Consume from topic {topic}")
-                    try:
-                        task_result[idx] = execute.submit(
-                            self.topic_2bronze, topic, os.path.join(self.bronze_location, topic))
-                        print(task_result[idx])
-                    except Exception as e:
-                        logging.info("Submmit task failed")
-        except Exception as e:
-            logging.info("Error when create threads")
-
-
-if __name__ == "__main__":
-    
-    args = parser.parse_args()
-    schema = CustomSchema(SCHEMA_CONFIG)
-    spark = create_spark_session(app_name="Kafka Stream To Bronze", spark_cluster=args.spark_cluster,
-                                 s3_endpoint=args.s3_endpoint, s3_access_key=args.s3_access_key,
-                                 s3_secret_key=args.s3_secret_key)
-    bronze = BronzeData(schema=schema, kafka_server=args.kafka_servers, bucket_name=args.bucket_name, spark=spark
-                        )
-    bronze.csv_to_bronze(source_csv=args.path_location_csv, target_table_name="location",
-                         id_option=False)
-    bronze.csv_to_bronze(source_csv=args.path_dpc_base_num_csv,
-                         target_table_name="dpc_base_num", id_option=True)
-    bronze.kafka_stream_2bronze(topics=["yellow_tripdata", "fhvhv_tripdata"])
+        self.topic_2bronze(topic, os.path.join(self.bronze_location, topic))
+        print("Consume Done")

@@ -136,17 +136,45 @@ with DAG(
         )
         kafka_fhvhv_trip_producer
         kafka_yellow_trip_produce
-       
-    kafka_stream_data_to_bronze = SparkKubernetesOperator(
-        task_id='kafka_stream_data_to_bronze',
-        namespace='spark',
-        application_file='/kubernetes/spark-pi.yaml',
-        kubernetes_conn_id='kubernetes_default',
-        on_failure_callback=alert_slack_channel,
-        image_pull_policy='Always',
-        do_xcom_push=True,
-        is_delete_operator_pod=True,
-        delete_on_termination=True
+
+
+    @task_group(default_args={'retries': 1})
+    def trip_consuming():
+        stream_fhvhv_to_bronze = SparkKubernetesOperator(
+            task_id='stream_fhvhv_to_bronze',
+            namespace='spark',
+            application_file='/kubernetes/bronze_fhvhv_streaming.yaml',
+            kubernetes_conn_id='kubernetes_default',
+            on_failure_callback=alert_slack_channel,
+            image_pull_policy='Always',
+            do_xcom_push=True,
+            is_delete_operator_pod=True,
+            delete_on_termination=True
+        )
+        stream_yellow_to_bronze = SparkKubernetesOperator(
+            task_id='stream_yellow_to_bronze',
+            namespace='spark',
+            application_file='/kubernetes/bronze_yellow_streaming.yaml',
+            kubernetes_conn_id='kubernetes_default',
+            on_failure_callback=alert_slack_channel,
+            image_pull_policy='Always',
+            do_xcom_push=True,
+            is_delete_operator_pod=True,
+            delete_on_termination=True
+        )
+        stream_yellow_to_bronze
+        stream_fhvhv_to_bronze
+
+    csv_to_bronze = SparkKubernetesOperator(
+       task_id='csv_to_bronze',
+       namespace='spark',
+       application_file='/kubernetes/csv_to_bronze.yaml',
+       kubernetes_conn_id='kubernetes_default',
+       on_failure_callback=alert_slack_channel,
+       image_pull_policy='Always',
+       do_xcom_push=True,
+       is_delete_operator_pod=True,
+       delete_on_termination=True
     )
     # stream_data_to_bronze = SparkSubmitOperator(
     #     task_id="stream_data_to_bronze",
@@ -174,6 +202,6 @@ with DAG(
     #     on_failure_callback=alert_slack_channel
     # )
 
-
-    create_topic >> Label("Topics created") >> kafka_streaming()
-    create_topic >> Label("Consume data") >> kafka_stream_data_to_bronze
+    csv_to_bronze
+    create_topic >> Label("Stream data") >> kafka_streaming()
+    create_topic >> Label("Consume data") >> trip_consuming()
