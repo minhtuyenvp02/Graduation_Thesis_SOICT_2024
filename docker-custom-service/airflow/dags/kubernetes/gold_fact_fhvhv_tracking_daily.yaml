@@ -1,0 +1,32 @@
+apiVersion: "sparkoperator.k8s.io/v1beta2"
+kind: SparkApplication
+metadata:
+  name: gold-update-fhvhv-tracking
+  namespace: spark
+spec:
+  type: Python
+  pythonVersion: "3"
+  mode: cluster
+  image: "minhtuyenvp02/spark-operator"
+  imagePullPolicy: Always
+  mainApplicationFile: local:///opt/app/spark/gold_fact_fhvhv_tracking.py
+  sparkVersion: "3.5.0"
+  restartPolicy:
+    type: Never
+    onFailureRetries: 2
+    onFailureRetryInterval: 10
+    onSubmissionFailureRetries: 5
+    onSubmissionFailureRetryInterval: 20
+  driver:
+    cores: 1
+    coreLimit: "1024m"
+    memory: "1024m"
+    labels:
+      version: 3.5.0
+    serviceAccount: spark
+  executor:
+    cores: 1
+    instances: 1
+    memory: "2048"
+    labels:
+      version: 3.5.0
