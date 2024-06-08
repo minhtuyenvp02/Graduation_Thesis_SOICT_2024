@@ -1,0 +1,16 @@
+version: 2
+
+models:
+  - name: dim_location
+    description: Test schema
+    columns:
+      - name: location_id
+        description: Test not_null, unique
+        tests:
+          - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: long
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 10
+          - unique
+          - not_null

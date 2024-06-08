@@ -11,6 +11,7 @@ additionalCatalogs:
     hive.s3.path-style-access=true
     hive.s3.max-connections=1000
     hive.s3.ssl.enabled=false
+    delta.register-table-procedure.enabled=true
     delta.enable-non-concurrent-writes=true
 #  minio: |
 #    connector.name=hive-hadoop2

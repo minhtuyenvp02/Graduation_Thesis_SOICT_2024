@@ -10,7 +10,7 @@ redis:
 trino:
 	helm repo add bitnami https://charts.bitnami.com/bitnami || true
 	helm repo add trino https://trinodb.github.io/charts/ || true
-	helm upgrade --install my-trino trino/trino --version 0.7.0 --namespace trino -f trino/values.yaml
+	helm upgrade --install my-trino trino/trino --namespace trino -f trino/values.yaml
 
 minio-cluster:
 	helm repo add bitnami https://charts.bitnami.com/bitnami
