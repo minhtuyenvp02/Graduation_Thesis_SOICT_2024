@@ -7,7 +7,7 @@ spec:
   type: Python
   pythonVersion: "3"
   mode: cluster
-  image: "minhtuyenvp02/spark-operator"
+  image: "minhtuyenvp02/spark-operator:latest"
   imagePullPolicy: Always
   mainApplicationFile: local:///opt/app/gold_load_fhvhv_fact.py
   sparkVersion: "3.5.0"
