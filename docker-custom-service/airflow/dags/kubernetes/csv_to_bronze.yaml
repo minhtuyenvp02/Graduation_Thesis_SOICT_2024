@@ -9,7 +9,7 @@ spec:
   mode: cluster
   image: "minhtuyenvp02/spark-operator"
   imagePullPolicy: Always
-  mainApplicationFile: local:///opt/app/spark/csv_to_bronze.py
+  mainApplicationFile: local:///opt/app/csv_to_bronze.py
   sparkVersion: "3.5.0"
   restartPolicy:
     type: Never

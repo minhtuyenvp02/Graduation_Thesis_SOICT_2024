@@ -9,7 +9,7 @@ spec:
   mode: cluster
   image: "minhtuyenvp02/spark-operator"
   imagePullPolicy: Always
-  mainApplicationFile: local:///opt/app/spark/silver_fhvhv_transform.py
+  mainApplicationFile: local:///opt/app/silver_fhvhv_transform.py
   sparkVersion: "3.5.0"
   restartPolicy:
     type: Never
