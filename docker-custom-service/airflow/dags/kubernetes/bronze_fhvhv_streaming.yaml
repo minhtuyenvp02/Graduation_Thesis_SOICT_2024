@@ -1,7 +1,7 @@
 apiVersion: "sparkoperator.k8s.io/v1beta2"
 kind: SparkApplication
 metadata:
-  name: stream-fhvhv-trip-to-bronze
+  name: stream-fhvhvku-trip-to-bronze
   namespace: spark
 spec:
   type: Python
@@ -9,7 +9,7 @@ spec:
   mode: cluster
   image: "minhtuyenvp02/spark-operator"
   imagePullPolicy: Always
-  mainApplicationFile: local:///opt/app/spark/bronze_fhvhv_streaming.py
+  mainApplicationFile: local:///opt/app/bronze_fhvhv_streaming.py
   sparkVersion: "3.5.0"
   restartPolicy:
     type: Never

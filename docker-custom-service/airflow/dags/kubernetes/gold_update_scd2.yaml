@@ -9,7 +9,7 @@ spec:
   mode: cluster
   image: "minhtuyenvp02/spark-operator"
   imagePullPolicy: Always
-  mainApplicationFile: local:///opt/app/spark/gold_update_scd2.py
+  mainApplicationFile: local:///opt/app/gold_update_scd2.py
   sparkVersion: "3.5.0"
   restartPolicy:
     type: Never

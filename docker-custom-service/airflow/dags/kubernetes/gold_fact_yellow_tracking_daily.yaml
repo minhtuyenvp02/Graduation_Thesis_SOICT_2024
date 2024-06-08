@@ -9,7 +9,7 @@ spec:
   mode: cluster
   image: "minhtuyenvp02/spark-operator"
   imagePullPolicy: Always
-  mainApplicationFile: local:///opt/app/spark/gold_fact_yellow_tracking_daily.py
+  mainApplicationFile: local:///opt/app/gold_fact_yellow_tracking_daily.py
   sparkVersion: "3.5.0"
   restartPolicy:
     type: Never
