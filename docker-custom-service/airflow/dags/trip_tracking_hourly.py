@@ -97,5 +97,5 @@ with DAG(
         delete_on_termination=True
     )
 
-    gold_fact_yellow_tracking_daily
+    # gold_fact_yellow_tracking_daily
     gold_fact_fhvhv_tracking_daily

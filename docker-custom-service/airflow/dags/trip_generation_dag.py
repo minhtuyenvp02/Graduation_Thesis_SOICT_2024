@@ -131,7 +131,7 @@ with DAG(
             on_finish_action="delete_pod"
         )
         kafka_fhvhv_trip_producer
-        kafka_yellow_trip_producer
+        # kafka_yellow_trip_producer
 
 
     @task_group(default_args={'retries': 1})
@@ -158,7 +158,7 @@ with DAG(
             is_delete_operator_pod=True,
             delete_on_termination=True
         )
-        stream_yellow_to_bronze
+        # stream_yellow_to_bronze
         stream_fhvhv_to_bronze
 
     csv_to_bronze = SparkKubernetesOperator(

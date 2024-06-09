@@ -104,7 +104,7 @@ with DAG(
             is_delete_operator_pod=True,
             delete_on_termination=True
         )
-        silver_yellow_transform
+        # silver_yellow_transform
         silver_fhvhv_transform
 
 
@@ -133,7 +133,7 @@ with DAG(
             delete_on_termination=True
         )
         gold_load_fhvhv_fact
-        gold_load_yellow_fact
+        # gold_load_yellow_fact
 
 
     silver_transform() >> Label("No failed") >> gold_load()
