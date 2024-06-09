@@ -72,14 +72,14 @@ default_args = {
 }
 with DAG(
         default_args=default_args,
-        dag_id="data_quality_pipeline",
+        dag_id="slowly_change_dim_update",
         schedule_interval='0 0 * * *',
         tags=["slowly change dimension update"],
         catchup=False,
         on_failure_callback=alert_slack_channel,
 ) as dag:
     @task_group(default_args={'retries': 2})
-    def gold_load():
+    def update_scd():
         gold_scd1_update = SparkKubernetesOperator(
             task_id='gold_scd1_update',
             namespace='spark',
@@ -104,5 +104,5 @@ with DAG(
         )
         gold_scd2_update
         gold_scd1_update
-    gold_load()
+    update_scd()
 
