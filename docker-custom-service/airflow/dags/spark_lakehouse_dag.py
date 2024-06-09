@@ -31,7 +31,7 @@ TOPICS = Variable.get("TOPIC").split(',')
 TRIP_PRODUCER_IMAGE = Variable.get("TRIP_PRODUCER_IMAGE")
 DATA_DIR = Variable.get("DATA_DIR")
 MESSAGE_SEND_SPEED = Variable.get("MESSAGE_SEND_SPEED")
-start_date = datetime(2024, 5, 30)
+start_date = datetime(2024, 6, 9)
 SLACK_WEBHOOK_URL = Variable.get("SLACK_WEB_HOOK")
 
 
@@ -86,93 +86,58 @@ with DAG(
 ) as dag:
     @task_group(default_args={'retries': 3})
     def silver_transform():
-        silver_yellow_transform = BashOperator(
+        silver_yellow_transform = SparkKubernetesOperator(
+            task_id='silver_yellow_transform',
+            namespace='spark',
+            application_file='/kubernetes/silver_yellow_transform.yaml',
+            kubernetes_conn_id='kubernetes_default',
             on_failure_callback=alert_slack_channel,
-            task_id="silver_yellow_transform",
-            bash_command=f'''
-               spark-submit --package org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 /opt/airflow/scripts/spark/silver_yellow_transform.py \
-                   --spark_cluster {SPARK_CLUSTER} \
-                   --bucket_name {S3_BUCKET_NAME} \
-                   --s3_endpoint {S3_ENDPOINT} \
-                   --s3_access_key {S3_ACCESS_KEY} \
-                   --s3_secret_key {S3_SECRET_KEY} \
-               ''',
-            trigger_rule=TriggerRule.NONE_FAILED
+            image_pull_policy='Always',
+            do_xcom_push=True,
+            is_delete_operator_pod=True,
+            delete_on_termination=True
         )
-
-        silver_fhvhv_transform = BashOperator(
-            task_id="silver_fhvhv_transform",
-            bash_command=f'''
-                   spark-submit --package org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 /opt/airflow/scripts/spark/silver_fhvhv_transform.py \
-                       --spark_cluster {SPARK_CLUSTER} \
-                       --bucket_name {S3_BUCKET_NAME} \
-                       --s3_endpoint {S3_ENDPOINT} \
-                       --s3_access_key {S3_ACCESS_KEY} \
-                       --s3_secret_key {S3_SECRET_KEY} \
-                   ''',
-            trigger_rule=TriggerRule.NONE_FAILED,
-            on_failure_callback=alert_slack_channel
+        silver_fhvhv_transform = SparkKubernetesOperator(
+            task_id='silver_fhvhv_transform',
+            namespace='spark',
+            application_file='/kubernetes/silver_fhvhv_transform.yaml',
+            kubernetes_conn_id='kubernetes_default',
+            on_failure_callback=alert_slack_channel,
+            image_pull_policy='Always',
+            do_xcom_push=True,
+            is_delete_operator_pod=True,
+            delete_on_termination=True
         )
         silver_yellow_transform
         silver_fhvhv_transform
 
 
     @task_group(default_args={'retries': 2})
-    def update_gold():
-        gold_scd1_update = BashOperator(
-            task_id="gold_update_scd1",
-            bash_command=f'''
-                    spark-submit --package org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 /opt/airflow/scripts/spark/gold_update_scd0.py \
-                        --spark_cluster {SPARK_CLUSTER} \
-                        --bucket_name {S3_BUCKET_NAME} \
-                        --s3_endpoint {S3_ENDPOINT} \
-                        --s3_access_key {S3_ACCESS_KEY} \
-                        --s3_secret_key {S3_SECRET_KEY} \
-                    ''',
-            trigger_rule=TriggerRule.NONE_FAILED,
+    def gold_load():
+        gold_load_fhvhv_fact = SparkKubernetesOperator(
+            task_id='gold_load_fhvhv_fact',
+            namespace='spark',
+            application_file='/kubernetes/gold_load_fhvhv_fact.yaml',
+            kubernetes_conn_id='kubernetes_default',
             on_failure_callback=alert_slack_channel,
+            image_pull_policy='Always',
+            do_xcom_push=True,
+            is_delete_operator_pod=True,
+            delete_on_termination=True
         )
-        gold_scd2_update = BashOperator(
-            task_id="gold_update_scd02",
-            bash_command=f'''
-                       spark-submit /opt/airflow/scripts/spark/gold_update_scd2.py \
-                           --spark_cluster {SPARK_CLUSTER} \
-                           --bucket_name {S3_BUCKET_NAME} \
-                           --s3_endpoint {S3_ENDPOINT} \
-                           --s3_access_key {S3_ACCESS_KEY} \
-                           --s3_secret_key {S3_SECRET_KEY} \
-                       ''',
-            trigger_rule=TriggerRule.NONE_FAILED,
+        gold_load_yellow_fact = SparkKubernetesOperator(
+            task_id='silver_fhvhv_transform',
+            namespace='spark',
+            application_file='/kubernetes/gold_load_yellow_fact.yaml',
+            kubernetes_conn_id='kubernetes_default',
             on_failure_callback=alert_slack_channel,
+            image_pull_policy='Always',
+            do_xcom_push=True,
+            is_delete_operator_pod=True,
+            delete_on_termination=True
         )
-        gold_update_yellow_trip_fact = BashOperator(
-            task_id="gold_update_yellow_fact",
-            bash_command=f'''
-                        spark-submit /opt/airflow/scripts/spark/gold_load_yellow_fact.py \
-                            --spark_cluster {SPARK_CLUSTER} \
-                            --bucket_name {S3_BUCKET_NAME} \
-                            --s3_endpoint {S3_ENDPOINT} \
-                            --s3_access_key {S3_ACCESS_KEY} \
-                            --s3_secret_key {S3_SECRET_KEY} \
-                        ''',
-            trigger_rule=TriggerRule.NONE_FAILED,
-            on_failure_callback=alert_slack_channel
-        )
-        gold_update_fhvhv_trip_fact = BashOperator(
-            task_id="gold_update_fhvhv_fact",
-            bash_command=f'''
-                            spark-submit --package org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1  /opt/airflow/scripts/spark/gold_load_fhvhv_fact.py \
-                                --spark_cluster {SPARK_CLUSTER} \
-                                --bucket_name {S3_BUCKET_NAME} \
-                                --s3_endpoint {S3_ENDPOINT} \
-                                --s3_access_key {S3_ACCESS_KEY} \
-                                --s3_secret_key {S3_SECRET_KEY} \
-                            ''',
-            trigger_rule=TriggerRule.NONE_FAILED,
-            on_failure_callback=alert_slack_channel,
-        )
-        [gold_scd1_update, gold_scd2_update] >> Label("No error") >> [gold_update_yellow_trip_fact,
-                                                                      gold_update_fhvhv_trip_fact]
+        gold_load_fhvhv_fact
+        gold_load_yellow_fact
 
 
-    silver_transform() >> Label("No failed") >> update_gold()
+    silver_transform() >> Label("No failed") >> gold_load()

@@ -14,3 +14,4 @@ models:
               max_value: 10
           - unique
           - not_null
+  

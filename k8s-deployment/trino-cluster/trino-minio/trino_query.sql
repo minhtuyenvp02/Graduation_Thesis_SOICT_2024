@@ -1,0 +1,1 @@
+CALL delta.system.register_table(schema_name => 'bronze', table_name => 'yellow_tripdata', table_location => 's3a://nyc-trip-bucket/bronze/yellow_tripdata');

@@ -236,7 +236,7 @@ class Gold(object):
         dim_dropoff_location = dim_location_df.withColumnRenamed("location_id", "dropoff_location_id")
 
         start_time = self.spark.range(1) \
-            .selectExpr("current_timestamp() - INTERVAL 2 HOURS as start_time") \
+            .selectExpr("current_timestamp() - INTERVAL 4 HOURS as start_time") \
             .collect()[0]['start_time']
         yellow_trip_df = self.spark \
             .readStream \
@@ -318,7 +318,7 @@ class Gold(object):
         dim_dropoff_location = dim_location_df.withColumnRenamed("location_id", "dropoff_location_id")
 
         start_time = self.spark.range(1) \
-            .selectExpr("current_timestamp() - INTERVAL 2 HOURS as start_time") \
+            .selectExpr("current_timestamp() - INTERVAL 4 HOURS as start_time") \
             .collect()[0]['start_time']
         fhvhv_trip_df = self.spark \
             .readStream \

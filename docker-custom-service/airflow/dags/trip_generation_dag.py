@@ -30,7 +30,7 @@ TOPICS = Variable.get("TOPIC").split(',')
 TRIP_PRODUCER_IMAGE = Variable.get("TRIP_PRODUCER_IMAGE")
 DATA_DIR = Variable.get("DATA_DIR")
 MESSAGE_SEND_SPEED = Variable.get("MESSAGE_SEND_SPEED")
-start_date = datetime(2024, 5, 30)
+start_date = datetime(2024, 6, 9)
 SLACK_WEBHOOK_URL = Variable.get("SLACK_WEB_HOOK")
 
 def alert_slack_channel(context: dict):
@@ -176,31 +176,6 @@ with DAG(
        is_delete_operator_pod=True,
        delete_on_termination=True
     )
-    # stream_data_to_bronze = SparkSubmitOperator(
-    #     task_id="stream_data_to_bronze",
-    #     packages='org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1',
-    #     application="/opt/airflow/scripts/spark/stream_to_bronze.py",
-    #     application_args=[
-    #         "--spark_cluster", SPARK_CLUSTER,
-    #         "--kafka_servers", KAFKA_CONSUMER_SERVERS,
-    #         "--bucket_name", S3_BUCKET_NAME,
-    #         "--path_location_csv", PATH_LOCATION_CSV,
-    #         "--path_dpc_base_num_csv", PATH_DPC_BASE_NUM_CSV,
-    #         "--s3_endpoint", S3_ENDPOINT,
-    #         "--s3_access_key", S3_ACCESS_KEY,
-    #         "--s3_secret_key", S3_SECRET_KEY
-    #     ],
-    #     conf={'spark.driver.host': '10.112.1.9',
-    #           "spark.kubernetes.driver.service.deleteOnTermination": "true"},
-    #     total_executor_cores=1,
-    #     executor_cores=1,
-    #     executor_memory='2g',
-    #     num_executors=2,
-    #     driver_memory='2g',
-    #     conn_id='spark_default',
-    #     verbose=True,
-    #     on_failure_callback=alert_slack_channel
-    # )
 
     csv_to_bronze
     create_topic >> Label("Stream data") >> kafka_streaming()
