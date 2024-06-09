@@ -95,23 +95,23 @@ with DAG(
 
     @task_group(default_args={'retries': 1})
     def kafka_streaming():
-        kafka_yellow_trip_producer = KubernetesPodOperator(
-            namespace="airflow",
-            task_id="kafka_yellow_trip_producer",
-            image=TRIP_PRODUCER_IMAGE + ":main",
-            cmds=["python3", 'yellow_trip_streaming_script.py'],
-            arguments=[
-                '--kafka_servers', KAFKA_PRODUCER_SERVERS,
-                '--data_dir', DATA_DIR,
-                '--send_speed', str(MESSAGE_SEND_SPEED),
-                '--minio_endpoint', S3_ENDPOINT
-            ],
-            get_logs=True,
-            in_cluster=True,
-            image_pull_policy='Always',
-            on_failure_callback=alert_slack_channel,
-            on_finish_action="delete_pod"
-        )
+        # kafka_yellow_trip_producer = KubernetesPodOperator(
+        #     namespace="airflow",
+        #     task_id="kafka_yellow_trip_producer",
+        #     image=TRIP_PRODUCER_IMAGE + ":main",
+        #     cmds=["python3", 'yellow_trip_streaming_script.py'],
+        #     arguments=[
+        #         '--kafka_servers', KAFKA_PRODUCER_SERVERS,
+        #         '--data_dir', DATA_DIR,
+        #         '--send_speed', str(MESSAGE_SEND_SPEED),
+        #         '--minio_endpoint', S3_ENDPOINT
+        #     ],
+        #     get_logs=True,
+        #     in_cluster=True,
+        #     image_pull_policy='Always',
+        #     on_failure_callback=alert_slack_channel,
+        #     on_finish_action="delete_pod"
+        # )
 
         kafka_fhvhv_trip_producer = KubernetesPodOperator(
             namespace="airflow",
@@ -147,17 +147,17 @@ with DAG(
             is_delete_operator_pod=True,
             delete_on_termination=True
         )
-        stream_yellow_to_bronze = SparkKubernetesOperator(
-            task_id='stream_yellow_to_bronze',
-            namespace='spark',
-            application_file='/kubernetes/bronze_yellow_streaming.yaml',
-            kubernetes_conn_id='kubernetes_default',
-            on_failure_callback=alert_slack_channel,
-            image_pull_policy='Always',
-            do_xcom_push=True,
-            is_delete_operator_pod=True,
-            delete_on_termination=True
-        )
+        # stream_yellow_to_bronze = SparkKubernetesOperator(
+        #     task_id='stream_yellow_to_bronze',
+        #     namespace='spark',
+        #     application_file='/kubernetes/bronze_yellow_streaming.yaml',
+        #     kubernetes_conn_id='kubernetes_default',
+        #     on_failure_callback=alert_slack_channel,
+        #     image_pull_policy='Always',
+        #     do_xcom_push=True,
+        #     is_delete_operator_pod=True,
+        #     delete_on_termination=True
+        # )
         # stream_yellow_to_bronze
         stream_fhvhv_to_bronze
 
