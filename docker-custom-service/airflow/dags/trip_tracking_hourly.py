@@ -2,11 +2,8 @@ import sys
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.models import Variable, Connection
-from airflow.operators.bash import BashOperator
-from airflow.operators.python import PythonOperator
-from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 from airflow.providers.slack.hooks.slack_webhook import SlackWebhookHook
-
+from airflow.providers.cncf.kubernetes.operators.spark_kubernetes import SparkKubernetesOperator
 sys.path.append("/opt/airflow/scripts/spark")
 from gold_fact_fhvhv_tracking import main
 
@@ -23,7 +20,7 @@ TOPICS = Variable.get("TOPIC").split(',')
 TRIP_PRODUCER_IMAGE = Variable.get("TRIP_PRODUCER_IMAGE")
 DATA_DIR = Variable.get("DATA_DIR")
 MESSAGE_SEND_SPEED = Variable.get("MESSAGE_SEND_SPEED")
-start_date = datetime(2024, 5, 30)
+start_date = datetime(2024, 6, 9)
 SLACK_WEBHOOK_URL = Variable.get("SLACK_WEB_HOOK")
 
 
