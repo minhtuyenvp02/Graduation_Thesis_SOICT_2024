@@ -12,4 +12,5 @@ delete-unused-svc:
 	kubectl get services -n spark -o name | grep "to-bronze" | xargs kubectl delete -n spark
 
 	kubectl get services -n spark -o name | grep "to-bronze" | xargs kubectl delete -n spark
+
 	 kubectl delete pod --field-selector=status.phase==Failed -n spark
