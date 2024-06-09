@@ -82,17 +82,17 @@ with DAG(
 ) as dag:
     @task_group(default_args={'retries': 3})
     def silver_transform():
-        silver_yellow_transform = SparkKubernetesOperator(
-            task_id='silver_yellow_transform',
-            namespace='spark',
-            application_file='/kubernetes/silver_yellow_transform.yaml',
-            kubernetes_conn_id='kubernetes_default',
-            on_failure_callback=alert_slack_channel,
-            image_pull_policy='Always',
-            do_xcom_push=True,
-            is_delete_operator_pod=True,
-            delete_on_termination=True
-        )
+        # silver_yellow_transform = SparkKubernetesOperator(
+        #     task_id='silver_yellow_transform',
+        #     namespace='spark',
+        #     application_file='/kubernetes/silver_yellow_transform.yaml',
+        #     kubernetes_conn_id='kubernetes_default',
+        #     on_failure_callback=alert_slack_channel,
+        #     image_pull_policy='Always',
+        #     do_xcom_push=True,
+        #     is_delete_operator_pod=True,
+        #     delete_on_termination=True
+        # )
         silver_fhvhv_transform = SparkKubernetesOperator(
             task_id='silver_fhvhv_transform',
             namespace='spark',
@@ -121,17 +121,17 @@ with DAG(
             is_delete_operator_pod=True,
             delete_on_termination=True
         )
-        gold_load_yellow_fact = SparkKubernetesOperator(
-            task_id='silver_fhvhv_transform',
-            namespace='spark',
-            application_file='/kubernetes/gold_load_yellow_fact.yaml',
-            kubernetes_conn_id='kubernetes_default',
-            on_failure_callback=alert_slack_channel,
-            image_pull_policy='Always',
-            do_xcom_push=True,
-            is_delete_operator_pod=True,
-            delete_on_termination=True
-        )
+        # gold_load_yellow_fact = SparkKubernetesOperator(
+        #     task_id='silver_fhvhv_transform',
+        #     namespace='spark',
+        #     application_file='/kubernetes/gold_load_yellow_fact.yaml',
+        #     kubernetes_conn_id='kubernetes_default',
+        #     on_failure_callback=alert_slack_channel,
+        #     image_pull_policy='Always',
+        #     do_xcom_push=True,
+        #     is_delete_operator_pod=True,
+        #     delete_on_termination=True
+        # )
         gold_load_fhvhv_fact
         # gold_load_yellow_fact
 
