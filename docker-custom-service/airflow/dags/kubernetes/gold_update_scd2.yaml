@@ -1,7 +1,7 @@
 apiVersion: "sparkoperator.k8s.io/v1beta2"
-kind: gold-update-scd2
+kind: SparkApplication
 metadata:
-  name: pyspark-pi
+  name: gold_update_scd2
   namespace: spark
 spec:
   type: Python

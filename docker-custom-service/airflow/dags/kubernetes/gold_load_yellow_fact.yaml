@@ -1,7 +1,7 @@
 apiVersion: "sparkoperator.k8s.io/v1beta2"
-kind: gold-update-yellơ-trip
+kind: SparkApplication
 metadata:
-  name: pyspark-pi
+  name: gold_load_yellow_fact
   namespace: spark
 spec:
   type: Python
