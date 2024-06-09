@@ -26,7 +26,7 @@ spec:
     serviceAccount: spark
   executor:
     cores: 1
-    instances: 1
-    memory: "2048"
+    instances: 2
+    memory: "1024"
     labels:
       version: 3.5.0
