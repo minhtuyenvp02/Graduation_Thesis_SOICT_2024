@@ -1,14 +1,22 @@
 import sys
 from datetime import datetime, timedelta
+
+import pytz
 from airflow import DAG
 from airflow.models import Variable, Connection
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
-from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
+from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import KubernetesPodOperator
+from airflow.operators.email import EmailOperator
+from airflow.decorators import task_group
+from airflow.utils.edgemodifier import Label
+from airflow.sensors.time_delta import TimeDeltaSensor
+from airflow.utils.trigger_rule import TriggerRule
+from airflow.providers.http.hooks.http import HttpHook
 from airflow.providers.slack.hooks.slack_webhook import SlackWebhookHook
+from datetime import datetime, timedelta
 
 sys.path.append("/opt/airflow/scripts/spark")
-from gold_fact_fhvhv_tracking import main
 
 KAFKA_PRODUCER_SERVERS = Variable.get("KAFKA_PRODUCER_SERVERS")
 KAFKA_CONSUMER_SERVERS = Variable.get("KAFKA_CONSUMER_SERVERS")
@@ -23,7 +31,7 @@ TOPICS = Variable.get("TOPIC").split(',')
 TRIP_PRODUCER_IMAGE = Variable.get("TRIP_PRODUCER_IMAGE")
 DATA_DIR = Variable.get("DATA_DIR")
 MESSAGE_SEND_SPEED = Variable.get("MESSAGE_SEND_SPEED")
-start_date = datetime(2024, 5, 30)
+start_date = datetime(2024, 6, 9)
 SLACK_WEBHOOK_URL = Variable.get("SLACK_WEB_HOOK")
 
 
@@ -70,37 +78,37 @@ default_args = {
 }
 with DAG(
         default_args=default_args,
-        dag_id="trip_tracking_daily",
-        schedule_interval='@daily',
-        tags=["trip_tracking_daily", "medallion_architecture"],
-        on_failure_callback=alert_slack_channel,
+        dag_id="data_quality_pipeline",
+        schedule_interval='0 0 * * *',
+        tags=["slowly change dimension update"],
         catchup=False,
+        on_failure_callback=alert_slack_channel,
 ) as dag:
-    gold_fact_yellow_tracking = BashOperator(
-        task_id="gold_update_yellow_tracking_daily",
-        bash_command=f'''
-                        spark-submit --package org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 /opt/airflow/scripts/spark/gold_fact_yellow_tracking.py \
-                            --spark_cluster {SPARK_CLUSTER} \
-                            --bucket_name {S3_BUCKET_NAME} \
-                            --s3_endpoint {S3_ENDPOINT} \
-                            --s3_access_key {S3_ACCESS_KEY} \
-                            --s3_secret_key {S3_SECRET_KEY} \
-                        ''',
-        on_failure_callback=alert_slack_channel,
-    )
-    gold_fact_fhvhv_tracking = BashOperator(
-        task_id="gold_update_fhvhv_tracking_daily",
-        bash_command=f'''
-                           spark-submit --package org.apache.hadoop:hadoop-aws:3.3.4,io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1  \
-                           --conf spark.driver.host=$(hostname -i) \
-                           /opt/airflow/scripts/spark/gold_fact_fhvhv_tracking.py \
-                               --spark_cluster {SPARK_CLUSTER} \
-                               --bucket_name {S3_BUCKET_NAME} \
-                               --s3_endpoint {S3_ENDPOINT} \
-                               --s3_access_key {S3_ACCESS_KEY} \
-                               --s3_secret_key {S3_SECRET_KEY} \
-                           ''',
-        on_failure_callback=alert_slack_channel,
-    )
-    gold_fact_fhvhv_tracking
-    gold_fact_yellow_tracking
+    @task_group(default_args={'retries': 2})
+    def gold_load():
+        gold_scd1_update = SparkKubernetesOperator(
+            task_id='gold_scd1_update',
+            namespace='spark',
+            application_file='/kubernetes/gold_update_scd1.yaml',
+            kubernetes_conn_id='kubernetes_default',
+            on_failure_callback=alert_slack_channel,
+            image_pull_policy='Always',
+            do_xcom_push=True,
+            is_delete_operator_pod=True,
+            delete_on_termination=True
+        )
+        gold_scd2_update = SparkKubernetesOperator(
+            task_id='gold_scd2_update',
+            namespace='spark',
+            application_file='/kubernetes/gold_update_scd2.yaml',
+            kubernetes_conn_id='kubernetes_default',
+            on_failure_callback=alert_slack_channel,
+            image_pull_policy='Always',
+            do_xcom_push=True,
+            is_delete_operator_pod=True,
+            delete_on_termination=True
+        )
+        gold_scd2_update
+        gold_scd1_update
+    gold_load()
+
