@@ -4,18 +4,12 @@ from datetime import datetime, timedelta
 import pytz
 from airflow import DAG
 from airflow.models import Variable, Connection
-from airflow.operators.bash import BashOperator
-from airflow.operators.python import PythonOperator
-from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import KubernetesPodOperator
-from airflow.operators.email import EmailOperator
 from airflow.decorators import task_group
 from airflow.utils.edgemodifier import Label
-from airflow.sensors.time_delta import TimeDeltaSensor
 from airflow.utils.trigger_rule import TriggerRule
 from airflow.providers.http.hooks.http import HttpHook
 from airflow.providers.slack.hooks.slack_webhook import SlackWebhookHook
-from datetime import datetime, timedelta
-
+from airflow.providers.cncf.kubernetes.operators.spark_kubernetes import SparkKubernetesOperator
 sys.path.append("/opt/airflow/scripts/spark")
 
 KAFKA_PRODUCER_SERVERS = Variable.get("KAFKA_PRODUCER_SERVERS")

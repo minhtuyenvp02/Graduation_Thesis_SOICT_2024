@@ -2,14 +2,10 @@ import sys
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.models import Variable
-from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
-from airflow.operators.email import EmailOperator
-from airflow.sensors.time_delta import TimeDeltaSensor
 from airflow.utils.edgemodifier import Label
 from airflow.decorators import task_group
 from airflow.providers.slack.hooks.slack_webhook import SlackWebhookHook
-from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 from airflow.providers.cncf.kubernetes.operators.spark_kubernetes import SparkKubernetesOperator
 from airflow.utils.trigger_rule import TriggerRule
