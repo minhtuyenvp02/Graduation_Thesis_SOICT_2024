@@ -30,18 +30,18 @@ class Silver(object):
          """)
         self.spark.sql("ALTER TABLE yellow_trip SET TBLPROPERTIES (delta.enableChangeDataFeed = true)")
 
-    def create_fhvhv_streaming_table(self):
-        self.spark.sql(f"""
-            CREATE DATABASE IF NOT EXISTS silver;
-            CREATE TABLE IF NOT EXISTS silver.fhvhv_trip
-            USING DELTA
-            LOCATION '{self.yellow_trip_tbl}'
-            ALTER TABLE silver.fhvhv_trip SET TBLPROPERTIES (delta.enableChangeDataFeed = true)")
-        """)
+    # def create_fhvhv_streaming_table(self):
+    #     self.spark.sql(f"""
+    #         CREATE DATABASE IF NOT EXISTS silver;
+    #         CREATE TABLE IF NOT EXISTS silver.fhvhv_trip
+    #         USING DELTA
+    #         LOCATION '{self.yellow_trip_tbl}'
+    #         ALTER TABLE silver.fhvhv_trip SET TBLPROPERTIES (delta.enableChangeDataFeed = true)")
+    #     """)
 
     def fhvhv_transform(self):
         time_tracking = self.spark.range(1) \
-            .selectExpr("current_timestamp() - INTERVAL 2 HOURS as start_time") \
+            .selectExpr("current_timestamp() - INTERVAL 1 HOURS as start_time") \
             .collect()[0]['start_time']
         df = self.spark.readStream \
             .format("delta") \
@@ -100,10 +100,10 @@ class Silver(object):
         # self.spark.sql(f"ALTER TABLE delta.`{self.fhvhv_trip_tbl}` SET TBLPROPERTIES (delta.enableChangeDataFeed = true)")
         print("Starting write to silver")
         stream_query = df.writeStream \
-            .foreachBatch(self.process_fhvhv_batch) \
+            .format('delta') \
             .option("checkpointLocation", target_checkpoint_location) \
             .trigger(availableNow=True) \
-            .start()
+            .start(self.fhvhv_trip_tbl)
         stream_query.awaitTermination()
         print("Done Streaming")
 
@@ -153,7 +153,6 @@ class Silver(object):
         # self.spark.sql(f"ALTER TABLE delta.`{self.yellow_trip_tbl}` SET TBLPROPERTIES (delta.enableChangeDataFeed = true)")
         print("Starting to write to silver")
         stream_query = df.writeStream \
-            .foreachBatch(self.process_yellow_batch) \
             .trigger(availableNow=True) \
             .option("checkpointLocation", target_checkpoint_location) \
             .start()
@@ -163,14 +162,14 @@ class Silver(object):
     def process_yellow_batch(self, batch_df, batch_id):
         print(f"Processing batch {batch_id}")
         batch_df.write \
-            .format("delta") \
-            .mode("append") \
-            .save(self.yellow_trip_tbl)
+            .format("console") \
+            .mode("append")
+
 
     def process_fhvhv_batch(self, batch_df, batch_id):
         print(f"Processing batch {batch_id}")
         batch_df.write \
-            .format("delta") \
+            .format("console") \
             .mode("append") \
             .save(self.fhvhv_trip_tbl)
 

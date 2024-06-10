@@ -26,7 +26,13 @@ additionalCatalogs:
 #    hive.allow-drop-table=true
 #    hive.s3.ssl.enabled=false
 
+additionalRequirements:
+  - sqlalchemy-trino
 
+bootstrapScript: |
+  #!/bin/bash
+  pip install sqlalchemy-trino &&\
+  if [ ! -f ~/bootstrap ]; then echo "Running Superset with uid {{ .Values.runAsUser }}" > ~/bootstrap; fi
 secretMounts:
   - name: redis-table-schema-volumn
     path: /etc/redis
