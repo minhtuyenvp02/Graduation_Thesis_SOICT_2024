@@ -11,7 +11,6 @@ spec:
   imagePullPolicy: Always
   mainApplicationFile: local:///opt/app/bronze_fhvhv_streaming.py
   sparkVersion: "3.5.0"
-  sp
   restartPolicy:
     type: Never
     onFailureRetries: 2
