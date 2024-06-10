@@ -143,7 +143,7 @@ with DAG(
             kubernetes_conn_id='kubernetes_default',
             on_failure_callback=alert_slack_channel,
             image_pull_policy='Always',
-            do_xcom_push=True,
+            do_xcom_push=False,
             is_delete_operator_pod=True,
             delete_on_termination=True
         )
@@ -154,7 +154,6 @@ with DAG(
         #     kubernetes_conn_id='kubernetes_default',
         #     on_failure_callback=alert_slack_channel,
         #     image_pull_policy='Always',
-        #     do_xcom_push=True,
         #     is_delete_operator_pod=True,
         #     delete_on_termination=True
         # )
@@ -168,7 +167,6 @@ with DAG(
        kubernetes_conn_id='kubernetes_default',
        on_failure_callback=alert_slack_channel,
        image_pull_policy='Always',
-       do_xcom_push=True,
        is_delete_operator_pod=True,
        delete_on_termination=True
     )
