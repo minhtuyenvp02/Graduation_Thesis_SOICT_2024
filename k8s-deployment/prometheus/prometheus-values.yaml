@@ -3802,6 +3802,13 @@ prometheus:
        static_configs:
          - targets:
              - kafka-jmx-metrics.kafka.svc.cluster.local:5556
+     - job_name: spark-cluster
+       scrape_interval: "45s"
+       scrape_timeout: "30s"
+       metrics_path: "/metrics"
+       static_configs:
+         - targets:
+             - kafka-jmx-metrics.kafka.svc.cluster.local:5556
   #     regex: __meta_kubernetes_node_label_(.+)
     #   - source_labels: [__address__]
     #     action: replace

@@ -12,9 +12,11 @@ trino:
 	helm repo add trino https://trinodb.github.io/charts/ || true
 	helm upgrade --install my-trino trino/trino --namespace trino -f trino/values.yaml
 
+
 minio-cluster:
 	helm repo add bitnami https://charts.bitnami.com/bitnami
 	helm repo update
     helm install minio oci://registry-1.docker.io/bitnamicharts/minio -n minio --create-namespace -f minio-values.yaml
 clean-minio-cluster:
+	kubectl delete pod --field-selector=status.phase==Failed -n trino
 	helm delete minio --namespace minio

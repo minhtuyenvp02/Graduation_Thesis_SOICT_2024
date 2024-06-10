@@ -11,6 +11,7 @@ spec:
   imagePullPolicy: Always
   mainApplicationFile: local:///opt/app/bronze_fhvhv_streaming.py
   sparkVersion: "3.5.0"
+  sp
   restartPolicy:
     type: Never
     onFailureRetries: 2
@@ -24,9 +25,15 @@ spec:
     labels:
       version: 3.5.0
     serviceAccount: spark
+    env:
+      - name: PYTHONPATH
+        value: '/opt/app'
   executor:
     cores: 1
     instances: 2
     memory: "1024m"
     labels:
       version: 3.5.0
+    env:
+      - name: PYTHONPATH
+        value: '/opt/app'

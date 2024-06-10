@@ -44,12 +44,14 @@ serviceAccount:
   # -- Create custom service account for Superset. If create: true and serviceAccountName is not provided, `superset.fullname` will be used.
   create: false
   annotations: {}
-
+additionalRequirements:
+  - sqlalchemy-trino
 # -- Install additional packages and do any other bootstrap configuration in this script
 # For production clusters it's recommended to build own image with this step done in CI
 # @default -- see `values.yaml`
 bootstrapScript: |
   #!/bin/bash
+  pip install sqlalchemy-trino &&\
   if [ ! -f ~/bootstrap ]; then echo "Running Superset with uid {{ .Values.runAsUser }}" > ~/bootstrap; fi
 
 # -- The name of the secret which we will use to generate a superset_config.py file
@@ -95,13 +97,13 @@ extraEnvRaw: []
   #       key: password
 
 # -- Extra environment variables to pass as secrets
-extraSecretEnv: {}
+extraSecretEnv: 
   # MAPBOX_API_KEY: ...
   # # Google API Keys: https://console.cloud.google.com/apis/credentials
   # GOOGLE_KEY: ...
   # GOOGLE_SECRET: ...
   #   # Generate your own secret key for encryption. Use openssl rand -base64 42 to generate a good key
-  #  SUPERSET_SECRET_KEY: 'CHANGE_ME_TO_A_COMPLEX_RANDOM_SECRET'
+    SUPERSET_SECRET_KEY: '/vZ0J8dwogzU8azBdvNr24ZU/daIv3ZguE5/OaTE7FL9I7BwCoCXHn5f'
 
 # -- Extra files to mount on `/app/pythonpath`
 extraConfigs: {}
@@ -139,7 +141,7 @@ extraVolumeMounts: []
 # -- A dictionary of overrides to append at the end of superset_config.py - the name does not matter
 # WARNING: the order is not guaranteed
 # Files can be passed as helm --set-file configOverrides.my-override=my-file.py
-configOverrides: {}
+configOverrides:
   # extend_timeout: |
   #    # Extend timeout to allow long running queries.
   #    SUPERSET_WEBSERVER_TIMEOUT = ...
@@ -171,9 +173,9 @@ configOverrides: {}
   #   AUTH_USER_REGISTRATION = True
   #   # The default user self registration role
   #   AUTH_USER_REGISTRATION_ROLE = "Admin"
-  # secret: |
-  #   # Generate your own secret key for encryption. Use `openssl rand -base64 42` to generate a good key
-  #   SECRET_KEY = 'CHANGE_ME_TO_A_COMPLEX_RANDOM_SECRET'
+   secret: |
+      SECRET_KEY = '/vZ0J8dwogzU8azBdvNr24ZU/daIv3ZguE5/OaTE7FL9I7BwCoCXHn5f'
+
 
 # -- Same as above but the values are files
 configOverridesFiles: {}
