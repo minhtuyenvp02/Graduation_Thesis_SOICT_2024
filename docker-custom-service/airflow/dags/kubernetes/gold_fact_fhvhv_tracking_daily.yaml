@@ -30,7 +30,7 @@ spec:
   executor:
     cores: 1
     instances: 2
-    memory: "1024"
+    memory: "1024m"
     labels:
       version: 3.5.0
     env:

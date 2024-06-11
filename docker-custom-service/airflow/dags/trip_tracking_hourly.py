@@ -81,7 +81,13 @@ with DAG(
         kubernetes_conn_id='kubernetes_default',
         on_failure_callback=alert_slack_channel,
         image_pull_policy='Always',
-        is_delete_operator_pod=True,
+        on_finish_action="delete_pod",
+        resources={
+            'request_cpu': '200m',  # Increased CPU request
+            'request_memory': '256Mi',  # Increased memory request
+            'limit_cpu': '500m',  # Increased CPU limit
+            'limit_memory': '512Mi',  # Increased memory limit
+        },
         delete_on_termination=True
     )
     # gold_fact_yellow_tracking_daily = SparkKubernetesOperator(

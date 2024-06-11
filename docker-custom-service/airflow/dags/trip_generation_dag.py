@@ -124,6 +124,12 @@ with DAG(
                 '--send_speed', str(MESSAGE_SEND_SPEED),
                 '--minio_endpoint', S3_ENDPOINT
             ],
+            resources={
+                'request_cpu': '500m',
+                'request_memory': '512Mi',
+                'limit_cpu': '1000m',
+                'limit_memory': '800Mi',
+            },
             get_logs=True,
             in_cluster=True,
             image_pull_policy='Always',
@@ -143,8 +149,14 @@ with DAG(
             kubernetes_conn_id='kubernetes_default',
             on_failure_callback=alert_slack_channel,
             image_pull_policy='Always',
+            resources={
+                'request_cpu': '300m',
+                'request_memory': '512Mi',
+                'limit_cpu': '800m',
+                'limit_memory': '800Mi',
+            },
             do_xcom_push=False,
-            is_delete_operator_pod=True,
+            on_finish_action="delete_pod",
             delete_on_termination=True
         )
         # stream_yellow_to_bronze = SparkKubernetesOperator(
@@ -163,11 +175,12 @@ with DAG(
     csv_to_bronze = SparkKubernetesOperator(
        task_id='csv_to_bronze',
        namespace='spark',
+       retries=2,
        application_file='/kubernetes/csv_to_bronze.yaml',
        kubernetes_conn_id='kubernetes_default',
        on_failure_callback=alert_slack_channel,
        image_pull_policy='Always',
-       is_delete_operator_pod=True,
+       on_finish_action="delete_pod",
        delete_on_termination=True
     )
 

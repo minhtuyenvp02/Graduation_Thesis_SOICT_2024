@@ -4,7 +4,7 @@ silver:
     dev:
       type: trino
       user: admin
-      host: http://34.128.118.158
+      host: http://146.190.87.26 
       port: 30088
       database: delta
       schema: 'bronze'
@@ -16,7 +16,7 @@ gold:
     dev:
       type: trino
       user: admin
-      host: http://34.128.118.158
+      host: http://146.190.87.26 
       port: 30088
       database: delta
       schema: 'gold'
