@@ -11,7 +11,7 @@ from airflow.utils.trigger_rule import TriggerRule
 from airflow.providers.http.hooks.http import HttpHook
 from airflow.providers.slack.hooks.slack_webhook import SlackWebhookHook
 from airflow.providers.cncf.kubernetes.operators.spark_kubernetes import SparkKubernetesOperator
-
+from kubernetes.client import V1ResourceRequirements
 sys.path.append("/opt/airflow/scripts/spark")
 
 KAFKA_PRODUCER_SERVERS = Variable.get("KAFKA_PRODUCER_SERVERS")
@@ -29,6 +29,12 @@ DATA_DIR = Variable.get("DATA_DIR")
 MESSAGE_SEND_SPEED = Variable.get("MESSAGE_SEND_SPEED")
 start_date = datetime(2024, 6, 9)
 SLACK_WEBHOOK_URL = Variable.get("SLACK_WEB_HOOK")
+
+
+silver_transform_resource_requirements = V1ResourceRequirements(
+    requests={'memory': '256Mi', 'cpu': '200m'},
+    limits={'memory': '512Mi', 'cpu': '500m'}
+)
 
 
 def alert_slack_channel(context: dict):
@@ -99,12 +105,7 @@ with DAG(
             application_file='/kubernetes/silver_fhvhv_transform.yaml',
             kubernetes_conn_id='kubernetes_default',
             on_failure_callback=alert_slack_channel,
-            resources={
-                'request_cpu': '200m',  
-                'request_memory': '256Mi', 
-                'limit_cpu': '500m', 
-                'limit_memory': '512Mi',
-            },
+            container_resources=silver_transform_resource_requirements,
             image_pull_policy='Always',
             do_xcom_push=False,
             on_finish_action="delete_pod",
@@ -122,12 +123,6 @@ with DAG(
             application_file='/kubernetes/gold_load_fhvhv_fact.yaml',
             kubernetes_conn_id='kubernetes_default',
             on_failure_callback=alert_slack_channel,
-            resources={
-                    'request_cpu': '200m',  
-                    'request_memory': '256Mi', 
-                    'limit_cpu': '500m', 
-                    'limit_memory': '512Mi',
-                },
             image_pull_policy='Always',
             do_xcom_push=False,
             on_finish_action="delete_pod",
