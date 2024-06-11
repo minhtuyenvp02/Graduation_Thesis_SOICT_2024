@@ -1215,7 +1215,7 @@ webserver:
     scheme: HTTP
 
   # Number of webservers
-  replicas: 1
+  replicas: 2
   # Max number of old replicasets to retain
   revisionHistoryLimit: ~
 

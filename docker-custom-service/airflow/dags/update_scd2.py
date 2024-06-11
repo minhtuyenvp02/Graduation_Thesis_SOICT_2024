@@ -73,34 +73,20 @@ default_args = {
 with DAG(
         default_args=default_args,
         dag_id="slowly_change_dim_update",
-        schedule_interval='0 0 * * *',
+        schedule_interval=timedelta(days=10),
         tags=["slowly change dimension update"],
         catchup=False,
         on_failure_callback=alert_slack_channel,
 ) as dag:
-    @task_group(default_args={'retries': 2})
-    def update_scd():
-        gold_scd1_update = SparkKubernetesOperator(
-            task_id='gold_scd1_update',
-            namespace='spark',
-            application_file='/kubernetes/gold_update_scd1.yaml',
-            kubernetes_conn_id='kubernetes_default',
-            on_failure_callback=alert_slack_channel,
-            image_pull_policy='Always',
-            on_finish_action="delete_pod",
-            delete_on_termination=True
-        )
-        gold_scd2_update = SparkKubernetesOperator(
-            task_id='gold_scd2_update',
-            namespace='spark',
-            application_file='/kubernetes/gold_update_scd2.yaml',
-            kubernetes_conn_id='kubernetes_default',
-            on_failure_callback=alert_slack_channel,
-            image_pull_policy='Always',
-            on_finish_action="delete_pod",
-            delete_on_termination=True
-        )
-        gold_scd2_update
-        gold_scd1_update
-    update_scd()
+    gold_scd2_update = SparkKubernetesOperator(
+        task_id='gold_scd2_update',
+        namespace='spark',
+        application_file='/kubernetes/gold_update_scd2.yaml',
+        kubernetes_conn_id='kubernetes_default',
+        on_failure_callback=alert_slack_channel,
+        image_pull_policy='Always',
+        on_finish_action="delete_pod",
+        delete_on_termination=True
+    )
+    gold_scd2_update
 

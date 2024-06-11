@@ -399,9 +399,9 @@ class Gold(object):
         table.optimize().executeZOrderBy(["date_id_fk", "pickup_location_id_fk"])
 
 
-spark = create_spark_session(app_name="Gold Update FHV Fact", spark_cluster='local[*]',
-                             s3_endpoint='http://152.42.164.18:30090', s3_access_key="admin",
-                             s3_secret_key='admin123')
-gold = Gold(bucket_name='nyc-trip-bucket', spark=spark)
-
-gold.update_fact_fhvhv_trip()
+# spark = create_spark_session(app_name="Gold Update FHV Fact", spark_cluster='local[*]',
+#                              s3_endpoint='http://152.42.164.18:30090', s3_access_key="admin",
+#                              s3_secret_key='admin123')
+# gold = Gold(bucket_name='nyc-trip-bucket', spark=spark)
+# 
+# gold.update_fact_fhvhv_trip()
