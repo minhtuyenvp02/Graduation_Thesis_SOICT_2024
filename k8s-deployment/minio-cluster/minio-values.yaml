@@ -218,7 +218,7 @@ statefulset:
   podManagementPolicy: Parallel
   ## @param statefulset.replicaCount Number of pods per zone (only for MinIO&reg; distributed mode). Should be even and `>= 4`
   ##
-  replicaCount: 3
+  replicaCount: 4
   ## @param statefulset.zones Number of zones (only for MinIO&reg; distributed mode)
   ##
   zones: 1
@@ -643,13 +643,13 @@ resourcesPreset: "micro"
 ##     cpu: 3
 ##     memory: 1024Mi
 ##
-resources: {}
-#   requests:
-#     cpu: 1
-#     memory: 512Mi
-#   limits:
-#     cpu: 2
-#     memory: 1024Mi
+resources:
+   requests:
+     cpu: 1
+     memory: 512Mi
+   limits:
+     cpu: 2
+     memory: 1024Mi
 ## Configure extra options for liveness probe
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
 ## @param livenessProbe.enabled Enable livenessProbe

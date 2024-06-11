@@ -8,3 +8,4 @@ update-airflow:
 clean-airflow:
 	helm uninstall airflow --namespace airflow
 	kubectl delete namespace airflow
+	kubectl delete pod --field-selector=status.phase==Failed -n airflow
