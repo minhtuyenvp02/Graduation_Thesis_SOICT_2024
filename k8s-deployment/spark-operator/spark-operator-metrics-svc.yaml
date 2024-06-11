@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: spark-operator-metrics
+  namespace: spark
+  labels:
+    app.kubernetes.io/name: spark-operator
+spec:
+  ports:
+  - name: metrics
+    port: 10254
+    targetPort: 10254
+  selector:
+    app.kubernetes.io/name: spark-operator

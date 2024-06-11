@@ -3,7 +3,8 @@ from pyspark.sql import SparkSession
 from delta import *
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
-
+from spark_executor import create_spark_session
+import logging
 
 class Gold(object):
     def __init__(self, bucket_name: str, spark: SparkSession):
@@ -171,9 +172,10 @@ class Gold(object):
         fact_fhvhv_trip_df = self.spark \
             .readStream \
             .format("delta") \
-            .option("readChangeFeed", "true") \
-            .option("startingTimestamp", start_time) \
             .load(silver_fhvhv_trip_path)
+            # .option("readChangeFeed", "true") \
+            # .option("startingTimestamp", start_time) \
+            # .load(silver_fhvhv_trip_path)
 
         fact_fhvhv_trip_df = fact_fhvhv_trip_df \
             .join(dim_date_df, fact_fhvhv_trip_df["pickup_date_id"] == dim_date_df['date_id'], "left") \
@@ -181,7 +183,8 @@ class Gold(object):
             .join(dim_dropoff_time, fact_fhvhv_trip_df["dropoff_time_id"] == dim_dropoff_time["dropoff_time_id"],
                   "left") \
             .join(dim_pickup_location,
-                  fact_fhvhv_trip_df['pickup_location_id'] == dim_pickup_location["pickup_location_id"], "left") \
+                  (fact_fhvhv_trip_df['pickup_location_id'] == dim_pickup_location["pickup_location_id"]) &
+                  (dim_pickup_location['is_active'] == True), "left") \
             .join(dim_dropoff_location,
                   fact_fhvhv_trip_df['dropoff_location_id'] == dim_dropoff_location["dropoff_location_id"], "left") \
             .join(dim_hvfhs_license_num_df,
@@ -216,11 +219,12 @@ class Gold(object):
         target_location = f"{self.gold_location}/fact_fhvhv_trip_t"
 
         stream_query = fact_fhvhv_trip_df.writeStream \
-            .format("delta") \
+            .format("console") \
             .outputMode("append") \
-            .trigger(availableNow=True) \
-            .option("checkpointLocation", f"{target_location}/_checkpoint") \
-            .start(target_location)
+            .trigger(availableNow=True)\
+            .start()
+            # .option("checkpointLocation", f"{target_location}/_checkpoint") \
+            # .start(target_location)
         stream_query.awaitTermination()
 
         table = DeltaTable.forPath(path=target_location, sparkSession=self.spark)
@@ -236,7 +240,7 @@ class Gold(object):
         dim_dropoff_location = dim_location_df.withColumnRenamed("location_id", "dropoff_location_id")
 
         start_time = self.spark.range(1) \
-            .selectExpr("current_timestamp() - INTERVAL 4 HOURS as start_time") \
+            .selectExpr("current_timestamp() - INTERVAL 2 HOURS as start_time") \
             .collect()[0]['start_time']
         yellow_trip_df = self.spark \
             .readStream \
@@ -298,11 +302,12 @@ class Gold(object):
         target_location = f"{self.gold_location}/fact_yellow_tracking_location_daily_t"
 
         stream_query = result_df.writeStream \
-            .format("delta") \
+            .format("console") \
             .outputMode("complete") \
             .trigger(availableNow=True) \
-            .option("checkpointLocation", f"{target_location}/_checkpoint") \
-            .start(target_location)
+            .start()
+            # .option("checkpointLocation", f"{target_location}/_checkpoint") \
+            # .start(target_location)
         stream_query.awaitTermination()
 
         table = DeltaTable.forPath(path=target_location, sparkSession=self.spark)
@@ -318,7 +323,7 @@ class Gold(object):
         dim_dropoff_location = dim_location_df.withColumnRenamed("location_id", "dropoff_location_id")
 
         start_time = self.spark.range(1) \
-            .selectExpr("current_timestamp() - INTERVAL 4 HOURS as start_time") \
+            .selectExpr("current_timestamp() - INTERVAL 2 HOURS as start_time") \
             .collect()[0]['start_time']
         fhvhv_trip_df = self.spark \
             .readStream \
@@ -392,3 +397,11 @@ class Gold(object):
 
         table = DeltaTable.forPath(path=target_location, sparkSession=self.spark)
         table.optimize().executeZOrderBy(["date_id_fk", "pickup_location_id_fk"])
+
+
+spark = create_spark_session(app_name="Gold Update FHV Fact", spark_cluster='local[*]',
+                             s3_endpoint='http://152.42.164.18:30090', s3_access_key="admin",
+                             s3_secret_key='admin123')
+gold = Gold(bucket_name='nyc-trip-bucket', spark=spark)
+
+gold.update_fact_fhvhv_trip()

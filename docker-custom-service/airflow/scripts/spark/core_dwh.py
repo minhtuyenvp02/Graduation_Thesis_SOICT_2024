@@ -77,6 +77,7 @@ class WareHouseBuilder(object):
         self.spark.sql('CREATE DATABASE IF NOT EXISTS gold;')
         DeltaTable.createIfNotExists(sparkSession=self.spark) \
             .tableName("gold.dim_location_t") \
+            .addColumn("id", generatedAlwaysAs="CAST()") \
             .addColumn("location_id", "INT", nullable=False) \
             .addColumn("borough", "STRING", nullable=True) \
             .addColumn("zone", "STRING", nullable=True) \

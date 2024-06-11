@@ -99,9 +99,15 @@ with DAG(
             application_file='/kubernetes/silver_fhvhv_transform.yaml',
             kubernetes_conn_id='kubernetes_default',
             on_failure_callback=alert_slack_channel,
+            resources={
+                'request_cpu': '200m',  
+                'request_memory': '256Mi', 
+                'limit_cpu': '500m', 
+                'limit_memory': '512Mi',
+            },
             image_pull_policy='Always',
             do_xcom_push=False,
-            is_delete_operator_pod=True,
+            on_finish_action="delete_pod",
             delete_on_termination=True
         )
         # silver_yellow_transform
@@ -116,9 +122,15 @@ with DAG(
             application_file='/kubernetes/gold_load_fhvhv_fact.yaml',
             kubernetes_conn_id='kubernetes_default',
             on_failure_callback=alert_slack_channel,
+            resources={
+                    'request_cpu': '200m',  
+                    'request_memory': '256Mi', 
+                    'limit_cpu': '500m', 
+                    'limit_memory': '512Mi',
+                },
             image_pull_policy='Always',
             do_xcom_push=False,
-            is_delete_operator_pod=True,
+            on_finish_action="delete_pod",
             delete_on_termination=True
         )
         # gold_load_yellow_fact = SparkKubernetesOperator(

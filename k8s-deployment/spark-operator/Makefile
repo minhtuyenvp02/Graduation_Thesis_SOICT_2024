@@ -6,7 +6,7 @@ spark-operator:
 	kubectl create clusterrolebinding spark-role --clusterrole=edit --serviceaccount=spark:spark --namespace=spark
 	kubectl create clusterrolebinding default-admin --clusterrole cluster-admin --serviceaccount=airflow:airflow-worker --namespace spark
 upgrade-spark-operator:
-	helm upgrade --install spark-operator spark-operator/spark-operator \
+	helm upgrade --install spark spark-operator/spark-operator \
     --namespace spark -f spark-operator-values.yaml
 delete-unused-svc:
 	kubectl get services -n spark -o name | grep "to-bronze" | xargs kubectl delete -n spark

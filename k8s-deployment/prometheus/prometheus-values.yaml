@@ -3292,7 +3292,8 @@ prometheus:
 
     ## Additional labels
     ##
-    additionalLabels: {}
+    additionalLabels:
+      release: prometheus
 
     ## SampleLimit defines per-scrape limit on number of scraped samples that will be accepted.
     ##
@@ -3541,11 +3542,11 @@ prometheus:
     ## ServiceMonitors to be selected for target discovery.
     ## If {}, select all ServiceMonitors
     ##
-    serviceMonitorSelector: {}
+    serviceMonitorSelector:
     ## Example which selects ServiceMonitors with label "prometheus" set to "somelabel"
     # serviceMonitorSelector:
-    #   matchLabels:
-    #     prometheus: somelabel
+       matchLabels:
+         prometheus: prometheus
 
     ## Namespaces to be selected for ServiceMonitor discovery.
     ##
@@ -3564,11 +3565,10 @@ prometheus:
     ## PodMonitors to be selected for target discovery.
     ## If {}, select all PodMonitors
     ##
-    podMonitorSelector: {}
+    podMonitorSelector:
     ## Example which selects PodMonitors with label "prometheus" set to "somelabel"
-    # podMonitorSelector:
-    #   matchLabels:
-    #     prometheus: somelabel
+       matchLabels:
+         prometheus: prometheus
 
     ## If nil, select own namespace. Namespaces to be selected for PodMonitor discovery.
     podMonitorNamespaceSelector: {}
@@ -3802,13 +3802,13 @@ prometheus:
        static_configs:
          - targets:
              - kafka-jmx-metrics.kafka.svc.cluster.local:5556
-     - job_name: spark-cluster
-       scrape_interval: "45s"
-       scrape_timeout: "30s"
-       metrics_path: "/metrics"
-       static_configs:
-         - targets:
-             - kafka-jmx-metrics.kafka.svc.cluster.local:5556
+#     - job_name: spark-cluster
+#       scrape_interval: "45s"
+#       scrape_timeout: "30s"
+#       metrics_path: "/metrics"
+#       static_configs:
+#         - targets:
+#             - spark://spark-master-svc.spark.
   #     regex: __meta_kubernetes_node_label_(.+)
     #   - source_labels: [__address__]
     #     action: replace
