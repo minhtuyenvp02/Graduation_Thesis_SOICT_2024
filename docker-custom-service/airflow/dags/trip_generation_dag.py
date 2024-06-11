@@ -31,8 +31,8 @@ start_date = datetime(2024, 6, 9)
 SLACK_WEBHOOK_URL = Variable.get("SLACK_WEB_HOOK")
 
 kafka_resource_requirements = V1ResourceRequirements(
-    requests={'memory': '400Mi', 'cpu': '500m'},
-    limits={'memory': '1000Mi', 'cpu': '1000m'}
+    requests={'memory': '512Mi', 'cpu': '500m'},
+    limits={'memory': '2048Mi', 'cpu': '1024m'}
 )
 def alert_slack_channel(context: dict):
     """ Alert to slack channel on failed dag
