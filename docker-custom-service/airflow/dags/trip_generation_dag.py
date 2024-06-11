@@ -9,6 +9,7 @@ from airflow.providers.slack.hooks.slack_webhook import SlackWebhookHook
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 from airflow.providers.cncf.kubernetes.operators.spark_kubernetes import SparkKubernetesOperator
 from airflow.utils.trigger_rule import TriggerRule
+from kubernetes.client import V1ResourceRequirements
 sys.path.append("/opt/airflow/scripts/spark")
 sys.path.append("/opt/airflow/scripts/")
 from kafka_topic_creation import create_kafka_topic
@@ -29,6 +30,10 @@ MESSAGE_SEND_SPEED = Variable.get("MESSAGE_SEND_SPEED")
 start_date = datetime(2024, 6, 9)
 SLACK_WEBHOOK_URL = Variable.get("SLACK_WEB_HOOK")
 
+kafka_resource_requirements = V1ResourceRequirements(
+    requests={'memory': '400Mi', 'cpu': '500m'},
+    limits={'memory': '1000Mi', 'cpu': '1000m'}
+)
 def alert_slack_channel(context: dict):
     """ Alert to slack channel on failed dag
 
@@ -124,15 +129,10 @@ with DAG(
                 '--send_speed', str(MESSAGE_SEND_SPEED),
                 '--minio_endpoint', S3_ENDPOINT
             ],
-            resources={
-                'request_cpu': '500m',
-                'request_memory': '512Mi',
-                'limit_cpu': '1000m',
-                'limit_memory': '800Mi',
-            },
             get_logs=True,
             in_cluster=True,
             image_pull_policy='Always',
+            container_resources=kafka_resource_requirements,
             on_failure_callback=alert_slack_channel,
             on_finish_action="delete_pod"
         )
@@ -149,12 +149,6 @@ with DAG(
             kubernetes_conn_id='kubernetes_default',
             on_failure_callback=alert_slack_channel,
             image_pull_policy='Always',
-            resources={
-                'request_cpu': '300m',
-                'request_memory': '512Mi',
-                'limit_cpu': '800m',
-                'limit_memory': '800Mi',
-            },
             do_xcom_push=False,
             on_finish_action="delete_pod",
             delete_on_termination=True
