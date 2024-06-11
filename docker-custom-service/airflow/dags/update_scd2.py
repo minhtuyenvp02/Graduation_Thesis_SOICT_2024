@@ -72,7 +72,7 @@ default_args = {
 }
 with DAG(
         default_args=default_args,
-        dag_id="slowly_change_dim_update",
+        dag_id="slowly_change_dim_2_update",
         schedule_interval=timedelta(days=10),
         tags=["slowly change dimension update"],
         catchup=False,
