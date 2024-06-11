@@ -72,7 +72,7 @@ default_args = {
 }
 with DAG(
         default_args=default_args,
-        dag_id="slowly_change_dim_update",
+        dag_id="slowly_change_dim_0_update",
         schedule="@once",
         tags=["create scd0"],
         catchup=False,
