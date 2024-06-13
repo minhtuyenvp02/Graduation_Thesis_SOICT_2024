@@ -10,6 +10,7 @@ from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperato
 from airflow.providers.cncf.kubernetes.operators.spark_kubernetes import SparkKubernetesOperator
 from airflow.utils.trigger_rule import TriggerRule
 from kubernetes.client import V1ResourceRequirements
+
 sys.path.append("/opt/airflow/scripts/spark")
 sys.path.append("/opt/airflow/scripts/")
 from kafka_topic_creation import create_kafka_topic
@@ -34,6 +35,8 @@ kafka_resource_requirements = V1ResourceRequirements(
     requests={'memory': '512Mi', 'cpu': '500m'},
     limits={'memory': '2048Mi', 'cpu': '1024m'}
 )
+
+
 def alert_slack_channel(context: dict):
     """ Alert to slack channel on failed dag
 
@@ -166,16 +169,17 @@ with DAG(
         # stream_yellow_to_bronze
         stream_fhvhv_to_bronze
 
+
     csv_to_bronze = SparkKubernetesOperator(
-       task_id='csv_to_bronze',
-       namespace='spark',
-       retries=2,
-       application_file='/kubernetes/csv_to_bronze.yaml',
-       kubernetes_conn_id='kubernetes_default',
-       on_failure_callback=alert_slack_channel,
-       image_pull_policy='Always',
-       on_finish_action="delete_pod",
-       delete_on_termination=True
+        task_id='csv_to_bronze',
+        namespace='spark',
+        retries=2,
+        application_file='/kubernetes/csv_to_bronze.yaml',
+        kubernetes_conn_id='kubernetes_default',
+        on_failure_callback=alert_slack_channel,
+        image_pull_policy='Always',
+        on_finish_action="delete_pod",
+        delete_on_termination=True
     )
 
     csv_to_bronze
