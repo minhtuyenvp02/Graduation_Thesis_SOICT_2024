@@ -6,6 +6,7 @@ from pyspark.sql.types import *
 from spark_executor import create_spark_session
 import logging
 
+
 class Gold(object):
     def __init__(self, bucket_name: str, spark: SparkSession):
         self.gold_location = f"s3a://{bucket_name}/gold"
@@ -16,54 +17,76 @@ class Gold(object):
     # apply SCD2 for dim_location
     def update_gold_location(self):
         dim_location = DeltaTable.forPath(sparkSession=self.spark, path=f"{self.gold_location}/dim_location_t", )
-        bronze_location_df = self.spark.read.format("delta").load(f"{self.bronze_location}/location")
+        bronze_location_df = self.spark.read \
+            .format("delta").load(f"{self.bronze_location}/location")
+        new_location_to_insert = bronze_location_df \
+            .alias("updates") \
+            .join(dim_location.toDF().alias("location"), "location_id") \
+            .where("location.is_active = true AND updates.service_zone <> location.service_zone")
 
-        bronze_location_df = bronze_location_df.withColumn("is_active", lit(True))
-        dim_active_location_df = dim_location.toDF().filter("is_active = True")
-        join_condition = [dim_active_location_df["location_id"] == bronze_location_df["location_id"]]
+        staged_updates = (
+            new_location_to_insert
+            .selectExpr("NULL as merge_key", "updates.*")
+            .union(bronze_location_df.selectExpr("location_id as merge_key", "*"))
+        )
 
-        update_df = bronze_location_df.join(dim_active_location_df, join_condition, "left_anti")
-        location_expire_df = bronze_location_df.join(dim_active_location_df, join_condition, "inner") \
-            .select(dim_active_location_df["*"]) \
-            .withColumn("is_active", lit(False))
+        dim_location.alias("location").merge(
+            staged_updates.alias("staged_updates"),
+            "location.location_id = merge_key") \
+            .whenMatchedUpdate(
+            condition="location.is_active = true AND location.service_zone <> staged_updates.service_zone",
+            set={
+                "is_active": "false",
+                "end_date": "staged_updates.effective_date"
+            }
+        ).whenNotMatchedInsert(
+            values={
+                "location_id": "staged_updates.location_id",
+                "borough": "staged_updates.borough",
+                "zone": "staged_updates.zone",
+                "service_zone": "staged_updates.service_zone",
+                "is_active": "true",
+                "effective_date": "staged_updates.effective_date",
+                "end_date": "null"
+            }
+        ).execute()
 
-        final_df = update_df.union(location_expire_df)
-
-        dim_location.alias("dim").merge(
-            final_df.alias("updates"),
-            "dim.location_id = updates.location_id AND dim.is_active = True"
-        ) \
-            .whenMatchedUpdate(set={"is_active": expr("updates.is_active"), "location_id": expr("updates.location_id"),
-                                    "borough": expr("updates.borough"), "zone": expr("updates.zone"),
-                                    "service_zone": expr("updates.service_zone")}) \
-            .whenNotMatchedInsertAll() \
-            .execute()
-
-    # apply SCD2 for dim_dpc_base_num
     def update_dpc_base_num(self):
         dim_dpc_base_num = DeltaTable.forPath(sparkSession=self.spark, path=f"{self.gold_location}/dim_dpc_base_num_t")
-        bronze_dpc_base_num_df = self.spark.read.format("delta").load(f"{self.bronze_location}/dpc_base_num")
-
-        bronze_dpc_base_num_df = bronze_dpc_base_num_df.withColumn("is_active", lit(True))
-        active_dpc_base_num_df = dim_dpc_base_num.toDF().filter("is_active=True")
-        join_condition = [active_dpc_base_num_df["id"] == bronze_dpc_base_num_df["id"]]
-
-        update_df = bronze_dpc_base_num_df.join(active_dpc_base_num_df, join_condition, "left_anti")
-        dpc_base_num_expire_df = bronze_dpc_base_num_df.join(active_dpc_base_num_df, join_condition, "inner") \
-            .select(active_dpc_base_num_df["*"]) \
-            .withColumn("is_active", lit(False))
-
-        final_df = update_df.union(dpc_base_num_expire_df)
-
-        dim_dpc_base_num.alias("dim").merge(
-            final_df.alias("updates"),
-            "dim.id = updates.id AND dim.is_active = True") \
+        bronze_dpc_base_num_df = self.spark.read \
+            .format("delta") \
+            .load(f"{self.bronze_location}/dpc_base_num")
+        new_dpc_to_insert = bronze_dpc_base_num_df \
+            .alias("updates") \
+            .join(dim_dpc_base_num.toDF().alias("dpc_base_num"), "id") \
+            .where("dpc_base_num.is_active = true AND updates.app_company <> dpc_base_num.app_company")
+        bronze_dpc_base_num_df = bronze_dpc_base_num_df.select(
+            *['id', 'base_num', "base_name", 'app_company', 'effective_date'])
+        staged_updates = (
+            new_dpc_to_insert
+            .selectExpr("NULL as merge_key", "updates.*")
+            .union(bronze_dpc_base_num_df.selectExpr("id as merge_key", "*"))
+        )
+        dim_dpc_base_num.alias("dpc_base_num").merge(
+            staged_updates.alias("staged_updates"),
+            "dpc_base_num.id = merge_key") \
             .whenMatchedUpdate(
-            set={"is_active": expr("updates.is_active"), "hv_license_num": expr("updates.hv_license_num"),
-                 "license_num": expr("updates.license_num"), "base_name": expr("updates.base_name"),
-                 "app_company": expr("updates.app_company")}) \
-            .whenNotMatchedInsertAll() \
-            .execute()
+            condition="dpc_base_num.is_active = true AND dpc_base_num.app_company <> staged_updates.app_company",
+            set={
+                "is_active": "false",
+                "end_date": "staged_updates.effective_date"
+            }
+        ).whenNotMatchedInsert(
+            values={
+                "base_num": "staged_updates.base_num",
+                "base_name": "staged_updates.base_name",
+                "app_company": "staged_updates.app_company",
+                "id": "staged_updates.id",
+                "is_active": "true",
+                "effective_date": "staged_updates.effective_date",
+                "end_date": "null"
+            }
+        ).execute()
 
     def upsert_to_delta_tbl(self, batch_df, batch_id):
         fact_table = DeltaTable.forPath(self.spark, f"s3a://{self.gold_location}/fact_yellow_trip_t")
@@ -103,10 +126,12 @@ class Gold(object):
         fact_yellow_trip_df = fact_yellow_trip_df \
             .join(dim_date_df, fact_yellow_trip_df["pickup_date_id"] == dim_date_df["date_id"], "left") \
             .join(dim_payment_df, fact_yellow_trip_df["payment_id"] == dim_payment_df["payment_id"], "left") \
-            .join(dim_pickup_location,
-                  fact_yellow_trip_df["pickup_location_id"] == dim_pickup_location["pickup_location_id"], "left") \
-            .join(dim_dropoff_location,
-                  fact_yellow_trip_df["dropoff_location_id"] == dim_dropoff_location["dropoff_location_id"], "left") \
+            .join(dim_pickup_location.alias("b"),
+                  "pickup_location_id",
+                  "left").where('b.is_active = true') \
+            .join(dim_dropoff_location.alias("c")
+                  , "dropoff_location_id",
+                  "left").where("c.is_active = true") \
             .join(dim_rate_code_df, fact_yellow_trip_df["rate_code_id"] == dim_rate_code_df["rate_code_id"], "left") \
             .join(dim_pickup_time, fact_yellow_trip_df["pickup_time_id"] == dim_pickup_time["pickup_time_id"], "left") \
             .join(dim_dropoff_time, fact_yellow_trip_df["dropoff_time_id"] == dim_dropoff_time["dropoff_time_id"],
@@ -145,9 +170,6 @@ class Gold(object):
             .start(target_location)
         stream_query.awaitTermination()
 
-        table = DeltaTable.forPath(path=target_location, sparkSession=self.spark)
-        table.optimize().executeZOrderBy(["date_fk", "pickup_location_fk"])
-
     def update_fact_fhvhv_trip(self):
         dim_location_path = f"{self.gold_location}/dim_location_t"
         dim_date_path = f"{self.gold_location}/dim_date_t"
@@ -162,10 +184,9 @@ class Gold(object):
         dim_time_df = self.spark.read.format("delta").load(dim_time_path)
         dim_pickup_time = dim_time_df.withColumnRenamed("id", "pickup_time_id")
         dim_dropoff_time = dim_time_df.withColumnRenamed("id", "dropoff_time_id")
-        dim_location_df = self.spark.read.format("delta").load(dim_location_path)
+        dim_location_df = self.spark.read.format("delta").load(dim_location_path).alias("location")
         dim_pickup_location = dim_location_df.withColumnRenamed("location_id", "pickup_location_id")
         dim_dropoff_location = dim_location_df.withColumnRenamed("location_id", "dropoff_location_id")
-
         start_time = self.spark.range(1) \
             .selectExpr("current_timestamp() - INTERVAL 2 HOURS as start_time") \
             .collect()[0]['start_time']
@@ -173,25 +194,26 @@ class Gold(object):
             .readStream \
             .format("delta") \
             .load(silver_fhvhv_trip_path)
-            # .option("readChangeFeed", "true") \
-            # .option("startingTimestamp", start_time) \
-            # .load(silver_fhvhv_trip_path)
-
-        fact_fhvhv_trip_df = fact_fhvhv_trip_df \
+        # .option("readChangeFeed", "true") \
+        # .option("startingTimestamp", start_time) \
+        # .load(silver_fhvhv_trip_path)
+        fact_fhvhv_trip_df = fact_fhvhv_trip_df.alias("fact") \
             .join(dim_date_df, fact_fhvhv_trip_df["pickup_date_id"] == dim_date_df['date_id'], "left") \
             .join(dim_pickup_time, fact_fhvhv_trip_df["pickup_time_id"] == dim_pickup_time["pickup_time_id"], "left") \
             .join(dim_dropoff_time, fact_fhvhv_trip_df["dropoff_time_id"] == dim_dropoff_time["dropoff_time_id"],
                   "left") \
-            .join(dim_pickup_location,
-                  (fact_fhvhv_trip_df['pickup_location_id'] == dim_pickup_location["pickup_location_id"]) &
-                  (dim_pickup_location['is_active'] == True), "left") \
-            .join(dim_dropoff_location,
-                  fact_fhvhv_trip_df['dropoff_location_id'] == dim_dropoff_location["dropoff_location_id"], "left") \
+            .join(dim_pickup_location.alias("b"),
+                  "pickup_location_id",
+                  "left").where('b.is_active = true') \
+            .join(dim_dropoff_location.alias("c")
+                  , "dropoff_location_id",
+                  "left").where("c.is_active = true") \
             .join(dim_hvfhs_license_num_df,
-                  fact_fhvhv_trip_df["license_num_id"] == dim_hvfhs_license_num_df["hvfhs_license_num"], "left") \
-            .join(dim_dpc_base_num_df,
-                  fact_fhvhv_trip_df["base_num_id"].cast(StringType()) == dim_dpc_base_num_df['license_num'].cast(
-                      StringType()), "left") \
+                  fact_fhvhv_trip_df['license_num_id'] == dim_hvfhs_license_num_df['hvfhs_license_num'],
+                  "left") \
+            .join(dim_dpc_base_num_df.alias("f"),
+                  fact_fhvhv_trip_df['base_num_id'] == dim_dpc_base_num_df['base_num'],
+                  "left").where('f.is_active = true') \
             .select(
             dim_date_df['date_id'].alias('date_fk'),
             dim_pickup_time['pickup_time_id'].alias('pickup_time_id_fk'),
@@ -199,7 +221,7 @@ class Gold(object):
             dim_pickup_location['pickup_location_id'].alias('pickup_location_id_fk'),
             dim_dropoff_location['dropoff_location_id'].alias('dropoff_location_id_fk'),
             dim_hvfhs_license_num_df["license_id"].alias('license_id_fk'),
-            dim_dpc_base_num_df['license_num'].alias('base_id_fk'),
+            dim_dpc_base_num_df['base_num'].alias('base_id_fk'),
             fact_fhvhv_trip_df['trip_miles'],
             fact_fhvhv_trip_df['trip_time'],
             fact_fhvhv_trip_df['base_passenger_fare'],
@@ -217,18 +239,13 @@ class Gold(object):
             fact_fhvhv_trip_df["differ_surcharge_total"]
         )
         target_location = f"{self.gold_location}/fact_fhvhv_trip_t"
-
-        stream_query = fact_fhvhv_trip_df.writeStream \
-            .format("console") \
+        stream_query = fact_fhvhv_trip_df \
+            .writeStream.format("delta") \
             .outputMode("append") \
-            .trigger(availableNow=True)\
-            .start()
-            # .option("checkpointLocation", f"{target_location}/_checkpoint") \
-            # .start(target_location)
+            .trigger(availableNow=True) \
+            .option("checkPointLocation", f"{target_location}/check_point") \
+            .start(target_location)
         stream_query.awaitTermination()
-
-        table = DeltaTable.forPath(path=target_location, sparkSession=self.spark)
-        table.optimize().executeZOrderBy(["date_fk", "pickup_location_id_fk"])
 
     def update_fact_yellow_tracking_location_daily(self):
         dim_location_path = f"{self.gold_location}/dim_location_t"
@@ -240,7 +257,7 @@ class Gold(object):
         dim_dropoff_location = dim_location_df.withColumnRenamed("location_id", "dropoff_location_id")
 
         start_time = self.spark.range(1) \
-            .selectExpr("current_timestamp() - INTERVAL 2 HOURS as start_time") \
+            .selectExpr("current_timestamp() - INTERVAL 5 HOURS as start_time") \
             .collect()[0]['start_time']
         yellow_trip_df = self.spark \
             .readStream \
@@ -302,16 +319,12 @@ class Gold(object):
         target_location = f"{self.gold_location}/fact_yellow_tracking_location_daily_t"
 
         stream_query = result_df.writeStream \
-            .format("console") \
+            .format("delta") \
             .outputMode("complete") \
             .trigger(availableNow=True) \
-            .start()
-            # .option("checkpointLocation", f"{target_location}/_checkpoint") \
-            # .start(target_location)
+            .option("checkpointLocation", f"{target_location}/_checkpoint") \
+            .start(target_location)
         stream_query.awaitTermination()
-
-        table = DeltaTable.forPath(path=target_location, sparkSession=self.spark)
-        table.optimize().executeZOrderBy(["date_id_fk", "pickup_location_id_fk"])
 
     def update_fact_fhvhv_tracking_location_daily(self):
         dim_location_path = f"{self.gold_location}/dim_location_t"
@@ -323,7 +336,7 @@ class Gold(object):
         dim_dropoff_location = dim_location_df.withColumnRenamed("location_id", "dropoff_location_id")
 
         start_time = self.spark.range(1) \
-            .selectExpr("current_timestamp() - INTERVAL 2 HOURS as start_time") \
+            .selectExpr("current_timestamp() - INTERVAL 5 HOURS as start_time") \
             .collect()[0]['start_time']
         fhvhv_trip_df = self.spark \
             .readStream \
@@ -385,7 +398,6 @@ class Gold(object):
         )
 
         target_location = f"{self.gold_location}/fact_fhvhv_tracking_location_daily_t"
-        print('Starting load fhvhv tracking daily .........')
 
         stream_query = result_df.writeStream \
             .format("delta") \
@@ -395,13 +407,3 @@ class Gold(object):
             .start(target_location)
         stream_query.awaitTermination()
 
-        table = DeltaTable.forPath(path=target_location, sparkSession=self.spark)
-        table.optimize().executeZOrderBy(["date_id_fk", "pickup_location_id_fk"])
-
-
-spark = create_spark_session(app_name="Gold Update FHV Fact", spark_cluster='local[*]',
-                             s3_endpoint='http://165.232.172.179/:30090', s3_access_key="admin",
-                             s3_secret_key='admin123')
-gold = Gold(bucket_name='nyc-trip-bucket', spark=spark)
-
-gold.update_fact_fhvhv_trip()

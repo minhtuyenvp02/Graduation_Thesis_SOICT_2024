@@ -27,4 +27,4 @@ def create_kafka_topic(kafka_servers: str, topics: [str], n_partitions=3, n_node
         else:
             print(f"Topic {topic} is already created")
 
-# create_kafka_topic(kafka_servers="10.211.56.3:31723,10.211.56.3:32120,10.211.56.3:32745", topics=["yellow-tripdata", 'fhvhv-tripdata'])
+# create_kafka_topic(kafka_servers='10.211.56.3:31044,10.211.56.3:31168,10.211.56.3:30351', topics=["yellow_tripdata", 'fhvhv_tripdata'])

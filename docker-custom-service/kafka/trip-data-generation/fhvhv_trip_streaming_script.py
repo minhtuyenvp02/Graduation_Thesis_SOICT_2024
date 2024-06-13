@@ -2,6 +2,7 @@ import argparse
 import sys
 from trip_data_generator import TripGenerator
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--kafka_servers", type=str, required=True)
@@ -15,12 +16,6 @@ def main():
         send_speed=int(args.send_speed),
         minio_endpoint=args.minio_endpoint,
     )
-    # generator = TripGenerator(
-    #     kafka_bootstrap_server="10.211.56.3:31723,10.211.56.3:32120,10.211.56.3:32745",
-    #     data_dir="nyc-trip-bucket/nyc-data/2023",
-    #     send_speed=200,
-    #     minio_endpoint="http://10.211.56.3:30090",
-    # )
     generator.simulate_streaming('fhvhv_tripdata')
 
 

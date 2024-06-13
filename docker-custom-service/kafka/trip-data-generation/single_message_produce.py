@@ -10,6 +10,7 @@ from confluent_kafka import Producer
 import fsspec
 import s3fs
 
+
 class SingleMessageProducer(object):
     def __init__(self, producer: Producer, part_idx, send_speed=500):
         self.producer = producer
@@ -24,7 +25,7 @@ class SingleMessageProducer(object):
         else:
             print(f"Message produced: {message.topic()} [{message.partition()}] @ {message.offset()}")
 
-    def send_single_item(self, url_file_path: str, topics: [str], send_speed, s3_endpoint:str):
+    def send_single_item(self, url_file_path: str, topics: [str], send_speed, s3_endpoint: str):
         fsspec.config.conf = {
             "s3":
                 {

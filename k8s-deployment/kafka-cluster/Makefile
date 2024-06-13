@@ -11,4 +11,4 @@ kafka-cluster:
 update-kafka-cluster:
 	helm upgrade --install kafka oci://registry-1.docker.io/bitnamicharts/kafka -n kafka -f kafka-values.yaml
 clean-kafka-cluster:
-	helm delete kafka --namespace kafkaa
+	helm delete kafka --namespace kafka

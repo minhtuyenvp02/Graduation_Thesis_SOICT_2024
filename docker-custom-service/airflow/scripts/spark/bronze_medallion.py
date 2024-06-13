@@ -1,10 +1,17 @@
 from confluent_kafka.admin import AdminClient
 from pyspark.sql import SparkSession
 from delta import *
+from pyspark.sql.functions import *
 from minio import Minio
+from datetime import datetime
 from schema import CustomSchema
 from spark_executor import create_spark_session
 from config import SCHEMA_CONFIG
+import logging
+import os
+import string
+import uuid
+import argparse
 
 
 class BronzeData(object):
@@ -28,7 +35,9 @@ class BronzeData(object):
             .option("header", True) \
             .load(source_csv)
         if id_option:
-            df = df.withColumn("id", monotonically_increasing_id() + 1)
+            df = df.withColumn("id", monotonically_increasing_id() + 1) \
+                    .drop("hv_license_num")
+        df = df.withColumn("effective_date", lit(datetime.now().date()))
         df.printSchema()
         df.show()
         table_path = f"{self.bronze_location}/{target_table_name}"
@@ -61,11 +70,18 @@ class BronzeData(object):
         stream_query.awaitTermination()
 
     def kafka_stream_2bronze(self, topic: str):
-        print(S3_CONFIG["fs.s3a.endpoint"])
+        # print(S3_CONFIG["fs.s3a.endpoint"])
+        # client = Minio(
+        #     endpoint=S3_CONFIG["fs.s3a.endpoint"],
+        #     access_key=S3_CONFIG["fs.s3a.access.key"],
+        #     secret_key=S3_CONFIG["fs.s3a.secret.key"],
+        #     cert_check=False,
+        #     secure=False
+        # )
         client = Minio(
-            endpoint=S3_CONFIG["fs.s3a.endpoint"],
-            access_key=S3_CONFIG["fs.s3a.access.key"],
-            secret_key=S3_CONFIG["fs.s3a.secret.key"],
+            endpoint='minio.minio.svc.cluster.local:9000',
+            access_key='admin',
+            secret_key='admin123',
             cert_check=False,
             secure=False
         )
@@ -73,6 +89,6 @@ class BronzeData(object):
         if not found:
             logging.info(f"Bucket {self.bucket_name} doesn't exist, auto make...")
             client.make_bucket(bucket_name=self.bucket_name, )
-        print(topics)
+        # print(topics)
         self.topic_2bronze(topic, os.path.join(self.bronze_location, topic))
         print("Consume Done")
