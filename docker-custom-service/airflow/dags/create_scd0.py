@@ -72,14 +72,14 @@ default_args = {
 }
 with DAG(
         default_args=default_args,
-        dag_id="slowly_change_dim_0_update",
+        dag_id="scd0_creation",
         schedule="@once",
         tags=["create scd0"],
         catchup=False,
         on_failure_callback=alert_slack_channel,
 ) as dag:
     gold_scd0_update = SparkKubernetesOperator(
-            task_id='gold_scd0_update',
+            task_id='gold_create_scd0',
             namespace='spark',
             application_file='/kubernetes/gold_update_scd1.yaml',
             kubernetes_conn_id='kubernetes_default',
