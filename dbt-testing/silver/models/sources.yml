@@ -7,73 +7,74 @@ sources:
         external:
           location: 's3a://nyc-trip-bucket/silver/fhvhv_trip'
           using: delta
-        columns:
-          - name: license_num_id
-            data_type: varchar
-          - name: base_num_id
-            data_type: varchar
-          - name: pickup_datetime
-            data_type: timestamp
-          - name: dropoff_datetime
-            data_type: timestamp
-          - name: pickup_location_id
-            data_type: integer
-          - name: dropoff_location_id
-            data_type: integer
-          - name: originating_base_num
-            data_type: varchar
-          - name: request_datetime
-            data_type: varchar
-          - name: on_scene_datetime
-            data_type: varchar
-          - name: trip_miles
-            data_type: decimal
-          - name: trip_time
-            data_type: decimal
-          - name: base_passenger_fare
-            data_type: decimal
-          - name: tolls
-            data_type: decimal
-          - name: bcf
-            data_type: decimal
-          - name: sales_tax
-            data_type: decimal
-          - name: congestion_surcharge
-            data_type: decimal
-          - name: airport_fee
-            data_type: decimal
-          - name: tips
-            data_type: decimal
-          - name: driver_pay
-            data_type: decimal
-          - name: id
-            data_type: integer
-          - name: total_surcharge
-            data_type: decimal
-          - name: totals_amount
-            data_type: decimal
-          - name: pickup_date_id
-            data_type: varchar
-          - name: dropoff_date_id
-            data_type: varchar
-          - name: avg_speed
-            data_type: decimal
-          - name: fare_per_min
-            data_type: decimal
-          - name: fare_per_mile
-            data_type: decimal
-          - name: differ_pay_proportion
-            data_type: decimal
-          - name: differ_surcharge_total
-            data_type: decimal
-          - name: pickup_time_id
-            data_type: varchar
-          - name: dropoff_time_id
-            data_type: varchar
-          - name: flags_key
-            data_type: varchar
+#        columns:
+#          - name: license_num_id
+#            data_type: varchar
+#          - name: base_num_id
+#            data_type: varchar
+#          - name: pickup_datetime
+#            data_type: timestamp
+#          - name: dropoff_datetime
+#            data_type: timestamp
+#          - name: pickup_location_id
+#            data_type: integer
+#          - name: dropoff_location_id
+#            data_type: integer
+#          - name: originating_base_num
+#            data_type: varchar
+#          - name: request_datetime
+#            data_type: varchar
+#          - name: on_scene_datetime
+#            data_type: varchar
+#          - name: trip_miles
+#            data_type: decimal
+#          - name: trip_time
+#            data_type: decimal
+#          - name: base_passenger_fare
+#            data_type: decimal
+#          - name: tolls
+#            data_type: decimal
+#          - name: bcf
+#            data_type: decimal
+#          - name: sales_tax
+#            data_type: decimal
+#          - name: congestion_surcharge
+#            data_type: decimal
+#          - name: airport_fee
+#            data_type: decimal
+#          - name: tips
+#            data_type: decimal
+#          - name: driver_pay
+#            data_type: decimal
+#          - name: id
+#            data_type: integer
+#          - name: total_surcharge
+#            data_type: decimal
+#          - name: totals_amount
+#            data_type: decimal
+#          - name: pickup_date_id
+#            data_type: varchar
+#          - name: dropoff_date_id
+#            data_type: varchar
+#          - name: avg_speed
+#            data_type: decimal
+#          - name: fare_per_min
+#            data_type: decimal
+#          - name: fare_per_mile
+#            data_type: decimal
+#          - name: differ_pay_proportion
+#            data_type: decimal
+#          - name: differ_surcharge_total
+#            data_type: decimal
+#          - name: pickup_time_id
+#            data_type: varchar
+#          - name: dropoff_time_id
+#            data_type: varchar
+#          - name: flags_key
+#            data_type: varchar
   - name: gold
     tables:
       - name: fact_fhvhv_trip_t
-        columns:
-      - name: 
+        external:
+          location: 's3a://nyc-trip-bucket/silver/fact_fhvhv_trip_t'
+          using: delta

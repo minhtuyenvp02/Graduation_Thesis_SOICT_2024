@@ -65,3 +65,6 @@ class TripGenerator(object):
 
                 except Exception as e:
                     logging.info("Error when create threads")
+
+
+

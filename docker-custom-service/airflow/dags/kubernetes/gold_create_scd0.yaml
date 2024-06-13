@@ -1,7 +1,7 @@
 apiVersion: "sparkoperator.k8s.io/v1beta2"
 kind: SparkApplication
 metadata:
-  name: gold_update_scd0
+  name: gold_create_scd0
   namespace: spark
 spec:
   type: Python
@@ -9,7 +9,7 @@ spec:
   mode: cluster
   image: "minhtuyenvp02/spark-operator:latest"
   imagePullPolicy: Always
-  mainApplicationFile: local:///opt/app/gold_update_scd0.py
+  mainApplicationFile: local:///opt/app/gold_create_scd0.py
   sparkVersion: "3.5.0"
   restartPolicy:
     type: Never

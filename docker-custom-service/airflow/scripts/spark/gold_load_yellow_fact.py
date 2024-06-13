@@ -8,18 +8,10 @@ import argparse
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--spark_cluster", type=str, required=True)
-    parser.add_argument("--bucket_name", type=str, required=True)
-    parser.add_argument("--s3_endpoint", type=str, required=True)
-    parser.add_argument("--s3_access_key", type=str, required=True)
-    parser.add_argument("--s3_secret_key", type=str, required=True)
-    args = parser.parse_args()
-
-    spark = create_spark_session(app_name="Gold Update Yellow Fact", spark_cluster=args.spark_cluster,
-                                 s3_endpoint=args.s3_endpoint, s3_access_key=args.s3_access_key,
-                                 s3_secret_key=args.s3_secret_key)
-    gold = Gold(bucket_name=args.bucket_name, spark=spark)
+    spark = create_spark_session(app_name="Gold Update Yellow Trip Fact",
+                                 s3_endpoint="http://minio.minio.svc.cluster.local:9000", s3_access_key='admin',
+                                 s3_secret_key='admin123')
+    gold = Gold(bucket_name='nyc-trip-bucket', spark=spark)
     try:
         gold.update_fact_yellow_trip()
     except Exception as E:

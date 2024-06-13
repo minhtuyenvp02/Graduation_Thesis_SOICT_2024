@@ -63,12 +63,11 @@ class WareHouseBuilder(object):
             .option("pipelines.autoOptimize.zOrderCols", "date_id") \
             .mode("overwrite") \
             .save(delta_table_path)
-        print("Wrinting.....")
         self.spark.sql(f"""
                         CREATE TABLE IF NOT EXISTS gold.dim_date_t
                         USING DELTA
                         LOCATION '{dim_payment_path}'
-                        OPTIMIZE gold.dim_date_t ZORDER BY (date_id)                                 
+                        OPTIMIZE gol.dim_date_t ZORDER BY (date_id)                                 
                     """)
         print("Write Done")
 
@@ -77,14 +76,14 @@ class WareHouseBuilder(object):
         self.spark.sql('CREATE DATABASE IF NOT EXISTS gold;')
         DeltaTable.createIfNotExists(sparkSession=self.spark) \
             .tableName("gold.dim_location_t") \
-            .addColumn("id", generatedAlwaysAs="CAST()") \
             .addColumn("location_id", "INT", nullable=False) \
             .addColumn("borough", "STRING", nullable=True) \
             .addColumn("zone", "STRING", nullable=True) \
             .addColumn("service_zone", "STRING", nullable=True) \
             .addColumn("is_active", "BOOLEAN", nullable=True) \
+            .addColumn("effective_date", "DATE", nullable=True) \
+            .addColumn("end_date", "DATE", nullable=True) \
             .location(f"{self.dwh_location}/dim_location_t") \
-            .partitionedBy("zone") \
             .comment("gold.dim_location_t") \
             .execute()
         return
@@ -94,13 +93,13 @@ class WareHouseBuilder(object):
         self.spark.sql('CREATE DATABASE IF NOT EXISTS gold;')
         DeltaTable.createIfNotExists(self.spark) \
             .tableName("gold.dim_dpc_base_num_t") \
-            .addColumn("hv_license_num", "STRING", nullable=True) \
-            .addColumn("license_num", "STRING", nullable=True) \
+            .addColumn("id", "INT", nullable=True) \
+            .addColumn("base_num", "STRING", nullable=True) \
             .addColumn("base_name", "STRING", nullable=True) \
             .addColumn("app_company", "STRING", nullable=True) \
-            .addColumn("id", "INT", nullable=True) \
             .addColumn("is_active", "BOOLEAN", nullable=True) \
-            .partitionedBy("license_num") \
+            .addColumn("effective_date", "DATE", nullable=True) \
+            .addColumn("end_date", "DATE", nullable=True) \
             .location(f"{self.dwh_location}/dim_dpc_base_num_t") \
             .comment("dwh.dim_dpc_base_num_t") \
             .execute()

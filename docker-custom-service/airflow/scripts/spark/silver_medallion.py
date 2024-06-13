@@ -41,7 +41,7 @@ class Silver(object):
 
     def fhvhv_transform(self):
         time_tracking = self.spark.range(1) \
-            .selectExpr("current_timestamp() - INTERVAL 1 HOURS as start_time") \
+            .selectExpr("current_timestamp() - INTERVAL 2 HOURS as start_time") \
             .collect()[0]['start_time']
         df = self.spark.readStream \
             .format("delta") \
@@ -150,35 +150,14 @@ class Silver(object):
         df = df.drop("_change_type", "_commit_version", "_commit_timestamp")
 
         target_checkpoint_location = f"{self.yellow_trip_tbl}/_checkpoint"
-        # self.spark.sql(f"ALTER TABLE delta.`{self.yellow_trip_tbl}` SET TBLPROPERTIES (delta.enableChangeDataFeed = true)")
         print("Starting to write to silver")
         stream_query = df.writeStream \
+            .format("delta") \
             .trigger(availableNow=True) \
             .option("checkpointLocation", target_checkpoint_location) \
-            .start()
+            .start(self.yellow_trip_tbl)
         stream_query.awaitTermination()
         print("Done Streaming")
 
-    def process_yellow_batch(self, batch_df, batch_id):
-        print(f"Processing batch {batch_id}")
-        batch_df.write \
-            .format("console") \
-            .mode("append")
 
 
-    def process_fhvhv_batch(self, batch_df, batch_id):
-        print(f"Processing batch {batch_id}")
-        batch_df.write \
-            .format("console") \
-            .mode("append") \
-            .save(self.fhvhv_trip_tbl)
-
-    def test_streaming(self):
-        target_location = f"{self.silver_location}/yellow_trip2"
-        target_checkpoint_location = f"{target_location}/_checkpoint"
-        df = self.spark.readStream.format("delta").load(f"s3a://{self.bucket_name}/bronze/yellow_tripdata")
-        query = df.writeStream \
-            .foreachBatch(self.process_batch) \
-            .option("checkpointLocation", target_checkpoint_location) \
-            .start()
-        query.awaitTermination()
