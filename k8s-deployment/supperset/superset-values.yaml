@@ -209,18 +209,18 @@ service:
     http: nil
 
 ingress:
-  enabled: false
-  ingressClassName: ~
-  annotations: {}
+  enabled: true
+  ingressClassName: ingress
+  annotations:
     # kubernetes.io/tls-acme: "true"
     ## Extend timeout to allow long running queries.
-    # nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
-    # nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
-    # nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+     nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+     nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
   path: /
   pathType: ImplementationSpecific
   hosts:
-    - chart-example.local
+    - superset.minhtuyenvp02.id.vn
   tls: []
   extraHostsRaw: []
   #  - secretName: chart-example-tls

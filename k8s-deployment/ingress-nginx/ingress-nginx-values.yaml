@@ -26,9 +26,9 @@ controller:
     ## for backwards compatibility consider setting the full image url via the repository value below
     ## use *either* current default registry/image or repository format or installing chart by providing the values.yaml will fail
     ## repository:
-    tag: "v1.10.0"
-    digest: sha256:42b3f0e5d0846876b1791cd3afeb5f1cbbe4259d6f35651dcc1b5c980925379c
-    digestChroot: sha256:7eb46ff733429e0e46892903c7394aff149ac6d284d92b3946f3baf7ff26a096
+    tag: "v1.10.1"
+    digest: sha256:e24f39d3eed6bcc239a56f20098878845f62baa34b9f2be2fd2c38ce9fb0f29e
+    digestChroot: sha256:c155954116b397163c88afcb3252462771bd7867017e8a17623e83601bab7ac7
     pullPolicy: IfNotPresent
     runAsNonRoot: true
     # www-data -> uid 101
@@ -125,6 +125,8 @@ controller:
     # Ingress creation gets rejected if there are multiple default IngressClasses.
     # Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#default-ingress-class
     default: false
+    # -- Annotations to be added to the IngressClass resource.
+    annotations: {}
     # -- Controller of the IngressClass. An Ingress Controller looks for IngressClasses it should reconcile by this value.
     # This value is also being set as the `--controller-class` argument of this Ingress Controller.
     # Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class
@@ -470,7 +472,8 @@ controller:
       # -- Enable the external controller service or not. Useful for internal-only deployments.
       enabled: true
     # -- Annotations to be added to the external controller service. See `controller.service.internal.annotations` for annotations to be added to the internal controller service.
-    annotations: {}
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: minhtuyenvp02.id.vn.
     # -- Labels to be added to both controller services.
     labels: {}
     # -- Type of the external controller service.
@@ -533,9 +536,9 @@ controller:
     appProtocol: true
     nodePorts:
       # -- Node port allocated for the external HTTP listener. If left empty, the service controller allocates one from the configured node port range.
-      http: 30080
+      http: ""
       # -- Node port allocated for the external HTTPS listener. If left empty, the service controller allocates one from the configured node port range.
-      https: 30443
+      https: ""
       # -- Node port mapping for external TCP listeners. If left empty, the service controller allocates them from the configured node port range.
       # Example:
       # tcp:
@@ -577,7 +580,7 @@ controller:
 
       # -- External traffic policy of the internal controller service. Set to "Local" to preserve source IP on providers supporting it.
       # Ref: https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
-      externalTrafficPolicy: Clusterin
+      externalTrafficPolicy: ""
       # -- Session affinity of the internal controller service. Must be either "None" or "ClientIP" if set. Defaults to "None".
       # Ref: https://kubernetes.io/docs/reference/networking/virtual-ips/#session-affinity
       sessionAffinity: ""
@@ -820,6 +823,18 @@ controller:
       labels: {}
       # -- Security context for secret creation & webhook patch pods
       securityContext: {}
+      # -- Admission webhook patch job RBAC
+      rbac:
+        # -- Create RBAC or not
+        create: true
+      # -- Admission webhook patch job service account
+      serviceAccount:
+        # -- Create a service account or not
+        create: true
+        # -- Custom service account name
+        name: ""
+        # -- Auto-mount service account token or not
+        automountServiceAccountToken: true
     # Use certmanager to generate webhook certs
     certManager:
       enabled: false

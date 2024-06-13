@@ -37,3 +37,13 @@ secretMounts:
   - name: redis-table-schema-volumn
     path: /etc/redis
     secretName: redis-table-definition
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations: {}
+  hosts: 
+    - host:  trino.minhtuyenvp02.id.vn
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
