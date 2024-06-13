@@ -81,7 +81,7 @@ with DAG(
     gold_scd0_update = SparkKubernetesOperator(
             task_id='gold_create_scd0',
             namespace='spark',
-            application_file='/kubernetes/gold_update_scd1.yaml',
+            application_file='/kubernetes/gold_create_scd0.yaml',
             kubernetes_conn_id='kubernetes_default',
             on_failure_callback=alert_slack_channel,
             image_pull_policy='Always',

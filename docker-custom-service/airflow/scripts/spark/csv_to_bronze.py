@@ -13,13 +13,13 @@ if __name__ == "__main__":
     # bronze = BronzeData(schema=schema, kafka_server=args.kafka_servers, bucket_name=args.bucket_name, spark=spark
     #                     )
     # bronze.kafka_stream_2bronze("fhvhv_tripdata")
+
     schema = CustomSchema(SCHEMA_CONFIG)
     spark = create_spark_session(app_name="Kafka Stream To Bronze",
-                                 spark_cluster='local[*]',
-                                 s3_endpoint="http://10.211.56.3:30090", s3_access_key='admin',
+                                 s3_endpoint="http://minio.minio.svc.cluster.local:9000", s3_access_key='admin',
                                  s3_secret_key='admin123')
-    bronze = BronzeData(schema=schema, kafka_server='10.211.56.3:31044,10.211.56.3:31168,10.211.56.3:30351',
-                        bucket_name='nyc-trip-bucket', spark=spark)
+    bronze = BronzeData(schema=schema, kafka_server='kafka.kafka.svc.cluster.local:9092', bucket_name='nyc-trip-bucket', spark=spark
+                        )
     bronze.csv_to_bronze(source_csv='s3a://nyc-trip-bucket/nyc-data/location.csv', target_table_name="location",
                          id_option=False)
     bronze.csv_to_bronze(source_csv='s3a://nyc-trip-bucket/nyc-data/dpc_base_num.csv',
