@@ -30,15 +30,6 @@ class Silver(object):
          """)
         self.spark.sql("ALTER TABLE yellow_trip SET TBLPROPERTIES (delta.enableChangeDataFeed = true)")
 
-    # def create_fhvhv_streaming_table(self):
-    #     self.spark.sql(f"""
-    #         CREATE DATABASE IF NOT EXISTS silver;
-    #         CREATE TABLE IF NOT EXISTS silver.fhvhv_trip
-    #         USING DELTA
-    #         LOCATION '{self.yellow_trip_tbl}'
-    #         ALTER TABLE silver.fhvhv_trip SET TBLPROPERTIES (delta.enableChangeDataFeed = true)")
-    #     """)
-
     def fhvhv_transform(self):
         time_tracking = self.spark.range(1) \
             .selectExpr("current_timestamp() - INTERVAL 2 HOURS as start_time") \
@@ -96,8 +87,6 @@ class Silver(object):
         df = df.drop("_change_type", "_commit_version", "_commit_timestamp")
         df.printSchema()
         target_checkpoint_location = f"{self.fhvhv_trip_tbl}/_checkpoint"
-        # enable CDF
-        # self.spark.sql(f"ALTER TABLE delta.`{self.fhvhv_trip_tbl}` SET TBLPROPERTIES (delta.enableChangeDataFeed = true)")
         print("Starting write to silver")
         stream_query = df.writeStream \
             .format('delta') \

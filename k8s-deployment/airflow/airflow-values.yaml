@@ -451,7 +451,7 @@ fernetKey: ~
 fernetKeySecretName: ~
 
 # Flask secret key for Airflow Webserver: `[webserver] secret_key` in airflow.cfg
-webserverSecretKey: ~
+webserverSecretKey: 1770886dc66fefb65080b187ddd838b7
 webserverSecretKeySecretName: ~
 
 # In order to use kerberos you need to create secret containing the keytab file
@@ -1195,21 +1195,21 @@ webserver:
   #      - "foo.remote"
   allowPodLogReading: true
   livenessProbe:
-    initialDelaySeconds: 15
+    initialDelaySeconds: 60
     timeoutSeconds: 5
     failureThreshold: 5
     periodSeconds: 10
     scheme: HTTP
 
   readinessProbe:
-    initialDelaySeconds: 15
+    initialDelaySeconds: 60
     timeoutSeconds: 5
     failureThreshold: 5
     periodSeconds: 10
     scheme: HTTP
 
   startupProbe:
-    timeoutSeconds: 20
+    timeoutSeconds: 30
     failureThreshold: 6
     periodSeconds: 10
     scheme: HTTP
@@ -1217,7 +1217,7 @@ webserver:
   # Number of webservers
   replicas: 1
   # Max number of old replicasets to retain
-  revisionHistoryLimit: ~
+  revisionHistoryLimit: 1
 
   # Command to use when running the Airflow webserver (templated).
   command: ~
@@ -1276,13 +1276,13 @@ webserver:
       ports:
         - port: "{{ .Values.ports.airflowUI }}"
 
-  resources: {}
-  #   limits:
-  #     cpu: 100m
-  #     memory: 128Mi
-  #   requests:
-  #     cpu: 100m
-  #     memory: 128Mi
+  resources:
+     limits:
+       cpu: 1500m
+       memory: 2Gi
+     requests:
+       cpu: 800m
+       memory: 512Mi
 
   # Create initial user.
   defaultUser:

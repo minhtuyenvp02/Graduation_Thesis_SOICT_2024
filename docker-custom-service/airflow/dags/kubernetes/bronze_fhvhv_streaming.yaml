@@ -1,7 +1,7 @@
 apiVersion: "sparkoperator.k8s.io/v1beta2"
 kind: SparkApplication
 metadata:
-  name: stream-fhvhvku-trip-to-bronze
+  name: stream-fhvhv-trip-to-bronze
   namespace: spark
 spec:
   type: Python
@@ -24,15 +24,16 @@ spec:
     labels:
       version: 3.5.0
     serviceAccount: spark
-    env:
-      - name: PYTHONPATH
-        value: '/opt/app'
+    envFrom:
+      - secretKeyRef:
+          name: spark-env-secret
   executor:
     cores: 1
     instances: 2
     memory: "1024m"
     labels:
       version: 3.5.0
-    env:
-      - name: PYTHONPATH
-        value: '/opt/app'
+    envFrom:
+      - secretKeyRef:
+          name: spark-env-secret
+      
