@@ -77,7 +77,7 @@ with DAG(
     gold_fact_fhvhv_tracking_daily = SparkKubernetesOperator(
         task_id='gold_fact_fhvhv_tracking_daily',
         namespace='spark',
-        application_file='/kubernetes/gold_fact_fhvhv_tracking_daily',
+        application_file='/kubernetes/gold_fact_fhvhv_tracking_daily.yaml',
         kubernetes_conn_id='kubernetes_default',
         on_failure_callback=alert_slack_channel,
         image_pull_policy='Always',
@@ -87,7 +87,7 @@ with DAG(
     # gold_fact_yellow_tracking_daily = SparkKubernetesOperator(
     #     task_id='gold_fact_yellow_tracking_daily',
     #     namespace='spark',
-    #     application_file='/kubernetes/silver_fhvhv_transform.yaml',
+    #     application_file='/kubernetes/gold_fact_yellow_tracking_daily.yaml',
     #     kubernetes_conn_id='kubernetes_default',
     #     on_failure_callback=alert_slack_channel,
     #     image_pull_policy='Always',

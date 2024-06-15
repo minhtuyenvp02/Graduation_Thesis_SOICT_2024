@@ -12,7 +12,10 @@ import os
 import string
 import uuid
 import argparse
-
+import os
+S3_ENDPOINT = os.environ.get('S3_ENDPOINT', "http://minio.minio.svc.cluster.local:9000")
+S3_ACCESS_KEY = os.environ.get('S3_ACCESS_KEY', "admin")
+S3_SECRET_KEY = os.environ.get('S3_SECRET_KEY', "admin123")
 
 class BronzeData(object):
     def __init__(self, kafka_server: str, bucket_name: str, schema, spark: SparkSession):
@@ -70,18 +73,10 @@ class BronzeData(object):
         stream_query.awaitTermination()
 
     def kafka_stream_2bronze(self, topic: str):
-        # print(S3_CONFIG["fs.s3a.endpoint"])
-        # client = Minio(
-        #     endpoint=S3_CONFIG["fs.s3a.endpoint"],
-        #     access_key=S3_CONFIG["fs.s3a.access.key"],
-        #     secret_key=S3_CONFIG["fs.s3a.secret.key"],
-        #     cert_check=False,
-        #     secure=False
-        # )
         client = Minio(
             endpoint='minio.minio.svc.cluster.local:9000',
-            access_key='admin',
-            secret_key='admin123',
+            access_key=S3_ACCESS_KEY,
+            secret_key=S3_SECRET_KEY,
             cert_check=False,
             secure=False
         )

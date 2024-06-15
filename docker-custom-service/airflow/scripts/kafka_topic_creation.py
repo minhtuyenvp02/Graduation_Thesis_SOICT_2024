@@ -2,7 +2,6 @@ import logging
 from confluent_kafka.admin import AdminClient, NewTopic
 
 
-# Initialize the kafka topic
 def create_kafka_topic(kafka_servers: str, topics: [str], n_partitions=3, n_nodes=2):
     """Create the kafka topic for the kafka server"""
     conf = {
@@ -26,5 +25,3 @@ def create_kafka_topic(kafka_servers: str, topics: [str], n_partitions=3, n_node
                     print(f"Failed to create topic {topic}: {e}")
         else:
             print(f"Topic {topic} is already created")
-
-# create_kafka_topic(kafka_servers='10.211.56.3:31044,10.211.56.3:31168,10.211.56.3:30351', topics=["yellow_tripdata", 'fhvhv_tripdata'])

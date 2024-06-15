@@ -3777,17 +3777,22 @@ prometheus:
        static_configs:
          - targets:
              - minio.minio.svc.cluster.local:9000
-     - job_name: kube-etcd
-       kubernetes_sd_configs:
-         - role: node
-       scheme: https
-       tls_config:
-         ca_file:   /etc/prometheus/secrets/etcd-client-cert/etcd-ca
-         cert_file: /etc/prometheus/secrets/etcd-client-cert/etcd-client
-         key_file:  /etc/prometheus/secrets/etcd-client-cert/etcd-client-key
-       relabel_configs:
-       - action: labelmap
-
+#     - job_name: kube-etcd
+#       kubernetes_sd_configs:
+#         - role: node
+#       scheme: https
+#       tls_config:
+#         ca_file:   /etc/prometheus/secrets/etcd-client-cert/etcd-ca
+#         cert_file: /etc/prometheus/secrets/etcd-client-cert/etcd-client
+#         key_file:  /etc/prometheus/secrets/etcd-client-cert/etcd-client-key
+#       relabel_configs:
+#       - action: labelmap
+     - job_name: airfow-job
+       metrics_path: "/metrics"
+       scheme: http
+       static_configs:
+         - targets:
+             - airflow-statsd.airflow.svc.cluster.local:9102
      - job_name: kafka
        scrape_interval: "45s"
        scrape_timeout: "30s"
