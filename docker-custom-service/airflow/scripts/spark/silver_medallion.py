@@ -6,6 +6,7 @@ from pyspark.sql.types import *
 from delta import DeltaTable
 import uuid
 import argparse
+import os
 
 
 def generate_uuid():
