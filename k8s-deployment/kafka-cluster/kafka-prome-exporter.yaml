@@ -99,7 +99,7 @@ readiness:
 
 prometheus:
   serviceMonitor:
-    enabled: false
+    enabled: true
     namespace: prometheus
     apiVersion: "monitoring.coreos.com/v1"
     interval: "30s"

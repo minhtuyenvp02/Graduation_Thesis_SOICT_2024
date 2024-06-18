@@ -1,6 +1,7 @@
 from silver_medallion import Silver
 from spark_executor import create_spark_session
 import argparse
+import os
 S3_ENDPOINT = os.environ.get('S3_ENDPOINT', "http://minio.minio.svc.cluster.local:9000")
 S3_ACCESS_KEY = os.environ.get('S3_ACCESS_KEY', "admin")
 S3_SECRET_KEY = os.environ.get('S3_SECRET_KEY', "admin123")

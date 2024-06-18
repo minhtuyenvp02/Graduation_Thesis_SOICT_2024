@@ -4,6 +4,7 @@ from config import *
 import logging
 from spark_executor import create_spark_session
 from gold_medallion import Gold
+import os
 
 S3_ENDPOINT = os.environ.get('S3_ENDPOINT', "http://minio.minio.svc.cluster.local:9000")
 S3_ACCESS_KEY = os.environ.get('S3_ACCESS_KEY', "admin")
@@ -24,5 +25,5 @@ def main():
         logging.info(E)
 
 
-if __name__ == __main__:
+if __name__ == "__main__":
     main()
