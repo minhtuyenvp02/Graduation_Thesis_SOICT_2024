@@ -4,10 +4,10 @@ silver:
     dev:
       type: trino
       user: admin
-      host: http://146.190.87.26 
+      host: http://206.189.92.103 
       port: 30088
       database: delta
-      schema: 'bronze'
+      schema: 'silver'
       threads: 1
 
 gold:

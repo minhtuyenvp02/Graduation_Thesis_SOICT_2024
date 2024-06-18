@@ -47,3 +47,20 @@ ingress:
       paths:
         - path: /
           pathType: ImplementationSpecific
+coordinator:
+  resources:
+    limits:
+      cpu: 2
+      memory: 3Gi
+    requests:
+      cpu: 1
+      memory: 2Gi
+worker:
+  resources:
+    limits:
+      cpu: 2
+      memory: 4Gi
+    requests:
+      cpu: 1
+      memory: 2Gi
+  

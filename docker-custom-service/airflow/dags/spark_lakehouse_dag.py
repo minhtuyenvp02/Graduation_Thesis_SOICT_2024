@@ -124,6 +124,7 @@ with DAG(
             kubernetes_conn_id='kubernetes_default',
             on_failure_callback=alert_slack_channel,
             image_pull_policy='Always',
+            container_resources=silver_transform_resource_requirements,
             do_xcom_push=False,
             on_finish_action="delete_pod",
             delete_on_termination=True

@@ -121,7 +121,7 @@ metrics:
 # -- Prometheus pod monitor for operator's pod.
 podMonitor:
   # -- If enabled, a pod monitor for operator's pod will be submitted. Note that prometheus metrics should be enabled as well.
-  enable: false
+  enable: true
   # -- Pod monitor labels
   labels: {}
   # -- The label to use to retrieve the job name from
