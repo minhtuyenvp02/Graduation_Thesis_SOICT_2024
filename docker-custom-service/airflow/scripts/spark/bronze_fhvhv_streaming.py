@@ -13,7 +13,7 @@ BUCKET_NAME = os.environ.get('BUCKET_NAME', "nyc-trip-bucket")
 if __name__ == "__main__":
     print(f"PULLING NEW IMAGE AT {datetime.now()} .......................................")
     schema = CustomSchema(SCHEMA_CONFIG)
-    spark = create_spark_session(app_name="FHVHV Trip To Bronze",
+    spark = create_spark_session(app_name="-streaming-fhvhv-trip-to-bronze",
                                  s3_endpoint=S3_ENDPOINT, s3_access_key=S3_ACCESS_KEY,
                                  s3_secret_key=S3_SECRET_KEY)
     bronze_processing = BronzeDataProcessing(schema=schema, kafka_server=KAFKA_CONSUMER_SERVER, bucket_name=BUCKET_NAME, spark=spark)

@@ -13,7 +13,7 @@ KAFKA_CONSUMER_SERVER = os.environ.get('KAFKA_CONSUMER_SERVER', "kafka.kafka.svc
 BUCKET_NAME = os.environ.get('BUCKET_NAME', "nyc-trip-bucket")
 
 if __name__ == "__main__":
-    spark = create_spark_session(app_name="Create SCD0", s3_endpoint=S3_ENDPOINT,
+    spark = create_spark_session(app_name="create-scd0", s3_endpoint=S3_ENDPOINT,
                                  s3_access_key=S3_ACCESS_KEY, s3_secret_key=S3_SECRET_KEY)
     silver_location = f"s3a://{BUCKET_NAME}/silver"
     gold_location = f"s3a://{BUCKET_NAME}/gold"

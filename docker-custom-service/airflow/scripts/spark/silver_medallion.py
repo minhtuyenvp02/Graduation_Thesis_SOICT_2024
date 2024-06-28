@@ -44,7 +44,7 @@ class SilverDataProcessing(object):
         df = df.fillna("N", ["access_a_ride_flag"]) \
             .fillna("0.0", ["airport_fee"]) \
             .fillna("unknown", ["originating_base_num"])
-        df = df.filter((col("base_passenger_fare") >= 0) & (col("driver_pay") >= 0) & (col("totals_amount") >= 0))
+        df = df.filter((col("base_passenger_fare") >= 0) & (col("driver_pay") >= 0))
         uuid_udf = udf(generate_uuid, StringType())
         df = df.withColumn("id", uuid_udf()) \
             .withColumn("total_surcharge", (df["tolls"] + df["bcf"]

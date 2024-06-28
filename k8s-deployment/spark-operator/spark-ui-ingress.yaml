@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: spark-app-ingress
+  namespace: spark
+spec:
+  rules:
+  - host: spark-app.minhtuyenvp02.id.vn
+    http:
+      paths:
+      - path: /spark/spark-app
+        pathType: Prefix
+        backend:
+          service:
+            name: spark-app-ui
+            port:
+              number: 80
