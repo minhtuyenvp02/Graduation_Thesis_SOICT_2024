@@ -136,7 +136,7 @@ class GoldDataProcessing(object):
             .join(dim_dropoff_time, fact_yellow_trip_df["dropoff_time_id"] == dim_dropoff_time["dropoff_time_id"],
                   "left") \
             .select(
-            df["id"],
+            fact_yellow_trip_df["id"],
             fact_yellow_trip_df['id'].alias('id_pk'),
             dim_date_df['date_id'].alias('date_fk'),
             dim_pickup_time['pickup_time_id'].alias('pickup_time_fk'),
@@ -215,7 +215,7 @@ class GoldDataProcessing(object):
                   fact_fhvhv_trip_df['base_num_id'] == dim_dpc_base_num_df['base_num'],
                   "left").where('f.is_active = true') \
             .select(
-            df["id"],
+            fact_fhvhv_trip_df["id"],
             dim_date_df['date_id'].alias('date_fk'),
             dim_pickup_time['pickup_time_id'].alias('pickup_time_id_fk'),
             dim_dropoff_time['dropoff_time_id'].alias('dropoff_time_id_fk'),
