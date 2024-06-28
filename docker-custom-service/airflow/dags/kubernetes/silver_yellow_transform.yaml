@@ -16,7 +16,10 @@ spec:
     onFailureRetries: 2
     onFailureRetryInterval: 10
     onSubmissionFailureRetries: 5
-    onSubmissionFailureRetryInterval: 20
+    onSubmissionFailureRetryInterval: 2
+  sparkUIOptions:
+    ingressAnnotations:
+      kubernetes.io/ingress.class: nginx
   driver:
     cores: 1
     coreLimit: "1024m"
