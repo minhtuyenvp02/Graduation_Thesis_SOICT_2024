@@ -5,7 +5,7 @@ from pyspark.sql.functions import *
 from minio import Minio
 from datetime import datetime
 from schema import CustomSchema
-from spark_executor import create_spark_session
+from spark_session_init import create_spark_session
 from config import SCHEMA_CONFIG
 import logging
 import os
@@ -17,7 +17,7 @@ S3_ENDPOINT = os.environ.get('S3_ENDPOINT', "http://minio.minio.svc.cluster.loca
 S3_ACCESS_KEY = os.environ.get('S3_ACCESS_KEY', "admin")
 S3_SECRET_KEY = os.environ.get('S3_SECRET_KEY', "admin123")
 
-class BronzeData(object):
+class BronzeDataProcessing(object):
     def __init__(self, kafka_server: str, bucket_name: str, schema, spark: SparkSession):
         self.schema = schema
         self.bronze_location = f"s3a://{bucket_name}/bronze"
@@ -51,7 +51,7 @@ class BronzeData(object):
             .option('path', table_path) \
             .saveAsTable(target_table_name)
 
-    def topic_2bronze(self, topic: str, target_location: str):
+    def write_data_to_bronze(self, topic: str, target_location: str):
         print(f"Submit at topic {topic}")
         raw_df = self.spark.readStream \
             .format("kafka") \
@@ -72,18 +72,26 @@ class BronzeData(object):
             .start(target_location)
         stream_query.awaitTermination()
 
-    def kafka_stream_2bronze(self, topic: str):
+    def stream_data_to_bronze(self, topic: str):
+        # client = Minio(
+        #     endpoint='minio.minio.svc.cluster.local:9000',
+        #     access_key=S3_ACCESS_KEY,
+        #     secret_key=S3_SECRET_KEY,
+        #     cert_check=False,
+        #     secure=False
+        # )
         client = Minio(
-            endpoint='minio.minio.svc.cluster.local:9000',
+            endpoint='10.211.56.3:30090',
             access_key=S3_ACCESS_KEY,
             secret_key=S3_SECRET_KEY,
             cert_check=False,
             secure=False
         )
+
         found = client.bucket_exists(self.bucket_name)
         if not found:
             logging.info(f"Bucket {self.bucket_name} doesn't exist, auto make...")
             client.make_bucket(bucket_name=self.bucket_name, )
         # print(topics)
-        self.topic_2bronze(topic, os.path.join(self.bronze_location, topic))
+        self.write_data_to_bronze(topic, os.path.join(self.bronze_location, topic))
         print("Consume Done")

@@ -18,13 +18,6 @@ class SingleMessageProducer(object):
         self.total_message = 0
         self.send_speed = send_speed  # the numbers of messages / second default 50
 
-    def acked_calback(self, error, message):
-        """Callback for message delivery reports."""
-        if error is not None:
-            print(f"Failed to deliver message: {error}")
-        else:
-            print(f"Message produced: {message.topic()} [{message.partition()}] @ {message.offset()}")
-
     def send_single_item(self, url_file_path: str, topics: [str], send_speed, s3_endpoint: str):
         fsspec.config.conf = {
             "s3":

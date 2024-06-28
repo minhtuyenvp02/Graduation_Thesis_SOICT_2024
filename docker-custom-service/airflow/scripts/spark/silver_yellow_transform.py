@@ -1,5 +1,5 @@
-from silver_medallion import Silver
-from spark_executor import create_spark_session
+from silver_medallion import SilverDataProcessing
+from spark_session_init import create_spark_session
 import argparse
 import os
 S3_ENDPOINT = os.environ.get('S3_ENDPOINT', "http://minio.minio.svc.cluster.local:9000")
@@ -12,5 +12,5 @@ if __name__ == "__main__":
     spark = create_spark_session(app_name="Silver Yellow Transform",
                                  s3_endpoint=S3_ENDPOINT, s3_access_key=S3_ACCESS_KEY,
                                  s3_secret_key=S3_SECRET_KEY)
-    silver = Silver(bucket_name=BUCKET_NAME, spark=spark)
-    silver.yellow_transform()
+    silver_processing = SilverDataProcessing(bucket_name=BUCKET_NAME, spark=spark)
+    silver_processing.transform_yellow_trip()

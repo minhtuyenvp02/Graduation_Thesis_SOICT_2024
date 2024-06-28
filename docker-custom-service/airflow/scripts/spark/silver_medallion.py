@@ -13,7 +13,7 @@ def generate_uuid():
     return str(uuid.uuid4())
 
 
-class Silver(object):
+class SilverDataProcessing(object):
     def __init__(self, bucket_name: str, spark: SparkSession):
         self.bucket_name = bucket_name
         self.silver_location = f"s3a://{self.bucket_name}/silver"
@@ -31,7 +31,7 @@ class Silver(object):
          """)
         self.spark.sql("ALTER TABLE yellow_trip SET TBLPROPERTIES (delta.enableChangeDataFeed = true)")
 
-    def fhvhv_transform(self):
+    def transform_fhvhv_trip(self):
         time_tracking = self.spark.range(1) \
             .selectExpr("current_timestamp() - INTERVAL 2 HOURS as start_time") \
             .collect()[0]['start_time']
@@ -44,6 +44,7 @@ class Silver(object):
         df = df.fillna("N", ["access_a_ride_flag"]) \
             .fillna("0.0", ["airport_fee"]) \
             .fillna("unknown", ["originating_base_num"])
+        df = df.filter((col("base_passenger_fare") >= 0) & (col("driver_pay") >= 0) & (col("totals_amount") >= 0))
         uuid_udf = udf(generate_uuid, StringType())
         df = df.withColumn("id", uuid_udf()) \
             .withColumn("total_surcharge", (df["tolls"] + df["bcf"]
@@ -59,24 +60,24 @@ class Silver(object):
             .withColumn("dropoff_datetime",
                         from_unixtime((df["dropoff_datetime"].cast('bigint') / 1000)).cast('timestamp')) \
             .withColumn("totals_amount", (df["base_passenger_fare"] + df['total_surcharge']).cast("decimal(10,2)"))
-
         df = df.withColumn("pickup_date_id",
-                           date_format(df["pickup_datetime"], 'yyyyMMdd')) \
+                           date_format(df["pickup_datetime"], 'yyyyMMdd').cast(IntegerType())) \
             .withColumn("dropoff_date_id",
-                        date_format(df["dropoff_datetime"], 'yyyyMMdd')) \
+                        date_format(df["dropoff_datetime"], 'yyyyMMdd').cast(IntegerType())) \
             .withColumn("avg_speed", when(df["trip_time"] == 0, 0.0)
                         .otherwise((df["trip_miles"] / df["trip_time"] * 1609.344).cast("decimal(10,2)"))) \
             .withColumn("fare_per_min", when(df["trip_time"] == 0, 0.0)
                         .otherwise((df["totals_amount"] / df["trip_time"] * 60).cast("decimal(10,2)"))) \
             .withColumn("fare_per_mile", when(df["trip_miles"] == 0, 0.0)
                         .otherwise((df["totals_amount"] / df["trip_miles"]).cast("decimal(10,2)"))) \
-            .withColumn("differ_pay_proportion",
-                        ((df['base_passenger_fare'] - df['driver_pay']) / df['base_passenger_fare']).cast(
-                            "decimal(10,2)")) \
-            .withColumn("differ_surcharge_total",
-                        (df["total_surcharge"] / df["totals_amount"]).cast("decimal(10,2)"))
-        df = df.withColumn("pickup_time_id", date_format(df["pickup_datetime"], "HHmm"))
-        df = df.withColumn("dropoff_time_id", date_format(df["dropoff_datetime"], "HHmm"))
+            .withColumn("differ_pay_proportion",when(df["trip_miles"] == 0, 0.00)
+                        .otherwise(((df['base_passenger_fare'] - df['driver_pay']) / df['base_passenger_fare']).cast(
+                            "decimal(10,2)"))) \
+            .withColumn("differ_surcharge_total", when(df["totals_amount"] == 0, 0.00)
+                        .otherwise((df["total_surcharge"] / df["totals_amount"]).cast("decimal(10,2)")))
+
+        df = df.withColumn("pickup_time_id", date_format(df["pickup_datetime"], "HHmm").cast(IntegerType()))
+        df = df.withColumn("dropoff_time_id", date_format(df["dropoff_datetime"], "HHmm").cast(IntegerType()))
         df = df.withColumn("flags_key",
                            concat(col("shared_request_flag"),
                                   col("shared_match_flag"),
@@ -84,8 +85,9 @@ class Silver(object):
                                   col("wav_request_flag"),
                                   col("wav_match_flag"))) \
             .drop("shared_request_flag", "shared_match_flag", "access_a_ride_flag", "wav_request_flag",
-                  "wav_match_flag")
+                  "wav_match_flag", "on_sence_datetime")
         df = df.drop("_change_type", "_commit_version", "_commit_timestamp")
+
         df.printSchema()
         target_checkpoint_location = f"{self.fhvhv_trip_tbl}/_checkpoint"
         print("Starting write to silver")
@@ -97,7 +99,7 @@ class Silver(object):
         stream_query.awaitTermination()
         print("Done Streaming")
 
-    def yellow_transform(self):
+    def transform_yellow_trip(self):
         time_tracking = self.spark.range(1) \
             .selectExpr("current_timestamp() - INTERVAL 2 HOURS as start_time") \
             .collect()[0]['start_time']
@@ -111,7 +113,8 @@ class Silver(object):
         df = df.withColumn("passenger_count", df["passenger_count"].cast(IntegerType())) \
             .withColumn("RatecodeID", df["RatecodeID"].cast(IntegerType())) \
             .withColumn("id", uuid_udf())
-
+        
+        df = df.filter(df["total_amount"] >= 0)
         df = df.withColumnRenamed('PULocationID', 'pickup_location_id') \
             .withColumn('trip_duration', (df["tpep_dropoff_datetime"].cast('bigint') / 1000) - (
                 df["tpep_pickup_datetime"].cast('bigint') / 1000)) \
@@ -133,8 +136,8 @@ class Silver(object):
                         .otherwise((df["total_amount"] / df["trip_distance"]).cast("decimal(10,2)"))) \
             .withColumn("total_surcharge", (df['total_amount'] - df['fare_amount']).cast("decimal(10,2)")) \
             .drop("tpep_pickup_datetime", "tpep_dropoff_datetime")
-        df = df.withColumn("differ_surcharge_total",
-                           (df["total_surcharge"] / df["total_amount"]).cast("decimal(10,2)"))
+        df = df.withColumn("differ_surcharge_total", when(df["total_amount"] ==0, 0.0)
+                           .otherwise((df["total_surcharge"] / df["total_amount"]).cast("decimal(10,2)")))
         df = df.withColumn("pickup_time_id", date_format(df["pickup_datetime"], "HHmm")) \
             .withColumn("dropoff_time_id", date_format(df["dropoff_datetime"], "HHmm"))
         df = df.drop("_change_type", "_commit_version", "_commit_timestamp")
@@ -148,6 +151,3 @@ class Silver(object):
             .start(self.yellow_trip_tbl)
         stream_query.awaitTermination()
         print("Done Streaming")
-
-
-

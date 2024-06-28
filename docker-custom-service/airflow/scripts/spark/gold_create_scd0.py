@@ -2,7 +2,7 @@ from core_dwh import *
 from pyspark.sql import SparkSession
 from delta import configure_spark_with_delta_pip
 import logging
-from spark_executor import create_spark_session
+from spark_session_init import create_spark_session
 import argparse
 import os
 
@@ -17,5 +17,5 @@ if __name__ == "__main__":
                                  s3_access_key=S3_ACCESS_KEY, s3_secret_key=S3_SECRET_KEY)
     silver_location = f"s3a://{BUCKET_NAME}/silver"
     gold_location = f"s3a://{BUCKET_NAME}/gold"
-    builder = WareHouseBuilder(silver_location=silver_location, dwh_location=gold_location, spark=spark)
+    builder = DimensionTableBuilder(silver_location=silver_location, dwh_location=gold_location, spark=spark)
     builder.run_dim_builder()

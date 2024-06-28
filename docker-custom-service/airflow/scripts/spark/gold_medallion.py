@@ -3,11 +3,10 @@ from pyspark.sql import SparkSession
 from delta import *
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
-from spark_executor import create_spark_session
 import logging
 
 
-class Gold(object):
+class GoldDataProcessing(object):
     def __init__(self, bucket_name: str, spark: SparkSession):
         self.gold_location = f"s3a://{bucket_name}/gold"
         self.silver_location = f"s3a://{bucket_name}/silver"
@@ -137,6 +136,7 @@ class Gold(object):
             .join(dim_dropoff_time, fact_yellow_trip_df["dropoff_time_id"] == dim_dropoff_time["dropoff_time_id"],
                   "left") \
             .select(
+            df["id"],
             fact_yellow_trip_df['id'].alias('id_pk'),
             dim_date_df['date_id'].alias('date_fk'),
             dim_pickup_time['pickup_time_id'].alias('pickup_time_fk'),
@@ -188,7 +188,7 @@ class Gold(object):
         dim_pickup_location = dim_location_df.withColumnRenamed("location_id", "pickup_location_id")
         dim_dropoff_location = dim_location_df.withColumnRenamed("location_id", "dropoff_location_id")
         start_time = self.spark.range(1) \
-            .selectExpr("current_timestamp() - INTERVAL 2 HOURS as start_time") \
+            .selectExpr("current_timestamp() - INTERVAL 23 HOURS as start_time") \
             .collect()[0]['start_time']
         fact_fhvhv_trip_df = self.spark \
             .readStream \
@@ -215,6 +215,7 @@ class Gold(object):
                   fact_fhvhv_trip_df['base_num_id'] == dim_dpc_base_num_df['base_num'],
                   "left").where('f.is_active = true') \
             .select(
+            df["id"],
             dim_date_df['date_id'].alias('date_fk'),
             dim_pickup_time['pickup_time_id'].alias('pickup_time_id_fk'),
             dim_dropoff_time['dropoff_time_id'].alias('dropoff_time_id_fk'),
@@ -298,13 +299,13 @@ class Gold(object):
             avg("total_amount").cast("decimal(10,2)").alias("avg_total_amount_per_trip")
         ) \
             .withColumn("tracking_id", concat(
+            col("pickup_date_id"),
             col("pickup_location_id"),
-            col('dropoff_location_id'),
-            col("pickup_date_id")
-        )) \
+            col('dropoff_location_id')
+        ).cast(IntegerType())) \
             .select(
             col("tracking_id"),
-            col("pickup_date_id").alias("date_id_fk"),
+            col("date_id").alias("date_id_fk"),
             col("pickup_location_id").alias("pickup_location_id_fk"),
             col("dropoff_location_id").alias("dropoff_location_id_fk"),
             col("nums_trip"),
@@ -377,10 +378,10 @@ class Gold(object):
             avg("driver_pay").cast("decimal(10,2)").alias("avg_driver_paid_per_trip")
         ) \
             .withColumn("tracking_id", concat(
+            col("pickup_date_id"),
             col("pickup_location_id"),
-            col('dropoff_location_id'),
-            col("pickup_date_id")
-        )) \
+            col('dropoff_location_id')
+        ).cast(IntegerType())) \
             .select(
             col("tracking_id"),
             col("pickup_date_id").alias("date_id_fk"),
@@ -397,6 +398,8 @@ class Gold(object):
             col("avg_driver_paid_per_trip")
         )
 
+        
+        result_df.printSchema()
         target_location = f"{self.gold_location}/fact_fhvhv_tracking_location_daily_t"
 
         stream_query = result_df.writeStream \
@@ -406,4 +409,3 @@ class Gold(object):
             .option("checkpointLocation", f"{target_location}/_checkpoint") \
             .start(target_location)
         stream_query.awaitTermination()
-

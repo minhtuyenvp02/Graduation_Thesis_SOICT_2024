@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
-from bronze_medallion import BronzeData
+from bronze_medallion import BronzeDataProcessing
 from config import *
-from spark_executor import create_spark_session
+from spark_session_init import create_spark_session
 from schema import CustomSchema
 from datetime import datetime
 import os
@@ -13,9 +13,14 @@ BUCKET_NAME = os.environ.get('BUCKET_NAME', "nyc-trip-bucket")
 if __name__ == "__main__":
     print(f"PULLING NEW IMAGE AT {datetime.now()} .......................................")
     schema = CustomSchema(SCHEMA_CONFIG)
+    # spark = create_spark_session(app_name="FHVHV Trip To Bronze",
+    #                              s3_endpoint=S3_ENDPOINT, s3_access_key=S3_ACCESS_KEY,
+    #                              s3_secret_key=S3_SECRET_KEY)
+    # bronze = BronzeData(schema=schema, kafka_server=KAFKA_CONSUMER_SERVER, bucket_name=BUCKET_NAME, spark=spark
+    #                     )
+
     spark = create_spark_session(app_name="FHVHV Trip To Bronze",
-                                 s3_endpoint=S3_ENDPOINT, s3_access_key=S3_ACCESS_KEY,
+                                 s3_endpoint="http://10.211.56.3:30090", s3_access_key=S3_ACCESS_KEY,
                                  s3_secret_key=S3_SECRET_KEY)
-    bronze = BronzeData(schema=schema, kafka_server=KAFKA_CONSUMER_SERVER, bucket_name=BUCKET_NAME, spark=spark
-                        )
-    bronze.kafka_stream_2bronze(topic='fhvhv_tripdata')
+    bronze_processing = BronzeDataProcessing(schema=schema, kafka_server="10.211.56.3:31044,10.211.56.3:31168,10.211.56.3:30351", bucket_name=BUCKET_NAME, spark=spark)
+    bronze_processing.stream_data_to_bronze(topic='fhvhv_tripdata')
