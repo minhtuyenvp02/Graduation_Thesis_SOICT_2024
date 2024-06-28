@@ -70,7 +70,7 @@ uiService:
 
 # -- Ingress URL format.
 # Requires the UI service to be enabled by setting `uiService.enable` to true.
-ingressUrlFormat: ""
+ingressUrlFormat: "{{$appName}}.minhtuyenvp02.id.vn/{{$appNamespace}}/{{$appName}}"
 
 # -- Set higher levels for more verbose logging
 logLevel: 2
