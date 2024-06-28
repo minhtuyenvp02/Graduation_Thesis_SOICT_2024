@@ -73,21 +73,13 @@ class BronzeDataProcessing(object):
         stream_query.awaitTermination()
 
     def stream_data_to_bronze(self, topic: str):
-        # client = Minio(
-        #     endpoint='minio.minio.svc.cluster.local:9000',
-        #     access_key=S3_ACCESS_KEY,
-        #     secret_key=S3_SECRET_KEY,
-        #     cert_check=False,
-        #     secure=False
-        # )
         client = Minio(
-            endpoint='10.211.56.3:30090',
+            endpoint='minio.minio.svc.cluster.local:9000',
             access_key=S3_ACCESS_KEY,
             secret_key=S3_SECRET_KEY,
             cert_check=False,
             secure=False
         )
-
         found = client.bucket_exists(self.bucket_name)
         if not found:
             logging.info(f"Bucket {self.bucket_name} doesn't exist, auto make...")
