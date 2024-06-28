@@ -103,8 +103,8 @@ with DAG(
             container_resources=silver_transform_resource_requirements,
             image_pull_policy='Always',
             do_xcom_push=False,
-            on_finish_action="delete_pod",
-            delete_on_termination=True
+            # on_finish_action="delete_pod",
+            # delete_on_termination=True
         )
         # silver_yellow_transform
         silver_fhvhv_transform
@@ -121,8 +121,8 @@ with DAG(
             image_pull_policy='Always',
             container_resources=silver_transform_resource_requirements,
             do_xcom_push=False,
-            on_finish_action="delete_pod",
-            delete_on_termination=True
+            # on_finish_action="delete_pod",
+            # delete_on_termination=True
         )
         # gold_load_yellow_fact = SparkKubernetesOperator(
         #     task_id='silver_fhvhv_transform',

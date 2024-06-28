@@ -178,8 +178,8 @@ with DAG(
         kubernetes_conn_id='kubernetes_default',
         on_failure_callback=alert_slack_channel,
         image_pull_policy='Always',
-        on_finish_action="delete_pod",
-        delete_on_termination=True
+        # on_finish_action="delete_pod",
+        # delete_on_termination=True
     )
 
     csv_to_bronze
