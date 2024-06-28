@@ -8,25 +8,21 @@ from itertools import product
 from pyspark.sql import SparkSession
 
 
-class WareHouseBuilder(object):
+class DimensionTableBuilder(object):
     def __init__(self, dwh_location: str, silver_location: str, spark: SparkSession):
         self.silver_location = silver_location
         self.dwh_location = dwh_location
         self.spark = spark
 
     def create_dim_date(self):
-        print("Hello here is dim date")
         self.spark.sql('CREATE DATABASE IF NOT EXISTS gold;')
-        # Define start and end dates
         start_date = "2020-01-01"
         end_date = "2025-12-31"
 
-        # Create a DataFrame with a range of dates
         dates = self.spark.sql(f"""
             SELECT explode(sequence(to_date('{start_date}'), to_date('{end_date}'), interval 1 day)) AS calendar_date
         """)
 
-        # Create the DataFrame with required columns
         dim_calendar = dates.select(
             (year(col("calendar_date")) * 10000 + month(col("calendar_date")) * 100 + dayofmonth(
                 col("calendar_date"))).alias("date_id"),
@@ -53,10 +49,8 @@ class WareHouseBuilder(object):
             expr("(month(calendar_date) + 5) % 12 + 1").alias("fiscal_month_jul_to_jun")
         ).orderBy(col("calendar_date"))
         dim_calendar.show(10)
-        # Define the path for Delta table
         delta_table_path = f"{self.dwh_location}/dim_date_t"
         print("Starting to write....")
-        # Write DataFrame to Delta table
         dim_calendar.write \
             .format("delta") \
             .option("overwriteSchema", "true") \

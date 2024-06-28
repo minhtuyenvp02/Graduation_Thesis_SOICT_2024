@@ -1,0 +1,62 @@
+sources:
+  - name: gold
+    database: delta
+    schema: silver
+    tables:
+      - name: fact_fhvhv_trip_t
+        external:
+          location: 's3a://nyc-trip-bucket/gold/fact_fhvhv_trip_t'
+          using: delta
+  - name: gold
+    database: delta
+    schema: silver
+    tables:
+      - name: fact_fhvhv_tracking_daily_t
+        external:
+          location: 's3a://nyc-trip-bucket/gold/fact_fhvhv_trip_tracking_daily_t'
+          using: delta
+
+  - name: gold
+    database: delta
+    schema: silver
+    tables:
+      - name: dim_date_t
+        external:
+          location: 's3a://nyc-trip-bucket/gold/dim_date_t'
+          using: delta
+
+  - name: gold
+    database: delta
+    schema: silver
+    tables:
+      - name: dim_time_t
+        external:
+          location: 's3a://nyc-trip-bucket/gold/dim_time_t'
+          using: delta
+
+  - name: gold
+    database: delta
+    schema: silver
+    tables:
+      - name: dim_dpc_base_num_t
+        external:
+          location: 's3a://nyc-trip-bucket/gold/dim_dpc_base_num_t'
+          using: delta
+
+  - name: gold
+    database: delta
+    schema: silver
+    tables:
+      - name: dim_hvfhs_license_num_t
+        external:
+          location: 's3a://nyc-trip-bucket/gold/dim_hvfhs_license_num_t'
+          using: delta
+  - name: gold
+    database: delta
+    schema: silver
+    tables:
+      - name: dim_location_t
+        external:
+          location: 's3a://nyc-trip-bucket/gold/dim_location_t'
+          using: delta
+

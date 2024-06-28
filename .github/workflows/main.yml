@@ -60,3 +60,30 @@ jobs:
           push: true
           tags: ${{ steps.meta_service2.outputs.tags }}
           labels: ${{ steps.meta_service2.outputs.labels }}
+
+build_and_push_spark_operator_imane:
+    name: Build and Push Spark Operator image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata for Spark Operator service
+        id: meta_service3
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ secrets.DOCKER_USERNAME }}/spark-operator
+
+      - name: Build and push Spark Operator Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./docker-custom-service/airflow/scripts
+          push: true
+          tags: ${{ steps.meta_service3.outputs.tags }}
+          labels: ${{ steps.meta_service3.outputs.labels }}
