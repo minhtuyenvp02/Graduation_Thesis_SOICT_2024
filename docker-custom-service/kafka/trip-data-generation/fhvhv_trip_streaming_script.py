@@ -16,5 +16,6 @@ def main():
         send_speed=int(args.send_speed),
         minio_endpoint=args.minio_endpoint,
     )
+    generator.simulate_streaming('fhvhv_tripdata')
 if __name__ == '__main__':
     main()
