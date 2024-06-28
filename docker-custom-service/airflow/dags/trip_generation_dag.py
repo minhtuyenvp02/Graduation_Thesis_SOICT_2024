@@ -101,7 +101,7 @@ with DAG(
     )
 
 
-    @task_group(default_args={'retries': 0})
+    @task_group(default_args={'retries': 1})
     def kafka_streaming():
         # kafka_yellow_trip_producer = KubernetesPodOperator(
         #     namespace="airflow",
