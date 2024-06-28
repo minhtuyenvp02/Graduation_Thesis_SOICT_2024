@@ -13,7 +13,7 @@ KAFKA_CONSUMER_SERVER = os.environ.get('KAFKA_CONSUMER_SERVER', "kafka.kafka.svc
 BUCKET_NAME = os.environ.get('BUCKET_NAME', "nyc-trip-bucket")
 
 if __name__ == "__main__":
-    spark = create_spark_session(app_name="Gold Update FHVHV Trip Fact",
+    spark = create_spark_session(app_name="update-fact-fhvhv-trip",
                                  s3_endpoint=S3_ENDPOINT, s3_access_key=S3_ACCESS_KEY,
                                  s3_secret_key=S3_SECRET_KEY)
     gold_processing = GoldDataProcessing(bucket_name=BUCKET_NAME, spark=spark)

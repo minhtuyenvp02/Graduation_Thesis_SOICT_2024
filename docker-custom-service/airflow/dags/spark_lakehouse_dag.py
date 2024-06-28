@@ -38,12 +38,7 @@ silver_transform_resource_requirements = V1ResourceRequirements(
 
 
 def alert_slack_channel(context: dict):
-    """ Alert to slack channel on failed dag
-
-    :param context: airflow context object
-    """
     if not SLACK_WEBHOOK_URL:
-        # Do nothing if slack webhook not set up
         return
 
     last_task: Optional[TaskInstance] = context.get('task_instance')

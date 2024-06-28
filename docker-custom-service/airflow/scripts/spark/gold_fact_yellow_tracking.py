@@ -14,7 +14,7 @@ BUCKET_NAME = os.environ.get('BUCKET_NAME', "nyc-trip-bucket")
 
 if __name__ == "__main__":
 
-    spark = create_spark_session(app_name="Gold Update Yellow Tracking Fact",
+    spark = create_spark_session(app_name="update-fact-yellow-tracking",
                                  s3_endpoint=S3_ENDPOINT, s3_access_key=S3_ACCESS_KEY,
                                  s3_secret_key=S3_SECRET_KEY)
     gold_processing = GoldDataProessing(bucket_name=BUCKET_NAME, spark=spark)
