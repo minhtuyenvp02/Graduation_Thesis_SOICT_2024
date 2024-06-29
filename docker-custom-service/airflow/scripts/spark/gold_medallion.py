@@ -188,15 +188,14 @@ class GoldDataProcessing(object):
         dim_pickup_location = dim_location_df.withColumnRenamed("location_id", "pickup_location_id")
         dim_dropoff_location = dim_location_df.withColumnRenamed("location_id", "dropoff_location_id")
         start_time = self.spark.range(1) \
-            .selectExpr("current_timestamp() - INTERVAL 23 HOURS as start_time") \
+            .selectExpr("current_timestamp() - INTERVAL 2 HOURS as start_time") \
             .collect()[0]['start_time']
         fact_fhvhv_trip_df = self.spark \
             .readStream \
             .format("delta") \
+            .option("readChangeFeed", "true") \
+            .option("startingTimestamp", start_time) \
             .load(silver_fhvhv_trip_path)
-        # .option("readChangeFeed", "true") \
-        # .option("startingTimestamp", start_time) \
-        # .load(silver_fhvhv_trip_path)
         fact_fhvhv_trip_df = fact_fhvhv_trip_df.alias("fact") \
             .join(dim_date_df, fact_fhvhv_trip_df["pickup_date_id"] == dim_date_df['date_id'], "left") \
             .join(dim_pickup_time, fact_fhvhv_trip_df["pickup_time_id"] == dim_pickup_time["pickup_time_id"], "left") \
