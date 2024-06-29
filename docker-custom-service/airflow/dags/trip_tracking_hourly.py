@@ -68,7 +68,7 @@ default_args = {
 with DAG(
         default_args=default_args,
         dag_id="trip_tracking_daily",
-        schedule_interval='0 */4 * * *',
+        schedule_interval='0 */5 * * *',
         tags=["trip_tracking_daily"],
         on_failure_callback=alert_slack_channel,
         catchup=False,
