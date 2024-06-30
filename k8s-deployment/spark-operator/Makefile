@@ -1,3 +1,4 @@
+.PHONY: spark-cluster
 spark-operator:
 	helm repo add spark-operator https://kubeflow.github.io/spark-operator
 	helm repo update
@@ -8,6 +9,8 @@ spark-operator:
 	kubectl create clusterrolebinding default-admin --clusterrole cluster-admin --serviceaccount=airflow:airflow-worker --namespace spark
 upgrade-spark-operator:
 	helm upgrade --install spark spark-operator/spark-operator --namespace spark -f spark-operator-values.yaml
+clean:
+	kubectl delete ns spark
 delete-unused-svc:
 	kubectl get services -n spark -o name | grep "to-bronze" | xargs kubectl delete -n spark
 

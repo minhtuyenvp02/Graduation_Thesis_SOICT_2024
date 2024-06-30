@@ -72,3 +72,11 @@ sources:
 #            data_type: varchar
 #          - name: flags_key
 #            data_type: varchar
+  - name: bronze
+    database: delta
+    schema: bronze
+    tables:
+      - name: fhvhv_tripdata
+        external:
+          location: 's3a://nyc-trip-bucket/bronze/fhvhv_tripdata'
+          using: delta

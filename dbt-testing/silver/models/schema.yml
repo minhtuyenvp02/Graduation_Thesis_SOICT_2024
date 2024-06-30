@@ -71,16 +71,16 @@
 version: 2
 
 models:
-#  - name: fhvhv_trip
-#    description: Fhvhv Trip Data
-#    tests:
+  - name: fhvhv_trip
+    description: Fhvhv Trip Data
+    tests:
 #      - dbt_expectations.expect_table_row_count_to_equal_other_table:
 #          compare_model: source('gold', 'fact_fhvhv_trip_t')
-#      - dbt_expectations.expect_table_row_count_to_equal_other_table:
-#          compare_model: source('bronze', 'fhvhv-tripdata')
-#      - dbt_expectations.expect_table_column_count_to_equal:
-#          value: 32
-#
+      - dbt_expectations.expect_table_row_count_to_equal_other_table:
+          compare_model: source('bronze', 'fhvhv_tripdata')
+      - dbt_expectations.expect_table_column_count_to_equal:
+          value: 32
+
 #    columns:
 #      - name: id
 #        tests:
@@ -108,10 +108,10 @@ models:
 #          - not_null
 #          - dbt_expectations.expect_column_values_to_be_of_type:
 #              column_type: decimal
-  - name: fact_fhvhv_tracking_daily_t
-    columns:
-      - name: date_id_fk
-        tests:
-          - not_null
-          - dbt_expectations.expect_column_values_to_be_of_type:
-                column_type: string
+#  - name: fact_fhvhv_tracking_daily_t
+#    columns:
+#      - name: date_id_fk
+#        tests:
+#          - not_null
+#          - dbt_expectations.expect_column_values_to_be_of_type:
+#                column_type: string
