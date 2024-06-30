@@ -35,7 +35,7 @@ class SingleMessageProducer(object):
         topic_name = url_file_path.split("/")[-1][0:-16]
         print("Starting send single message")
         if topics is None:
-            logging("No topic")
+            logging.info("No topic")
             return None
         if topic_name in topics:
             print(topic_name)

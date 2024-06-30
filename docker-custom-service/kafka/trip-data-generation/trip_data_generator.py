@@ -62,7 +62,6 @@ class TripGenerator(object):
                             print(f"topic ís {file_name}")
                             self.generator.send_single_item(file, topics, send_speed=self.send_speed, s3_endpoint=self.url_endpoint)
                             print("send erorr")
-
                 except Exception as e:
                     logging.info("Error when create threads")
 
