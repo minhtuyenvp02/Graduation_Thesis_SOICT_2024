@@ -379,7 +379,7 @@ class GoldDataProcessing(object):
             .withColumn("tracking_id", concat(
             col("pickup_date_id"),
             col("pickup_location_id"),
-            col('dropoff_location_id')
+            col("dropoff_location_id")
         ).cast(IntegerType())) \
             .select(
             col("tracking_id"),

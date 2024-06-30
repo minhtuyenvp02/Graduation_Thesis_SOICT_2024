@@ -7,7 +7,7 @@ models:
         tests:
           - not_null
           - dbt_expectations.expect_column_values_to_be_of_type:
-                column_type: varchar
+              column_type: varchar
       - name: tracking_id
         tests:
           - not_null
@@ -19,7 +19,7 @@ models:
         tests:
           - not_null
           - dbt_expectations.expect_column_values_to_be_of_type:
-                column_type: bigint
+              column_type: bigint
           - dbt_expectations.expect_column_values_to_be_between:
               min_value: 0
               row_condition: "tracking_id is not null"
@@ -131,7 +131,7 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('dim_location')
+              to: ref('dim_location_t')
               field: location_id
           - dbt_expectations.expect_column_values_to_be_of_type:
               column_type: integer
@@ -277,7 +277,7 @@ models:
                 min_value: 0  # (Optional)
                 row_condition: "id not null"
             - dbt_expectations.expect_column_values_to_be_of_type:
-              column_type: decimal
+                column_type: decimal
 
       - name: differ_surcharge_total
         tests:
