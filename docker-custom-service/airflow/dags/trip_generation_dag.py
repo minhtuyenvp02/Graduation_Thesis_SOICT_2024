@@ -143,7 +143,7 @@ with DAG(
         # kafka_yellow_trip_producer
 
 
-    @task_group(default_args={'retries': 3})
+    @task_group(default_args={'retries': 10})
     def trip_consuming():
         stream_fhvhv_to_bronze = SparkKubernetesOperator(
             task_id='stream_fhvhv_to_bronze',
