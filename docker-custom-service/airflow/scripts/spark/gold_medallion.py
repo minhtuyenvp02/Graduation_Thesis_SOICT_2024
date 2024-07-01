@@ -300,8 +300,9 @@ class GoldDataProcessing(object):
             .withColumn("tracking_id", concat(
             col("pickup_date_id"),
             col("pickup_location_id"),
-            col('dropoff_location_id')
-        ).cast(IntegerType())) \
+            col('dropoff_location_id'),
+            unix_timestamp(current_timestamp()).cast("integer")
+        )) \
             .select(
             col("tracking_id"),
             col("date_id").alias("date_id_fk"),
@@ -377,10 +378,11 @@ class GoldDataProcessing(object):
             avg("driver_pay").cast("decimal(10,2)").alias("avg_driver_paid_per_trip")
         ) \
             .withColumn("tracking_id", concat(
-            col("pickup_date_id"),
+        col("pickup_date_id"),
             col("pickup_location_id"),
-            col("dropoff_location_id")
-        ).cast(IntegerType())) \
+            col("dropoff_location_id"),
+            unix_timestamp(current_timestamp()).cast("integer")
+        )) \
             .select(
             col("tracking_id"),
             col("pickup_date_id").alias("date_id_fk"),
@@ -402,7 +404,7 @@ class GoldDataProcessing(object):
         target_location = f"{self.gold_location}/fact_fhvhv_tracking_location_daily_t"
 
         stream_query = result_df.writeStream \
-            .format("delta") \
+            .format("console") \
             .outputMode("complete") \
             .trigger(availableNow=True) \
             .option("checkpointLocation", f"{target_location}/_checkpoint") \
