@@ -599,11 +599,11 @@ controller:
   ##
   resources:
      requests:
-       cpu: 1
+       cpu: 200m
        memory: 512Mi
      limits:
-       cpu: 2
-       memory: 1500Mi
+       cpu: 500m
+       memory: 800Mi
   ## Kafka pods' Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
   ## @param controller.podSecurityContext.enabled Enable security context for the pods

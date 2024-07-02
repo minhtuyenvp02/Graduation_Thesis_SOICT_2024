@@ -404,7 +404,7 @@ class GoldDataProcessing(object):
         target_location = f"{self.gold_location}/fact_fhvhv_tracking_location_daily_t"
 
         stream_query = result_df.writeStream \
-            .format("console") \
+            .format("delta") \
             .outputMode("complete") \
             .trigger(availableNow=True) \
             .option("checkpointLocation", f"{target_location}/_checkpoint") \
