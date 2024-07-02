@@ -387,7 +387,7 @@ alertmanager:
 
     # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
     # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
-#    ingressClassName: nginx
+    ingressClassName: nginx
 
     annotations: {}
 
@@ -401,13 +401,13 @@ alertmanager:
 
     ## Hosts must be provided if Ingress is enabled.
     ##
-    hosts: []
-      # - alertmanager.domain.com
+    hosts:
+       - alertmanager.minhtuyenvp02.id.vn
 
     ## Paths to use for ingress rules - one path should match the alertmanagerSpec.routePrefix
     ##
-    paths: []
-    # - /
+    paths:
+     - /
 
     ## For Kubernetes >= 1.18 you should specify the pathType (determines how Ingress paths should be matched)
     ## See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#better-path-matching-with-path-types
@@ -989,8 +989,8 @@ grafana:
     ## Annotations for Grafana Ingress
     ##
     annotations: {}
-      # kubernetes.io/ingress.class: nginx
-      # kubernetes.io/tls-acme: "true"
+#      kubernetes.io/ingress.class: nginx
+#       kubernetes.io/tls-acme: "true"
 
     ## Labels to be added to the Ingress
     ##
@@ -999,10 +999,9 @@ grafana:
     ## Hostnames.
     ## Must be provided if Ingress is enable.
     ##
-    # hosts:
-    #   - grafana.domain.com
     hosts:
       - grafana.minhtuyenvp02.id.vn
+#    hosts:
 
     ## Path for grafana ingress
     path: /
@@ -1057,7 +1056,6 @@ grafana:
       defaultDatasourceEnabled: true
       isDefaultDatasource: true
 
-      name: Prometheus
       uid: prometheus
 
       ## URL of prometheus datasource
@@ -1092,7 +1090,6 @@ grafana:
         # traceIdLabelName: trace_id
       alertmanager:
         enabled: true
-        name: Alertmanager
         uid: alertmanager
         handleGrafanaManagedAlerts: false
         implementation: prometheus
@@ -1292,12 +1289,6 @@ kubelet:
     ## https://github.com/prometheus-operator/prometheus-operator/issues/926
     ##
     https: true
-
-    ## Skip TLS certificate validation when scraping.
-    ## This is enabled by default because kubelet serving certificate deployed by kubeadm is by default self-signed
-    ## ref: https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-certs/#kubelet-serving-certs
-    ##
-    insecureSkipVerify: true
 
     ## Enable scraping /metrics/cadvisor from kubelet's service
     ##
@@ -2231,8 +2222,6 @@ prometheusOperator:
     #   argocd.argoproj.io/hook-delete-policy: HookSucceeded
 
     namespaceSelector: {}
-    objectSelector: {}
-
 
     deployment:
       enabled: false
@@ -2483,12 +2472,6 @@ prometheusOperator:
         runAsUser: 2000
         seccompProfile:
           type: RuntimeDefault
-      ## Service account for Prometheus Operator Webhook Job Patch to use.
-      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
-      ##
-      serviceAccount:
-        create: true
-        automountServiceAccountToken: true
 
     # Security context for create job container
     createSecretJob:
@@ -2863,7 +2846,7 @@ prometheusOperator:
   thanosImage:
     registry: quay.io
     repository: thanos/thanos
-    tag: v0.35.1
+    tag: v0.35.0
     sha: ""
 
   ## Set a Label Selector to filter watched prometheus and prometheusAgent
@@ -3164,7 +3147,7 @@ prometheus:
 
     # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
     # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
-    # ingressClassName: nginx
+#    ingressClassName: nginx
 
     annotations: {}
     labels: {}
@@ -3367,15 +3350,6 @@ prometheus:
   ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api.md#prometheusspec
   ##
   prometheusSpec:
-    ## Statefulset's persistent volume claim retention policy
-    ## pvcDeleteOnStsDelete and pvcDeleteOnStsScale determine whether
-    ## statefulset's PVCs are deleted (true) or retained (false) on scaling down
-    ## and deleting statefulset, respectively. Requires 1.27.0+.
-    ## Ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#persistentvolumeclaim-retention
-    persistentVolumeClaimRetentionPolicy: {}
-    #  whenDeleted: Retain
-    #  whenScaled: Retain
-
     ## If true, pass --storage.tsdb.max-block-duration=2h to prometheus. This is already done if using Thanos
     ##
     disableCompaction: false
@@ -3438,7 +3412,7 @@ prometheus:
     image:
       registry: quay.io
       repository: prometheus/prometheus
-      tag: v2.52.0
+      tag: v2.51.2
       sha: ""
 
     ## Tolerations for use with node taints
@@ -3790,53 +3764,45 @@ prometheus:
     ## port to 2379 and allow etcd scraping provided it is running on all Kubernetes master nodes
     ##
     additionalScrapeConfigs:
-      - job_name: minio-job
-        metrics_path: /minio/v2/metrics/cluster
-        scheme: http
-        static_configs:
-          - targets:
-              - minio.minio.svc.cluster.local:9000
-          #     - job_name: kube-etcd
-          #       kubernetes_sd_configs:
-          #         - role: node
-          #       scheme: https
-          #       tls_config:
-          #         ca_file:   /etc/prometheus/secrets/etcd-client-cert/etcd-ca
-          #         cert_file: /etc/prometheus/secrets/etcd-client-cert/etcd-client
-          #         key_file:  /etc/prometheus/secrets/etcd-client-cert/etcd-client-key
-          #       relabel_configs:
-          #       - action: labelmap
-      - job_name: airfow-job
-        metrics_path: "/metrics"
-        scheme: http
-        static_configs:
-          - targets:
-              - airflow-statsd.airflow.svc.cluster.local:9102
-      - job_name: kafka
-        scrape_interval: "45s"
-        scrape_timeout: "30s"
-        metrics_path: "/metrics"
-        static_configs:
-          - targets:
-              - kafka-metrics-prometheus-kafka-exporter.kafka.svc.cluster.local:9308
-      - job_name: kafka-jmx
-        scrape_interval: "45s"
-        scrape_timeout: "30s"
-        metrics_path: "/metrics"
-        static_configs:
-          - targets:
-              - kafka-jmx-metrics.kafka.svc.cluster.local:5556
-    # - job_name: kube-etcd
-    #   kubernetes_sd_configs:
-    #     - role: node
-    #   scheme: https
-    #   tls_config:
-    #     ca_file:   /etc/prometheus/secrets/etcd-client-cert/etcd-ca
-    #     cert_file: /etc/prometheus/secrets/etcd-client-cert/etcd-client
-    #     key_file:  /etc/prometheus/secrets/etcd-client-cert/etcd-client-key
-    #   relabel_configs:
-    #   - action: labelmap
-    #     regex: __meta_kubernetes_node_label_(.+)
+     - job_name: spark-job
+       scrape_interval: "45s"
+       scrape_timeout: "30s"
+       metrics_path: /metrics/
+       static_configs:
+         - targets:
+             - spark-master-svc.spark.svc.cluster.local:80
+     - job_name: minio-job
+       metrics_path: /minio/v2/metrics/cluster
+       scheme: http
+       static_configs:
+         - targets:
+             - minio.minio.svc.cluster.local:9000
+     - job_name: kube-etcd
+       kubernetes_sd_configs:
+         - role: node
+       scheme: https
+       tls_config:
+         ca_file:   /etc/prometheus/secrets/etcd-client-cert/etcd-ca
+         cert_file: /etc/prometheus/secrets/etcd-client-cert/etcd-client
+         key_file:  /etc/prometheus/secrets/etcd-client-cert/etcd-client-key
+       relabel_configs:
+       - action: labelmap
+
+     - job_name: kafka
+       scrape_interval: "45s"
+       scrape_timeout: "30s"
+       metrics_path: "/metrics"
+       static_configs:
+         - targets:
+             - kafka-metrics.kafka.svc.cluster.local:9308
+     - job_name: kafka-jmx
+       scrape_interval: "45s"
+       scrape_timeout: "30s"
+       metrics_path: "/metrics"
+       static_configs:
+         - targets:
+             - kafka-jmx-metrics.kafka.svc.cluster.local:5556
+  #     regex: __meta_kubernetes_node_label_(.+)
     #   - source_labels: [__address__]
     #     action: replace
     #     targetLabel: __address__
@@ -4112,7 +4078,7 @@ prometheus:
     ## Defines the maximum time that the `prometheus` container's startup probe
     ## will wait before being considered failed. The startup probe will return
     ## success after the WAL replay is complete. If set, the value should be
-    ## greater than 60 (seconds). Otherwise it will be equal to 900 seconds (15
+    ## greater than 60 (seconds). Otherwise it will be equal to 600 seconds (15
     ## minutes).
     maximumStartupDurationSeconds: 0
 
@@ -4462,7 +4428,7 @@ thanosRuler:
     image:
       registry: quay.io
       repository: thanos/thanos
-      tag: v0.35.1
+      tag: v0.35.0
       sha: ""
 
     ## Namespaces to be selected for PrometheusRules discovery.

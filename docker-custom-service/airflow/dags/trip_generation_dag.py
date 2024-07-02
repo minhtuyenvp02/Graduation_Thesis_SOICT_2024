@@ -27,7 +27,7 @@ S3_BUCKET_NAME = Variable.get("S3_BUCKET_NAME")
 TOPICS = Variable.get("TOPIC").split(',')
 TRIP_PRODUCER_IMAGE = Variable.get("TRIP_PRODUCER_IMAGE")
 DATA_DIR = Variable.get("DATA_DIR")
-MESSAGE_SEND_SPEED = 2000
+MESSAGE_SEND_SPEED = 500
 start_date = datetime(2024, 6, 26)
 SLACK_WEBHOOK_URL = Variable.get("SLACK_WEB_HOOK")
 
@@ -87,7 +87,7 @@ with DAG(
         on_failure_callback=alert_slack_channel,
         tags=["trip-generator", "producer"],
         catchup=False,
-) as dag:
+) as dag: 
     create_topic = PythonOperator(
         task_id="create_topic",
         python_callable=create_kafka_topic,
