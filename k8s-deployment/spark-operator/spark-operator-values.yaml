@@ -135,7 +135,15 @@ podMonitor:
 nodeSelector: {}
 
 # tolerations -- List of node taints to tolerate
-tolerations: []
+tolerations:
+  - key: "node-type"
+    operator: "Equal"
+    value: "production"
+    effect: "NoSchedule"
+  - key: "node-type"
+    operator: "Equal"
+    value: "production"
+    effect: "NoExecute"
 
 # affinity -- Affinity for pod assignment
 affinity: {}
