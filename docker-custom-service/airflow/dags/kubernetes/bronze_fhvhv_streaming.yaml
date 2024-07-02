@@ -35,7 +35,7 @@ spec:
       - key: "node-type"
         operator: "Equal"
         value: "production"
-        effect: "NoSchedule"
+        effect: "NoExecute"
   executor:
     cores: 1
     instances: 2
@@ -49,5 +49,5 @@ spec:
       - key: "node-type"
         operator: "Equal"
         value: "production"
-        effect: "NoSchedule"
+        effect: "NoExecute"
       
