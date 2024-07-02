@@ -87,7 +87,7 @@ with DAG(
         on_failure_callback=alert_slack_channel,
         tags=["trip-generator", "producer"],
         catchup=False,
-) as dag:
+) as dag: 
     create_topic = PythonOperator(
         task_id="create_topic",
         python_callable=create_kafka_topic,
