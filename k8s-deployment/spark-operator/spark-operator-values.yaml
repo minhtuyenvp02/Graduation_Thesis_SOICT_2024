@@ -97,7 +97,7 @@ webhook:
   # -- Enable webhook server
   enable: true
   # -- Webhook service port
-  port: 8080
+  port: 443
   # -- Webhook container port name and service target port name
   portName: webhook
   # -- The webhook server will only operate on namespaces with this label, specified in the form key1=value1,key2=value2.

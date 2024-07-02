@@ -33,7 +33,6 @@ spec:
           name: spark-env-secret
     tolerations:
       - key: node-type
-        operator: Exists
         value: production
         effect: NoSchedule
   executor:
@@ -47,7 +46,6 @@ spec:
           name: spark-env-secret
     tolerations:
       - key: node-type
-        operator: Exists
         value: production
         effect: NoSchedule
       
