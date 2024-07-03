@@ -1,6 +1,6 @@
 CALL delta.system.register_table(schema_name => 'silver', table_name => 'fhvhv_trip', table_location => 's3a://nyc-trip-bucket/silver/fhvhv_trip');
 
-CALL delta.system.register_table(schema_name => 'bronze', table_name => 'fhvhv_tripdata', table_location => 's3a://nyc-trip-bucket/bronzefhvhv_tripdata');
+CALL delta.system.register_table(schema_name => 'bronze', table_name => 'fhvhv_tripdata', table_location => 's3a://nyc-trip-bucket/bronze/fhvhv_tripdata');
 
 
 
