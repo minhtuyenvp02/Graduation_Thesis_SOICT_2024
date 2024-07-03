@@ -27,7 +27,7 @@ TOPICS = Variable.get("TOPIC").split(',')
 TRIP_PRODUCER_IMAGE = Variable.get("TRIP_PRODUCER_IMAGE")
 DATA_DIR = Variable.get("DATA_DIR")
 MESSAGE_SEND_SPEED = Variable.get("MESSAGE_SEND_SPEED")
-start_date = datetime(2024, 6, 26)
+start_date = datetime(2024, 7, 2)
 SLACK_WEBHOOK_URL = Variable.get("SLACK_WEB_HOOK")
 
 

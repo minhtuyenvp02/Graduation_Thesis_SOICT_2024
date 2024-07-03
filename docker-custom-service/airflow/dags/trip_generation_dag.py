@@ -27,8 +27,8 @@ S3_BUCKET_NAME = Variable.get("S3_BUCKET_NAME")
 TOPICS = Variable.get("TOPIC").split(',')
 TRIP_PRODUCER_IMAGE = Variable.get("TRIP_PRODUCER_IMAGE")
 DATA_DIR = Variable.get("DATA_DIR")
-MESSAGE_SEND_SPEED = 500
-start_date = datetime(2024, 6, 26)
+MESSAGE_SEND_SPEED = 300
+start_date = datetime(2024, 7, 2)
 SLACK_WEBHOOK_URL = Variable.get("SLACK_WEB_HOOK")
 
 kafka_resource_requirements = V1ResourceRequirements(

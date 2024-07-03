@@ -4,7 +4,8 @@ from delta import *
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
 import logging
-
+def generate_uuid():
+    return str(uuid.uuid4())
 
 class GoldDataProcessing(object):
     def __init__(self, bucket_name: str, spark: SparkSession):
@@ -255,7 +256,7 @@ class GoldDataProcessing(object):
         dim_location_df = self.spark.read.format("delta").load(dim_location_path)
         dim_pickup_location = dim_location_df.withColumnRenamed("location_id", "pickup_location_id")
         dim_dropoff_location = dim_location_df.withColumnRenamed("location_id", "dropoff_location_id")
-
+        uuid_udf = udf(generate_uuid, StringType())
         start_time = self.spark.range(1) \
             .selectExpr("current_timestamp() - INTERVAL 5 HOURS as start_time") \
             .collect()[0]['start_time']
@@ -297,12 +298,7 @@ class GoldDataProcessing(object):
             avg("trip_distance").cast("decimal(10,2)").alias("avg_distance_per_trip"),
             avg("total_amount").cast("decimal(10,2)").alias("avg_total_amount_per_trip")
         ) \
-            .withColumn("tracking_id", concat(
-            col("pickup_date_id"),
-            col("pickup_location_id"),
-            col('dropoff_location_id'),
-            unix_timestamp(current_timestamp()).cast("integer")
-        )) \
+            .withColumn("tracking_id", uuid_udf()) \
             .select(
             col("tracking_id"),
             col("date_id").alias("date_id_fk"),
@@ -335,7 +331,7 @@ class GoldDataProcessing(object):
         dim_location_df = self.spark.read.format("delta").load(dim_location_path)
         dim_pickup_location = dim_location_df.withColumnRenamed("location_id", "pickup_location_id")
         dim_dropoff_location = dim_location_df.withColumnRenamed("location_id", "dropoff_location_id")
-
+        uuid_udf = udf(generate_uuid, StringType())
         start_time = self.spark.range(1) \
             .selectExpr("current_timestamp() - INTERVAL 5 HOURS as start_time") \
             .collect()[0]['start_time']
@@ -377,12 +373,7 @@ class GoldDataProcessing(object):
             avg("totals_amount").cast("decimal(10,2)").alias("avg_total_amount_per_trip"),
             avg("driver_pay").cast("decimal(10,2)").alias("avg_driver_paid_per_trip")
         ) \
-            .withColumn("tracking_id", concat(
-        col("pickup_date_id"),
-            col("pickup_location_id"),
-            col("dropoff_location_id"),
-            unix_timestamp(current_timestamp()).cast("integer")
-        )) \
+            .withColumn("tracking_id",  uuid_udf()) \
             .select(
             col("tracking_id"),
             col("pickup_date_id").alias("date_id_fk"),
