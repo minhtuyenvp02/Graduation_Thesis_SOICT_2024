@@ -218,7 +218,7 @@ statefulset:
   podManagementPolicy: Parallel
   ## @param statefulset.replicaCount Number of pods per zone (only for MinIO&reg; distributed mode). Should be even and `>= 4`
   ##
-  replicaCount: 3c
+  replicaCount: 3
   ## @param statefulset.zones Number of zones (only for MinIO&reg; distributed mode)
   ##
   zones: 1
@@ -1089,7 +1089,7 @@ persistence:
     - ReadWriteOnce
   ## @param persistence.size PVC Storage Request for MinIO&reg; data volume
   ##
-  size: 6Gi
+  size: 12Gi
   ## @param persistence.annotations Annotations for the PVC
   ##
   annotations: {}
@@ -1152,7 +1152,7 @@ volumePermissions:
        memory: 512Mi
     limits:
        cpu: 1300m
-       memory: 1024Mi
+       memory: 1500Mi
 
   ## Init container' Security Context
   ## Note: the chown of the data folder is done to containerSecurityContext.runAsUser
