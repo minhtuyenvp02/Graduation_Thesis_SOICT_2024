@@ -7,14 +7,15 @@ from schema import CustomSchema
 
 def create_spark_session(app_name: str, s3_endpoint: str, s3_access_key: str, s3_secret_key: str):
     builder = SparkSession.builder.appName(f"{app_name}") \
-        .config("spark.sql.shuffle.partitions", 4) \
+        .config("spark.sql.shuffle.partitions", 16) \
         .config("spark.driver.maxResultSize", "2g") \
         .config("spark.executor.memory", "2g") \
         .config("spark.sql.streaming.schemaInference", "true") \
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
         .config("spark.databricks.delta.schema.autoMerge.enabled", "true") \
         .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
-        .config("spark.databricks.delta.properties.defaults.enableChangeDataFeed", "true")
+        .config("spark.databricks.delta.properties.defaults.enableChangeDataFeed", "true") \
+        .config("spark.databricks.delta.changeDataFeed.timestampOutOfRange.enabled", "true")
     print("start configure_spark_with_delta_pi")
     
     spark = (configure_spark_with_delta_pip(builder, extra_packages=[

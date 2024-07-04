@@ -76,7 +76,7 @@ default_args = {
 with DAG(
         default_args=default_args,
         dag_id="data_quality_pipeline",
-        schedule_interval='0 */2 * * *',
+        schedule_interval='0 */1 * * *',
         tags=["lakehouse processing", "medallion architecture"],
         catchup=False,
         on_failure_callback=alert_slack_channel,
