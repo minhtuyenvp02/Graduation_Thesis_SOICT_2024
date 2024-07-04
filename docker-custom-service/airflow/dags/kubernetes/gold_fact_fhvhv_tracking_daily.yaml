@@ -37,7 +37,7 @@ spec:
   executor:
     cores: 1
     instances: 2
-    memory: "2000m"
+    memory: "1600m"
     labels:
       version: 3.5.0
     envFrom:
