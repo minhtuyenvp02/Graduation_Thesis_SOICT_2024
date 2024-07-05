@@ -81,7 +81,7 @@ with DAG(
         catchup=False,
         on_failure_callback=alert_slack_channel,
 ) as dag:
-    @task_group(default_args={'retries': 3})
+    @task_group(default_args={'retries': 5, 'retry_delay': timedelta(0)})
     def silver_transform():
         # silver_yellow_transform = SparkKubernetesOperator(
         #     task_id='silver_yellow_transform',
@@ -110,7 +110,7 @@ with DAG(
         silver_fhvhv_transform
 
 
-    @task_group(default_args={'retries': 2})
+    @task_group(default_args={'retries': 5, 'retry_delay': timedelta(0)})
     def gold_load():
         gold_load_fhvhv_fact = SparkKubernetesOperator(
             task_id='gold_load_fhvhv_fact',
